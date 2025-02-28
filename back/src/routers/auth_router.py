@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Response, status
+from fastapi import APIRouter, Depends, status
 
 from src.data.models import User
 from src.routers.schemas import Token, UserCreate, UserLogin, UserResponse
