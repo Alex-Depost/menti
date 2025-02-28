@@ -1,27 +1,19 @@
 from fastapi import FastAPI
 
-from src.routers.auth_router import router as auth_router
+from src.routers.user_auth_router import router as user_auth
+from src.routers.mentor_auth_router import router as mentor_auth
 from src.setup import setup
 
-# Create FastAPI application
 app = FastAPI(title="JWT Authentication API")
 
-# Initialize application
 setup()
 
 # Include routers
-app.include_router(auth_router, prefix="/api/auth")
+app.include_router(user_auth, prefix="/auth/users")
+app.include_router(mentor_auth, prefix="/auth/mentors")
+
 
 # Root endpoint
 @app.get("/")
 async def read_root():
-    return {
-        "message": "Welcome to JWT Authentication API",
-        "endpoints": {
-            "Authentication": {
-                "signup": "/api/auth/signup",
-                "signin": "/api/auth/signin",
-                "me": "/api/auth/me"
-            }
-        }
-    }
+    return {"message": "GOYDA API"}

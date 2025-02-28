@@ -34,3 +34,19 @@ class User(Base):
 
     def __repr__(self):
         return f"<User(id={self.id}, email={self.email})>"
+
+
+class Mentor(Base):
+    """Mentor model for mentorship management."""
+
+    __tablename__ = "mentors"
+
+    id = cast(int, Column(Integer, primary_key=True, index=True))
+    email = cast(str, Column(String(100), nullable=False, index=True, unique=True))
+    password_hash = cast(str, Column(String(128), nullable=False))
+    is_active = cast(bool, Column(Boolean, default=True))
+    created_at = cast(datetime, Column(DateTime, default=datetime.now))
+    updated_at = cast(datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now))
+
+    def __repr__(self):
+        return f"<Mentor(id={self.id}, user_id={self.user_id})>"
