@@ -2,3 +2,6 @@ sqlalchemy
 fastapi[standard]
 python-dotenv
 asyncpg
+pyjwt
+passlib[bcrypt]
+pydantic[email]

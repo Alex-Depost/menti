@@ -1,4 +1,3 @@
-import os
 from contextlib import asynccontextmanager
 from typing import cast
 
@@ -6,11 +5,11 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import CreateSchema
 
+from src.config import CONNECTION_STRING
 from src.data.models import SCHEMA_NAME, Base
 
 main_engine = create_async_engine(
-    f"postgresql+asyncpg://{os.environ['POSTGRES_USER']}:{os.environ['POSTGRES_PASSWORD']}@{
-        os.environ['POSTGRES_HOST']}:{os.environ['POSTGRES_PORT']}/{os.environ['POSTGRES_DB']}",
+    CONNECTION_STRING,
     echo=False,
 )
 DBSession = sessionmaker(

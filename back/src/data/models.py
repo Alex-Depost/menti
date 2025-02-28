@@ -1,11 +1,13 @@
 from datetime import datetime
+from typing import cast
+
 from sqlalchemy import (
-    MetaData,
-    Column,
-    Integer,
-    String,
     Boolean,
+    Column,
     DateTime,
+    Integer,
+    MetaData,
+    String,
 )
 from sqlalchemy.orm import declarative_base
 
@@ -23,13 +25,12 @@ class User(Base):
 
     __tablename__ = "users"
 
-    id = Column(Integer, primary_key=True, index=True)
-    username = Column(String(50), nullable=False, index=True)
-    email = Column(String(100), nullable=False, index=True)
-    password_hash = Column(String(128), nullable=False)
-    is_active = Column(Boolean, default=True)
-    created_at = Column(DateTime, default=datetime.utcnow)
-    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    id = cast(int, Column(Integer, primary_key=True, index=True))
+    email = cast(str, Column(String(100), nullable=False, index=True, unique=True))
+    password_hash = cast(str, Column(String(128), nullable=False))
+    is_active = cast(bool, Column(Boolean, default=True))
+    created_at = cast(datetime, Column(DateTime, default=datetime.now))
+    updated_at = cast(datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now))
 
     def __repr__(self):
-        return f"<User(id={self.id}, username={self.username}, email={self.email})>"
+        return f"<User(id={self.id}, email={self.email})>"
