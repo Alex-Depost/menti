@@ -1,4 +1,4 @@
-import authService from "./auth";
+import { authService } from "./auth";
 import { API_URL } from "./config";
 
 export interface MentorData {
