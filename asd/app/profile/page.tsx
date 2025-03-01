@@ -1,9 +1,11 @@
 "use client";
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
+import { MentorData, fetchMentorProfile } from "../api/auth";
+import { MentorResumeData, createMentorResume, getMyResumes, updateMentorResume, uploadAvatar } from "../api/profile";
 
-// Вынесли компоненты за пределы основного компонента для избежания пересоздания при перерендере
-const ViewMode = ({ formData, setIsEditing }: { 
+// Компонент режима просмотра
+const ViewMode = ({ formData, setIsEditing, isLoading }: { 
   formData: { 
     name: string; 
     university: string; 
@@ -12,60 +14,71 @@ const ViewMode = ({ formData, setIsEditing }: {
     avatar: string;
   }; 
   setIsEditing: (value: boolean) => void;
+  isLoading: boolean;
 }) => (
   <div className="max-w-2xl mx-auto">
     <div className="bg-white p-6 rounded-lg shadow space-y-6">
-      <div className="flex flex-col items-center mb-6">
-        {formData.avatar ? (
-          <img 
-            src={formData.avatar} 
-            alt="Аватар пользователя" 
-            className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
-          />
-        ) : (
-          <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
-            </svg>
+      {isLoading ? (
+        <div className="flex justify-center py-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+        </div>
+      ) : (
+        <>
+          <div className="flex flex-col items-center mb-6">
+            {formData.avatar ? (
+              <img 
+                src={formData.avatar} 
+                alt="Аватар пользователя" 
+                className="w-32 h-32 rounded-full object-cover border-2 border-gray-200"
+              />
+            ) : (
+              <div className="w-32 h-32 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-12 h-12">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z" />
+                </svg>
+              </div>
+            )}
           </div>
-        )}
-      </div>
 
-      <div>
-        <h3 className="text-sm font-medium text-gray-500">Название</h3>
-        <p className="mt-1 text-lg">{formData.name}</p>
-      </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Название</h3>
+            <p className="mt-1 text-lg">{formData.name}</p>
+          </div>
 
-      <div>
-        <h3 className="text-sm font-medium text-gray-500">Университет</h3>
-        <p className="mt-1 text-lg">{formData.university}</p>
-      </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Университет</h3>
+            <p className="mt-1 text-lg">{formData.university}</p>
+          </div>
 
-      <div>
-        <h3 className="text-sm font-medium text-gray-500">Описание</h3>
-        <p className="mt-1 text-lg whitespace-pre-wrap">{formData.description}</p>
-      </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Описание</h3>
+            <p className="mt-1 text-lg whitespace-pre-wrap">{formData.description}</p>
+          </div>
 
-      <div>
-        <h3 className="text-sm font-medium text-gray-500">Свободные дни</h3>
-        <p className="mt-1 text-lg">{formData.availableDays}</p>
-      </div>
+          <div>
+            <h3 className="text-sm font-medium text-gray-500">Свободные дни</h3>
+            <p className="mt-1 text-lg">{formData.availableDays}</p>
+          </div>
 
-      <button
-        onClick={() => setIsEditing(true)}
-        className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 transition-colors"
-      >
-        Редактировать
-      </button>
+          <button
+            onClick={() => setIsEditing(true)}
+            className="w-full bg-gray-100 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-200 transition-colors"
+          >
+            Редактировать
+          </button>
+        </>
+      )}
     </div>
   </div>
 );
 
+// Компонент режима редактирования
 const EditMode = ({ 
   formData, 
   handleChange,
   handleAvatarChange,
-  handleSubmit 
+  handleSubmit,
+  isSubmitting
 }: { 
   formData: { 
     name: string; 
@@ -77,6 +90,7 @@ const EditMode = ({
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleAvatarChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSubmit: (e: React.FormEvent) => void;
+  isSubmitting: boolean;
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -185,9 +199,13 @@ const EditMode = ({
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors"
+          disabled={isSubmitting}
+          className={`w-full py-2 px-4 rounded-md transition-colors ${isSubmitting 
+            ? 'bg-blue-400 cursor-not-allowed' 
+            : 'bg-blue-600 text-white hover:bg-blue-700'
+          }`}
         >
-          Сохранить
+          {isSubmitting ? 'Сохранение...' : 'Сохранить'}
         </button>
       </div>
     </form>
@@ -196,6 +214,11 @@ const EditMode = ({
 
 export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [mentorProfile, setMentorProfile] = useState<MentorData | null>(null);
+  const [resumeId, setResumeId] = useState<number | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     university: "",
@@ -203,6 +226,53 @@ export default function ProfilePage() {
     availableDays: "",
     avatar: "",
   });
+
+  // Загрузка данных профиля
+  useEffect(() => {
+    async function loadProfileData() {
+      try {
+        setIsLoading(true);
+        
+        // Загрузка данных профиля ментора
+        const profileData = await fetchMentorProfile();
+        setMentorProfile(profileData);
+        
+        // Загрузка резюме ментора
+        const resumes = await getMyResumes();
+        
+        if (resumes && resumes.length > 0) {
+          const resume = resumes[0]; // Берем первое резюме
+          setResumeId(resume.id);
+          
+          setFormData({
+            name: profileData.name || '',
+            university: resume.university || '',
+            description: resume.description || '',
+            availableDays: '', // Это поле нужно будет добавить на бэкенде
+            avatar: profileData.avatar_url || '',
+          });
+        } else {
+          // Если резюме нет, то заполняем только данные из профиля
+          setFormData({
+            name: profileData.name || '',
+            university: '',
+            description: '',
+            availableDays: '',
+            avatar: profileData.avatar_url || '',
+          });
+        }
+        
+        setIsEditing(false); // После загрузки данных переходим в режим просмотра
+      } catch (err) {
+        console.error('Ошибка при загрузке данных профиля:', err);
+        setError('Не удалось загрузить данные профиля. Пожалуйста, войдите в систему.');
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    
+    loadProfileData();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -212,39 +282,87 @@ export default function ProfilePage() {
     }));
   };
 
-  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
+      try {
+        // Временно показываем загруженную картинку пользователю до загрузки на сервер
+        const localPreview = URL.createObjectURL(file);
         setFormData((prev) => ({
           ...prev,
-          avatar: reader.result as string,
+          avatar: localPreview,
         }));
-      };
-      reader.readAsDataURL(file);
+        
+        // Загружаем аватарку на сервер
+        const avatarUrl = await uploadAvatar(file);
+        
+        // Обновляем URL аватарки после загрузки на сервер
+        setFormData((prev) => ({
+          ...prev,
+          avatar: avatarUrl,
+        }));
+        
+      } catch (err) {
+        console.error('Ошибка при загрузке аватарки:', err);
+        alert('Не удалось загрузить аватарку. Пожалуйста, попробуйте еще раз.');
+      }
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsEditing(false);
+    setIsSubmitting(true);
+    setError(null);
+    
+    try {
+      // Создаем или обновляем резюме
+      const resumeData: MentorResumeData = {
+        title: formData.name,
+        university: formData.university,
+        description: formData.description,
+      };
+      
+      if (resumeId) {
+        // Обновляем существующее резюме
+        await updateMentorResume(resumeId, resumeData);
+      } else {
+        // Создаем новое резюме
+        const newResume = await createMentorResume(resumeData);
+        setResumeId(newResume.id);
+      }
+      
+      setIsEditing(false);
+    } catch (err) {
+      console.error('Ошибка при сохранении данных:', err);
+      setError('Не удалось сохранить данные. Пожалуйста, попробуйте еще раз.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
     <div className="container mx-auto py-8">
       <h1 className="text-2xl font-bold mb-6">Анкета ментора</h1>
+      
+      {error && (
+        <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
+          {error}
+        </div>
+      )}
+      
       {isEditing ? (
         <EditMode 
           formData={formData} 
           handleChange={handleChange}
           handleAvatarChange={handleAvatarChange}
-          handleSubmit={handleSubmit} 
+          handleSubmit={handleSubmit}
+          isSubmitting={isSubmitting}
         />
       ) : (
         <ViewMode 
           formData={formData} 
-          setIsEditing={setIsEditing} 
+          setIsEditing={setIsEditing}
+          isLoading={isLoading}
         />
       )}
     </div>
