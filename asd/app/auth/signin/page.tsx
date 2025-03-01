@@ -1,5 +1,5 @@
 "use client"
-import authService from "@/app/service/auth";
+import { authService } from "@/app/service/auth";
 import { LoginForm } from "@/components/login-form"
 import { TabsAuth } from "@/components/tabs-auth";
 import { useRouter, useSearchParams } from "next/navigation";
