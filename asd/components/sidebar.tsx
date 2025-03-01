@@ -61,7 +61,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           {!isAuthenticated ? (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app" ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
                   <Link href="/app" className="flex items-center gap-3">
                     <Home className={`h-4 w-4 ${pathname === "/app" ? "" : "text-muted-foreground"}`} />
                     <span>Главная</span>
@@ -69,7 +69,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/auth/signin" ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/auth/signin" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
                   <Link href="/auth/signin" className="flex items-center gap-3">
                     <User className={`h-4 w-4 ${pathname === "/auth/signin" ? "" : "text-muted-foreground"}`} />
                     <span>Войти</span>
@@ -80,26 +80,34 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ) : isUser ? (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app" ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
-                  <Link href="/app" className="flex items-center gap-3">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app" className="flex gap-3">
                     <Home className={`h-4 w-4 ${pathname === "/app" ? "" : "text-muted-foreground"}`} />
                     <span>Все менторы</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname.startsWith("/app/courses") ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
-                  <Link href="/app/user/inbox" className="flex items.center gap-3">
-                    <BookOpen className={`h-4 w-4 ${pathname.startsWith("/app/courses") ? "" : "text-muted-foreground"}`} />
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname.startsWith("/app/user/inbox") ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/user/inbox" className="flex gap-3">
+                    <BookOpen className={`h-4 w-4 ${pathname.startsWith("/app/user/inbox") ? "" : "text-muted-foreground"}`} />
                     <span>Заявки на менторство</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname.startsWith("/app/courses") ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
-                  <Link href="/app/user/outgoing" className="flex items.center gap-3">
-                    <BookOpen className={`h-4 w-4 ${pathname.startsWith("/app/courses") ? "" : "text-muted-foreground"}`} />
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname.startsWith("/app/user/outgoing") ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/user/outgoing" className="flex gap-3">
+                    <BookOpen className={`h-4 w-4 ${pathname.startsWith("/app/user/outgoing") ? "" : "text-muted-foreground"}`} />
                     <span>Мои отклики</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/user/profile" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/user/profile" className="flex gap-3">
+                    <User className={`h-4 w-4 ${pathname === "/app/user/profile" ? "" : "text-muted-foreground"}`} />
+                    <span>Профиль</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
@@ -107,41 +115,38 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ) : (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items.center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/dashboard" ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
-                  <Link href="/app/dashboard" className="flex items.center gap-3">
+                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/dashboard" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/dashboard" className="flex gap-3">
                     <MessageSquare className={`h-4 w-4 ${pathname === "/app/dashboard" ? "" : "text-muted-foreground"}`} />
                     <span>Мои отклики</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items.center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/search" ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
-                  <Link href="/app/search" className="flex items.center gap-3">
+                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/search" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/search" className="flex gap-3">
                     <Search className={`h-4 w-4 ${pathname === "/app/search" ? "" : "text-muted-foreground"}`} />
                     <span>Поиск менти</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items.center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname.startsWith("/app/students") ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
-                  <Link href="/app/students" className="flex items.center gap-3">
+                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname.startsWith("/app/students") ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/students" className="flex gap-3">
                     <Users className={`h-4 w-4 ${pathname.startsWith("/app/students") ? "" : "text-muted-foreground"}`} />
                     <span>Мои студенты</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/profile" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/profile" className="flex gap-3">
+                    <User className={`h-4 w-4 ${pathname === "/app/profile" ? "" : "text-muted-foreground"}`} />
+                    <span>Профиль</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </>
-          )}
-
-          {isAuthenticated && (
-            <SidebarMenuItem>
-              <SidebarMenuButton asChild className={`w-full flex items.center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/profile" ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
-                <Link href="/app/profile" className="flex items.center gap-3">
-                  <User className={`h-4 w-4 ${pathname === "/app/profile" ? "" : "text-muted-foreground"}`} />
-                  <span>Профиль</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
           )}
         </SidebarMenu>
 
@@ -151,16 +156,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {isAuthenticated && (
               <>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className={`w-full flex items.center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/settings" ? "bg-primary/10 text-primary" : "hover:bg-muted/50 hover:text-primary"}`}>
-                    <Link href="/app/settings" className="flex items.center gap-3">
+                  <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/settings" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                    <Link href="/app/settings" className="flex gap-3">
                       <Settings className={`h-4 w-4 ${pathname === "/app/settings" ? "" : "text-muted-foreground"}`} />
                       <span>Настройки</span>
                     </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className="w-full flex items.center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all">
-                    <button onClick={handleLogout} className="flex items.center gap-3 w-full text-left">
+                  <SidebarMenuButton asChild className="w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all">
+                    <button onClick={handleLogout} className="flex gap-3 w-full text-left">
                       <LogOut className="h-4 w-4 text-muted-foreground" />
                       <span>Выйти</span>
                     </button>
