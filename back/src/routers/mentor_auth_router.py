@@ -42,7 +42,7 @@ async def get_current_user_info(
     avatar_url = None
     if current_user.avatar_uuid:
         base_url = str(request.base_url)
-        avatar_url = urljoin(base_url, f"api/v1/storage/avatar/{current_user.avatar_uuid}")
+        avatar_url = urljoin(base_url, f"img/{current_user.avatar_uuid}")
     
     # Создаем копию объекта ментора и добавляем avatar_url
     mentor_dict = {
@@ -112,7 +112,7 @@ async def update_mentor_profile(
     avatar_url = None
     if updated_mentor.avatar_uuid:
         base_url = str(request.base_url)
-        avatar_url = urljoin(base_url, f"api/v1/storage/avatar/{updated_mentor.avatar_uuid}")
+        avatar_url = urljoin(base_url, f"img/{updated_mentor.avatar_uuid}")
     
     # Возвращаем полный объект ментора
     return MentorDisplay(

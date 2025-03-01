@@ -2,28 +2,21 @@
 
 import { FeedResponse } from "@/app/service/feed";
 import { MentorCard } from "@/components/mentor-card";
-import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import { Users, X } from "lucide-react";
+import { Users } from "lucide-react";
 
 interface FeedListProps {
   isLoading: boolean;
   feedData: FeedResponse;
   currentPage: number;
   handlePageChange: (page: number) => void;
-  handleTagClick: (tag: string) => void;
-  activeTags: string[];
-  handleClearAllTags: () => void;
 }
 
 export function MentorsFeedList({
   isLoading,
   feedData,
   currentPage,
-  handlePageChange,
-  handleTagClick,
-  activeTags,
-  handleClearAllTags
+  handlePageChange
 }: FeedListProps) {
   return (
     <main className="container mx-auto px-4 py-8">
@@ -51,15 +44,6 @@ export function MentorsFeedList({
                     <div className="h-4 bg-muted/60 rounded animate-pulse w-3/4" />
                   </div>
                 </div>
-
-                {/* Tags */}
-                <div className="pt-2">
-                  <div className="flex flex-wrap gap-1.5">
-                    <div className="h-5 bg-muted/60 rounded-full animate-pulse w-16" />
-                    <div className="h-5 bg-muted/60 rounded-full animate-pulse w-20" />
-                    <div className="h-5 bg-muted/60 rounded-full animate-pulse w-12" />
-                  </div>
-                </div>
               </div>
             </div>
           ))}
@@ -68,7 +52,7 @@ export function MentorsFeedList({
         <div className="space-y-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {feedData.items.map((item) => (
-              <MentorCard key={item.id} item={item} onTagClick={handleTagClick} />
+              <MentorCard key={item.id} item={item} />
             ))}
           </div>
           {feedData.pages > 1 && (
@@ -86,18 +70,8 @@ export function MentorsFeedList({
           </div>
           <h3 className="text-xl font-medium mb-2">Менторы не найдены</h3>
           <p className="text-muted-foreground text-center max-w-md mb-6">
-            Попробуйте изменить параметры поиска или очистить фильтры, чтобы увидеть больше результатов
+            Попробуйте изменить параметры поиска, чтобы увидеть больше результатов
           </p>
-          {activeTags.length > 0 && (
-            <Button
-              variant="outline"
-              onClick={handleClearAllTags}
-              className="gap-2"
-            >
-              <X className="h-4 w-4" />
-              Очистить все фильтры
-            </Button>
-          )}
         </div>
       )}
     </main>

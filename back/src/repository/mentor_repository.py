@@ -1,7 +1,7 @@
 from sqlalchemy import select, update
 from sqlalchemy.orm import selectinload
 from src.data.base import session_scope
-from src.data.models import Mentor, Tag
+from src.data.models import Mentor
 from sqlalchemy import insert
 import uuid
 from typing import Optional, Dict, Any
@@ -74,33 +74,22 @@ async def update_mentor_profile(mentor_id: int, update_data: Dict[str, Any]) -> 
 
 
 async def get_mentor_by_id(mentor_id: int) -> Mentor:
-    """Получить ментора по ID с загрузкой тегов."""
+    """Получить ментора по ID."""
     async with session_scope() as session:
         result = await session.execute(
             select(Mentor)
             .where(Mentor.id == mentor_id)
-            .options(selectinload(Mentor.tags))
         )
         return result.scalars().first()
 
 
-async def get_mentors(page: int = 1, size: int = 10, tag_name: str = None) -> tuple[list[Mentor], int]:
-    """Получить список менторов с пагинацией и фильтрацией по тегу."""
+async def get_mentors(page: int = 1, size: int = 10) -> tuple[list[Mentor], int]:
+    """Получить список менторов с пагинацией."""
     async with session_scope() as session:
-        query = select(Mentor).options(selectinload(Mentor.tags))
-        count_query = select(Mentor)
-        
-        if tag_name:
-            tag_query = select(Tag).where(Tag.name.ilike(f"%{tag_name}%"))
-            tag_result = await session.execute(tag_query)
-            tag = tag_result.scalars().first()
-            
-            if tag:
-                query = query.where(Mentor.tags.any(Tag.id == tag.id))
-                count_query = count_query.where(Mentor.tags.any(Tag.id == tag.id))
+        query = select(Mentor)
         
         # Считаем общее количество
-        count_result = await session.execute(select(Mentor.id).select_from(count_query.subquery()))
+        count_result = await session.execute(select(Mentor.id).select_from(query.subquery()))
         total = len(count_result.all())
         
         # Применяем пагинацию
@@ -132,54 +121,53 @@ async def update_mentor(mentor_id: int, update_data: MentorUpdateSchema) -> Ment
         result = await session.execute(
             select(Mentor)
             .where(Mentor.id == mentor_id)
-            .options(selectinload(Mentor.tags))
         )
         return result.scalars().first()
 
 
-async def add_tags_to_mentor(mentor_id: int, tag_ids: list[int]) -> Mentor:
-    """Добавить теги ментору."""
+async def get_filtered_mentors(
+    target_universities: list[str] = None,
+    admission_type: str = None,
+    page: int = 1,
+    size: int = 10,
+) -> tuple[list[Mentor], int]:
+    """
+    Получить список менторов с фильтрацией по целевым университетам,
+    типу поступления и опционально по тегу
+    
+    Args:
+        target_universities: Список университетов для фильтрации
+        admission_type: Тип поступления для фильтрации
+        page: Номер страницы для пагинации
+        size: Размер страницы для пагинации
+        
+    Returns:
+        Кортеж из списка менторов и общего количества менторов
+    """
     async with session_scope() as session:
-        mentor = await session.get(Mentor, mentor_id)
-        if not mentor:
-            return None
+        # Базовый запрос
+        query = select(Mentor)
+        count_query = select(Mentor)
         
-        tags = []
-        for tag_id in tag_ids:
-            tag = await session.get(Tag, tag_id)
-            if tag:
-                tags.append(tag)
+        # Фильтрация по университетам
+        if target_universities and len(target_universities) > 0:
+            query = query.where(Mentor.university.in_(target_universities))
+            count_query = count_query.where(Mentor.university.in_(target_universities))
         
-        mentor.tags.extend(tags)
-        await session.commit()
+        # Фильтрация по типу поступления
+        if admission_type:
+            query = query.where(Mentor.admission_type == admission_type)
+            count_query = count_query.where(Mentor.admission_type == admission_type)
         
-        # Перезагружаем ментора с тегами
-        result = await session.execute(
-            select(Mentor)
-            .where(Mentor.id == mentor_id)
-            .options(selectinload(Mentor.tags))
-        )
-        return result.scalars().first()
-
-
-async def remove_tags_from_mentor(mentor_id: int, tag_ids: list[int]) -> Mentor:
-    """Удалить теги у ментора."""
-    async with session_scope() as session:
-        mentor = await session.get(Mentor, mentor_id)
-        if not mentor:
-            return None
-            
-        for tag_id in tag_ids:
-            tag = await session.get(Tag, tag_id)
-            if tag and tag in mentor.tags:
-                mentor.tags.remove(tag)
-                
-        await session.commit()
+        # Считаем общее количество
+        count_result = await session.execute(select(Mentor.id).select_from(count_query.subquery()))
+        total = len(count_result.all())
         
-        # Перезагружаем ментора с тегами
-        result = await session.execute(
-            select(Mentor)
-            .where(Mentor.id == mentor_id)
-            .options(selectinload(Mentor.tags))
-        )
-        return result.scalars().first()
+        # Применяем пагинацию
+        skip = (page - 1) * size
+        query = query.offset(skip).limit(size)
+        
+        result = await session.execute(query)
+        mentors = result.scalars().all()
+        
+        return mentors, total

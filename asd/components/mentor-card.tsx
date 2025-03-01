@@ -1,6 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { FeedItem } from "@/app/service/feed";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -9,10 +8,9 @@ import { MessageSquare } from "lucide-react";
 
 interface MentorCardProps {
     item: FeedItem;
-    onTagClick: (tag: string) => void;
 }
 
-export function MentorCard({ item, onTagClick }: MentorCardProps) {
+export function MentorCard({ item }: MentorCardProps) {
     // Get mentor initials for avatar
     const getInitials = (name: string) => {
         return name
@@ -70,22 +68,6 @@ export function MentorCard({ item, onTagClick }: MentorCardProps) {
                     <div>
                         <h4 className="font-medium mb-2">{item.title}</h4>
                         <p className="text-sm text-muted-foreground">{item.description}</p>
-                    </div>
-
-                    {/* Tags */}
-                    <div className="pt-2">
-                        <div className="flex flex-wrap gap-1.5">
-                            {item.tags.map((tag) => (
-                                <Badge
-                                    key={tag}
-                                    variant="secondary"
-                                    className="cursor-pointer hover:bg-secondary/80 text-xs py-0.5 px-2 transition-colors"
-                                    onClick={() => onTagClick(tag)}
-                                >
-                                    {tag}
-                                </Badge>
-                            ))}
-                        </div>
                     </div>
                 </div>
             </div>

@@ -14,7 +14,7 @@ from src.services.avatar_service import (
 )
 
 
-router = APIRouter(tags=["Аватарки"])
+router = APIRouter(tags=["Images"])
 
 
 @router.post("/me/avatar", status_code=status.HTTP_201_CREATED)

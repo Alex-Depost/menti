@@ -16,9 +16,8 @@ export default function FeedPage() {
     pages: 0
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const [tagFilter, setTagFilter] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [activeTags, setActiveTags] = useState<string[]>([]);
   const [showFilters, setShowFilters] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
@@ -26,10 +25,10 @@ export default function FeedPage() {
     setIsAuthenticated(authService.isAuthenticated());
   }, []);
 
-  const fetchFeed = async (page: number = currentPage, tag: string = tagFilter) => {
+  const fetchFeed = async (page: number = currentPage) => {
     setIsLoading(true);
     try {
-      const data = await feedService.getFeed(page, 10, tag);
+      const data = await feedService.getFeed(page, 10);
       setFeedData(data);
       setCurrentPage(data.page);
     } catch (error) {
@@ -50,71 +49,27 @@ export default function FeedPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleTagClick = (tag: string) => {
-    setTagFilter(tag);
-    setCurrentPage(1);
-    fetchFeed(1, tag);
-
-    // Add to active tags if not already there
-    if (!activeTags.includes(tag)) {
-      setActiveTags([...activeTags, tag]);
-    }
-  };
-
-  const handleTagSearch = () => {
+  const handleSearch = () => {
     setCurrentPage(1);
     fetchFeed(1);
   };
-
-  const handleRemoveTag = (tag: string) => {
-    const newTags = activeTags.filter(t => t !== tag);
-    setActiveTags(newTags);
-
-    if (tagFilter === tag) {
-      setTagFilter('');
-      fetchFeed(1, '');
-    }
-  };
-
-  const handleClearAllTags = () => {
-    setActiveTags([]);
-    setTagFilter('');
-    fetchFeed(1, '');
-  };
-
-  // Get all unique tags from feed items
-  const allTags = Array.from(
-    new Set(
-      feedData.items.flatMap(item => item.tags)
-    )
-  ).sort();
 
   return (
     <>
       <MentorsFeedHeader
         isAuthenticated={isAuthenticated}
-        tagFilter={tagFilter}
-        setTagFilter={setTagFilter}
-        handleTagSearch={handleTagSearch}
+        searchQuery={searchQuery}
+        setSearchQuery={setSearchQuery}
+        handleSearch={handleSearch}
         showFilters={showFilters}
         setShowFilters={setShowFilters}
-        activeTags={activeTags}
-        handleRemoveTag={handleRemoveTag}
-        handleClearAllTags={handleClearAllTags}
-        allTags={allTags}
-        handleTagClick={handleTagClick}
       />
-
-      {currentPage === 1 && <MentorsFeedHero />}
-
+      <MentorsFeedHero isAuthenticated={isAuthenticated} />
       <MentorsFeedList
         isLoading={isLoading}
         feedData={feedData}
         currentPage={currentPage}
         handlePageChange={handlePageChange}
-        handleTagClick={handleTagClick}
-        activeTags={activeTags}
-        handleClearAllTags={handleClearAllTags}
       />
     </>
   );

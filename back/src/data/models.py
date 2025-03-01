@@ -27,20 +27,6 @@ Base = declarative_base(
     metadata=METADATA,
 )
 
-# Association table for Mentor and Tag (many-to-many)
-mentor_tags = Table(
-    "mentor_tags",
-    Base.metadata,
-    Column(
-        "mentor_id",
-        Integer,
-        ForeignKey(f"{SCHEMA_NAME}.mentors.id"),
-        primary_key=True,
-    ),
-    Column("tag_id", Integer, ForeignKey(f"{SCHEMA_NAME}.tags.id"), primary_key=True),
-    Column("created_at", DateTime, default=datetime.now),
-)
-
 class AdmissionType(str, PyEnum):
     """Enum for student admission types."""
     EGE = "ЕГЭ"
@@ -106,29 +92,6 @@ class Mentor(AsyncAttrs, Base):
     title = cast(str, Column(String(100), nullable=True))
     description = cast(str, Column(String(500), nullable=True))
     admission_type = cast(str, Column(Enum(AdmissionType), nullable=True))
-    
-    # Связь с тегами
-    tags = relationship("Tag", secondary=mentor_tags, back_populates="mentors")
 
     def __repr__(self):
         return f"<Mentor(id={self.id}, email={self.email})>"
-
-
-class Tag(Base):
-    """Tag model for mentorship management."""
-
-    __tablename__ = "tags"
-
-    id = cast(int, Column(Integer, primary_key=True, index=True))
-    name = cast(str, Column(String(100), nullable=False, index=True, unique=True))
-    created_at = cast(datetime, Column(DateTime, default=datetime.now))
-    updated_at = cast(
-        datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    )
-    # Связь с менторами
-    mentors = relationship(
-        "Mentor", secondary=mentor_tags, back_populates="tags"
-    )
-
-    def __repr__(self):
-        return f"<Tag(id={self.id}, name={self.name})>"

@@ -11,7 +11,6 @@ export interface FeedItem {
     title: string;
     description: string;
     mentor: Mentor;
-    tags: string[];
 }
 
 export interface FeedResponse {
@@ -22,13 +21,12 @@ export interface FeedResponse {
     pages: number;
 }
 
-const getFeed = async (page = 1, size = 10, tag?: string): Promise<FeedResponse> => {
+const getFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
     try {
         // Build URL with query parameters
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('size', size.toString());
-        if (tag) params.append('tag', tag);
 
         const url = `${API_URL}/feed/?${params.toString()}`;
         const response = await fetch(url);

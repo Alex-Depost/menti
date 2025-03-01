@@ -78,18 +78,6 @@ class MentorResponse(CoreUserSchema):
         from_attributes = True
 
 
-class TagSchema(BaseModel):
-    """Schema for tag."""
-
-    id: int
-    name: str
-
-    class Config:
-        """Pydantic config."""
-
-        from_attributes = True
-
-
 class MentorFeedInfo(BaseModel):
     """Schema for mentor information in feed responses."""
 
@@ -158,7 +146,6 @@ class MentorDisplay(BaseModel):
     university: Optional[str] = None
     title: Optional[str] = None
     free_days: Optional[List[DayOfWeek]] = None
-    tags: List[TagSchema] = []
 
     class Config:
         """Pydantic config."""
@@ -193,7 +180,6 @@ class MentorFeedResponse(BaseModel):
     university: Optional[str] = None
     email: EmailStr
     avatar_url: Optional[str] = None
-    tags: List[TagSchema] = []
 
     class Config:
         """Pydantic config."""

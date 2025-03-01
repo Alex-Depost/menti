@@ -48,7 +48,7 @@ async def get_current_user_info(
     avatar_url = None
     if current_user.avatar_uuid:
         base_url = str(request.base_url)
-        avatar_url = urljoin(base_url, f"api/v1/storage/avatar/{current_user.avatar_uuid}")
+        avatar_url = urljoin(base_url, f"img/{current_user.avatar_uuid}")
     
     # Создаем полный объект для отображения
     return UserDisplay(
