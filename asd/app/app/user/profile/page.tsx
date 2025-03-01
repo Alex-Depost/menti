@@ -2,22 +2,13 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-    Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
-    CardContent,
-    CardFooter
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
 import userService, { UserData, UserUpdateData } from "@/app/service/user";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { TiptapEditor } from "@/components/ui/tiptap-editor";
+
+// Импортируем созданные компоненты
+import { LoadingProfile } from "./components/loading-profile";
+import { ProfileInfo } from "./components/profile-info";
+import { ProfileEditForm } from "./components/profile-edit-form";
 
 export default function UserProfilePage() {
     const { isAuthenticated, isUser } = useAuth();
@@ -61,38 +52,6 @@ export default function UserProfilePage() {
         loadUserData();
     }, [isAuthenticated, isUser, router]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
-
-        // Для числовых полей преобразуем строку в число
-        if (name === "age") {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value ? parseInt(value, 10) : null
-            }));
-        } else {
-            setFormData(prev => ({
-                ...prev,
-                [name]: value || null
-            }));
-        }
-    };
-
-    const handleTargetUniversitiesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const universities = e.target.value.split(',').map(uni => uni.trim()).filter(Boolean);
-        setFormData(prev => ({
-            ...prev,
-            target_universities: universities.length > 0 ? universities : null
-        }));
-    };
-
-    const handleDescriptionChange = (value: string) => {
-        setFormData(prev => ({
-            ...prev,
-            description: value || null
-        }));
-    };
-
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
@@ -119,22 +78,7 @@ export default function UserProfilePage() {
     };
 
     if (loading) {
-        return (
-            <div className="container mx-auto py-8">
-                <Card className="max-w-2xl mx-auto">
-                    <CardHeader>
-                        <CardTitle className="text-center">Загрузка профиля...</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="animate-pulse space-y-4">
-                            <div className="h-4 bg-muted rounded w-3/4 mx-auto"></div>
-                            <div className="h-4 bg-muted rounded w-1/2 mx-auto"></div>
-                            <div className="h-4 bg-muted rounded w-2/3 mx-auto"></div>
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-        );
+        return <LoadingProfile />;
     }
 
     return (
@@ -144,182 +88,20 @@ export default function UserProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Левая колонка - информация о профиле */}
                 <div className="md:col-span-1">
-                    <Card>
-                        <CardHeader className="text-center">
-                            <div className="flex justify-center mb-4">
-                                <Avatar className="w-24 h-24">
-                                    <AvatarFallback className="text-2xl">
-                                        {userData?.name ? userData.name.substring(0, 2).toUpperCase() : "ПП"}
-                                    </AvatarFallback>
-                                </Avatar>
-                            </div>
-                            <CardTitle>{userData?.name || "Пользователь"}</CardTitle>
-                            <CardDescription>{userData?.email}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                <div>
-                                    <p className="text-sm text-muted-foreground">ID пользователя</p>
-                                    <p>{userData?.id}</p>
-                                </div>
-                                {userData?.telegram_link && (
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Telegram</p>
-                                        <p>{userData.telegram_link}</p>
-                                    </div>
-                                )}
-                                {userData?.age && (
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Возраст</p>
-                                        <p>{userData.age} лет</p>
-                                    </div>
-                                )}
-                                {userData?.admission_type && (
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Тип поступления</p>
-                                        <p>{userData.admission_type}</p>
-                                    </div>
-                                )}
-                                <div>
-                                    <p className="text-sm text-muted-foreground">Статус</p>
-                                    <p>{userData?.is_active ? "Активен" : "Неактивен"}</p>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
+                    <ProfileInfo userData={userData} />
                 </div>
 
                 {/* Правая колонка - форма редактирования */}
                 <div className="md:col-span-2">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Редактирование профиля</CardTitle>
-                            <CardDescription>
-                                Обновите информацию о себе
-                            </CardDescription>
-                        </CardHeader>
-                        <form onSubmit={handleSubmit}>
-                            <CardContent className="space-y-6">
-                                {error && (
-                                    <div className="bg-red-50 p-4 rounded-md text-red-600 text-sm">
-                                        {error}
-                                    </div>
-                                )}
-                                {success && (
-                                    <div className="bg-green-50 p-4 rounded-md text-green-600 text-sm">
-                                        {success}
-                                    </div>
-                                )}
-
-                                <div className="space-y-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="name">Имя</Label>
-                                            <Input
-                                                id="name"
-                                                name="name"
-                                                value={formData.name || ""}
-                                                onChange={handleChange}
-                                                placeholder="Ваше имя"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="email">Email</Label>
-                                            <Input
-                                                id="email"
-                                                name="email"
-                                                type="email"
-                                                value={formData.email || ""}
-                                                onChange={handleChange}
-                                                placeholder="example@mail.com"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="telegram_link">Ссылка на Telegram</Label>
-                                            <Input
-                                                id="telegram_link"
-                                                name="telegram_link"
-                                                value={formData.telegram_link || ""}
-                                                onChange={handleChange}
-                                                placeholder="@username"
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="age">Возраст</Label>
-                                            <Input
-                                                id="age"
-                                                name="age"
-                                                type="number"
-                                                value={formData.age || ""}
-                                                onChange={handleChange}
-                                                placeholder="Ваш возраст"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="password">Новый пароль</Label>
-                                        <Input
-                                            id="password"
-                                            name="password"
-                                            type="password"
-                                            onChange={handleChange}
-                                            placeholder="Оставьте пустым, чтобы не менять"
-                                        />
-                                    </div>
-
-                                    <Separator />
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="description">Описание</Label>
-                                        <TiptapEditor
-                                            value={formData.description || ''}
-                                            onChange={handleDescriptionChange}
-                                            placeholder="Расскажите о себе"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="target_universities">Целевые университеты</Label>
-                                        <Input
-                                            id="target_universities"
-                                            name="target_universities"
-                                            value={formData.target_universities?.join(", ") || ""}
-                                            onChange={handleTargetUniversitiesChange}
-                                            placeholder="МГУ, МФТИ, ВШЭ (через запятую)"
-                                        />
-                                        <p className="text-xs text-muted-foreground">Укажите через запятую</p>
-                                    </div>
-
-                                    <div className="space-y-2">
-                                        <Label htmlFor="admission_type">Тип поступления</Label>
-                                        <select
-                                            id="admission_type"
-                                            name="admission_type"
-                                            value={formData.admission_type || ""}
-                                            onChange={handleChange}
-                                            className="w-full p-2 border rounded-md"
-                                        >
-                                            <option value="">Не выбрано</option>
-                                            <option value="ЕГЭ">ЕГЭ</option>
-                                            <option value="олимпиады">Олимпиады</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="flex justify-between">
-                                <Button variant="outline" type="button" onClick={() => router.back()}>
-                                    Отмена
-                                </Button>
-                                <Button type="submit" disabled={saving}>
-                                    {saving ? "Сохранение..." : "Сохранить изменения"}
-                                </Button>
-                            </CardFooter>
-                        </form>
-                    </Card>
+                    <ProfileEditForm
+                        userData={userData}
+                        formData={formData}
+                        setFormData={setFormData}
+                        error={error}
+                        success={success}
+                        saving={saving}
+                        onSubmit={handleSubmit}
+                    />
                 </div>
             </div>
         </div>
