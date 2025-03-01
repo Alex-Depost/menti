@@ -29,7 +29,7 @@ export function SearchInput({ value, onChange, onSearch }: SearchInputProps) {
         <div className="relative flex w-full max-w-xs items-center">
             <Search className="absolute left-2.5 h-4 w-4 text-muted-foreground" />
             <Input
-                type="search"
+                type="text"
                 placeholder="Search by tag..."
                 className="w-full pl-8 pr-10"
                 value={inputValue}

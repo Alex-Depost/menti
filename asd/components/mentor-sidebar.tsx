@@ -1,14 +1,13 @@
-import * as React from "react"
-import { MessageSquare, Search, User } from "lucide-react"
 import {
   Sidebar,
   SidebarContent,
-  SidebarHeader,
-  SidebarMenuItem,
   SidebarMenu,
   SidebarMenuButton,
-  SidebarRail,
+  SidebarMenuItem,
+  SidebarRail
 } from "@/components/ui/sidebar"
+import { MessageSquare, Search, User } from "lucide-react"
+import * as React from "react"
 
 export function MentorSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
