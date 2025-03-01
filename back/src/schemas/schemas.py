@@ -192,6 +192,23 @@ class UserDisplay(BaseModel):
         from_attributes = True
 
 
+class UserUpdateSchema(BaseModel):
+    """Схема для обновления профиля пользователя."""
+
+    name: Optional[str] = None
+    telegram_link: Optional[str] = None
+    age: Optional[int] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    description: Optional[str] = None
+    target_universities: Optional[List[str]] = None
+    admission_type: Optional[AdmissionType] = None
+
+    class Config:
+        """Pydantic config."""
+        from_attributes = True
+
+
 class MentorDisplay(BaseModel):
     """Полная схема ментора для отображения."""
 

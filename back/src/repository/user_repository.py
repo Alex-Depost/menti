@@ -3,7 +3,7 @@ from src.data.base import session_scope
 from src.data.models import User
 from sqlalchemy import insert
 import uuid
-from typing import Optional
+from typing import Optional, Dict, Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -40,3 +40,33 @@ async def update_user_avatar(db: AsyncSession, user_id: int, avatar_uuid: Option
     stmt = update(User).where(User.id == user_id).values(avatar_uuid=avatar_uuid)
     await db.execute(stmt)
     await db.commit()
+
+
+async def update_user_profile(user_id: int, update_data: Dict[str, Any]) -> User:
+    """
+    Обновляет профиль пользователя
+    
+    Args:
+        user_id: ID пользователя
+        update_data: Словарь с обновляемыми полями
+        
+    Returns:
+        Обновленный объект пользователя
+    """
+    async with session_scope() as session:
+        # Сначала получаем пользователя, чтобы убедиться, что он существует
+        user_query = select(User).where(User.id == user_id)
+        result = await session.execute(user_query)
+        user = result.scalars().first()
+        
+        if not user:
+            return None
+        
+        # Обновляем профиль
+        stmt = update(User).where(User.id == user_id).values(**update_data)
+        await session.execute(stmt)
+        await session.commit()
+        
+        # Получаем и возвращаем обновленного пользователя
+        result = await session.execute(user_query)
+        return result.scalars().first()

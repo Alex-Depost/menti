@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, status, Request, HTTPException
 from urllib.parse import urljoin
 
 from src.data.models import User
@@ -7,9 +7,11 @@ from src.schemas.schemas import (
     UserCreationSchema,
     UserLoginSchema,
     UserResponse,
+    UserUpdateSchema,
+    UserDisplay,
 )
 from src.security.auth import get_current_user
-from src.services.user_auth_service import authenticate_user, register_user
+from src.services.user_auth_service import authenticate_user, register_user, update_user_profile_service
 
 router = APIRouter(tags=["authentication"])
 
@@ -23,8 +25,14 @@ async def signup(user_data: UserCreationSchema):
 
 @router.post("/signin", response_model=Token)
 async def signin(user_data: UserLoginSchema):
-    _, access_token = await authenticate_user(user_data.email, user_data.password)
-    return {"access_token": access_token, "token_type": "bearer"}
+    result = await authenticate_user(user_data.email, user_data.password)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    return result
 
 
 @router.get("/me", response_model=UserResponse)
@@ -48,3 +56,28 @@ async def get_current_user_info(
     }
     
     return user_dict
+
+
+@router.patch("/me", response_model=UserDisplay)
+async def update_user_profile(
+    update_data: UserUpdateSchema,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Обновление профиля текущего пользователя
+    
+    Позволяет изменить:
+    - Имя (name)
+    - Ссылку на телеграм (telegram_link)
+    - Возраст (age)
+    - Почту (email)
+    - Пароль (password)
+    - Описание (description)
+    - Целевые университеты (target_universities)
+    - Тип поступления (admission_type)
+    
+    Для изменения аватара используйте отдельный эндпоинт /me/avatar
+    """
+    # Обновляем профиль и возвращаем обновленные данные
+    updated_user = await update_user_profile_service(current_user.id, update_data)
+    return updated_user

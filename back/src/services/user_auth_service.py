@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from src.config import Roles
 from src.data.models import User
 import src.repository.user_repository as user_repo
-from src.schemas.schemas import UserCreationSchema
+from src.schemas.schemas import UserCreationSchema, UserUpdateSchema
 from src.security.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
@@ -39,20 +39,51 @@ async def register_user(user_data: UserCreationSchema) -> User:
         )
 
 
-async def authenticate_user(email: str, password: str) -> tuple[User, str]:
-    entity = await user_repo.get_user_by_email(email)
-    # Verify user exists and password is correct
-    if not entity or not verify_password(password, entity.password_hash):
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
+async def authenticate_user(email: str, password: str):
+    user = await user_repo.get_user_by_email(email)
 
-    # Create access token
+    if not user:
+        return False
+
+    if not verify_password(password, user.password_hash):
+        return False
+
+    # Generate JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        Roles.USER, data={"sub": entity.email}, expires_delta=access_token_expires
+        role=Roles.USER, data={"sub": user.email}, expires_delta=access_token_expires
     )
+    return {"access_token": access_token, "token_type": "bearer"}
 
-    return entity, access_token
+
+async def update_user_profile_service(user_id: int, update_data: UserUpdateSchema) -> User:
+    """
+    Обновляет профиль пользователя
+    
+    Args:
+        user_id: ID пользователя
+        update_data: Данные для обновления
+        
+    Returns:
+        Обновленный объект пользователя
+    
+    Raises:
+        HTTPException: Если пользователь не найден
+    """
+    # Преобразуем данные в словарь и удаляем None значения
+    update_dict = update_data.dict(exclude_unset=True)
+    
+    # Если передан пароль, хэшируем его
+    if "password" in update_dict:
+        update_dict["password_hash"] = get_password_hash(update_dict.pop("password"))
+    
+    # Обновляем профиль
+    updated_user = await user_repo.update_user_profile(user_id, update_dict)
+    
+    if not updated_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Пользователь не найден",
+        )
+    
+    return updated_user
