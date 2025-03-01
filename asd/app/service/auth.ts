@@ -39,7 +39,7 @@ class AuthService {
         return window.localStorage.getItem("token")
     }
     getAuthType() {
-        return window.localStorage.getItem("authType")
+        return window.localStorage.getItem("authType");
     }
     isAuthenticated() {
         return !!this.getToken()

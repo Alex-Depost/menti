@@ -1,6 +1,6 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MoreHorizontal } from 'lucide-react';
 
 interface PaginationProps {
     currentPage: number;
@@ -19,22 +19,33 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
     });
 
     return (
-        <div className="flex items-center justify-center space-x-2 mt-8">
+        <div className="flex items-center justify-center space-x-1.5 mt-8">
             <Button
                 variant="outline"
                 size="icon"
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 disabled={currentPage === 1}
+                className="h-9 w-9 rounded-md transition-all hover:bg-muted"
+                aria-label="Предыдущая страница"
             >
                 <ChevronLeft className="h-4 w-4" />
             </Button>
 
             {currentPage > 3 && totalPages > 5 && (
                 <>
-                    <Button variant="outline" onClick={() => onPageChange(1)}>
+                    <Button 
+                        variant={currentPage === 1 ? "default" : "outline"}
+                        onClick={() => onPageChange(1)}
+                        className="h-9 w-9 rounded-md font-medium text-sm"
+                        aria-label="Перейти на страницу 1"
+                    >
                         1
                     </Button>
-                    {currentPage > 4 && <span className="mx-1">...</span>}
+                    {currentPage > 4 && (
+                        <span className="flex items-center justify-center w-9 h-9">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                        </span>
+                    )}
                 </>
             )}
 
@@ -43,6 +54,13 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
                     key={page}
                     variant={currentPage === page ? "default" : "outline"}
                     onClick={() => onPageChange(page)}
+                    className={`h-9 w-9 rounded-md font-medium text-sm ${
+                        currentPage === page 
+                            ? 'shadow-sm' 
+                            : 'hover:bg-muted transition-colors'
+                    }`}
+                    aria-label={`Перейти на страницу ${page}`}
+                    aria-current={currentPage === page ? 'page' : undefined}
                 >
                     {page}
                 </Button>
@@ -50,8 +68,17 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
 
             {currentPage < totalPages - 2 && totalPages > 5 && (
                 <>
-                    {currentPage < totalPages - 3 && <span className="mx-1">...</span>}
-                    <Button variant="outline" onClick={() => onPageChange(totalPages)}>
+                    {currentPage < totalPages - 3 && (
+                        <span className="flex items-center justify-center w-9 h-9">
+                            <MoreHorizontal className="h-4 w-4 text-muted-foreground" />
+                        </span>
+                    )}
+                    <Button 
+                        variant="outline" 
+                        onClick={() => onPageChange(totalPages)}
+                        className="h-9 w-9 rounded-md font-medium text-sm"
+                        aria-label={`Перейти на страницу ${totalPages}`}
+                    >
                         {totalPages}
                     </Button>
                 </>
@@ -62,6 +89,8 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
                 size="icon"
                 onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                 disabled={currentPage === totalPages}
+                className="h-9 w-9 rounded-md transition-all hover:bg-muted"
+                aria-label="Следующая страница"
             >
                 <ChevronRight className="h-4 w-4" />
             </Button>
