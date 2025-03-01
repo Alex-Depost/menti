@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { MentorData, fetchMentorProfile } from "@/app/api/auth";
-import { MentorResumeData, createMentorResume, getMyResumes, updateMentorResume, uploadAvatar } from "@/app/api/profile";
+import { MentorData, fetchMentorProfile } from "../api/auth";
+import { MentorResumeData, createMentorResume, getMyResumes, updateMentorResume, uploadAvatar } from "../api/profile";
 
-
+// Компонент режима просмотра
 const ViewMode = ({ formData, setIsEditing, isLoading }: { 
   formData: { 
     name: string; 
@@ -117,7 +117,7 @@ const EditMode = ({
               </div>
             )}
             <div 
-              className="absolute bottom-0 right-0 bg-gray-600 text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
+              className="absolute bottom-0 right-0 bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4">
@@ -201,8 +201,8 @@ const EditMode = ({
           type="submit"
           disabled={isSubmitting}
           className={`w-full py-2 px-4 rounded-md transition-colors ${isSubmitting 
-            ? 'bg-gray-400 cursor-not-allowed' 
-            : 'bg-gray-600 text-white hover:bg-gray-700'
+            ? 'bg-blue-400 cursor-not-allowed' 
+            : 'bg-blue-600 text-white hover:bg-blue-700'
           }`}
         >
           {isSubmitting ? 'Сохранение...' : 'Сохранить'}
@@ -342,7 +342,7 @@ export default function ProfilePage() {
 
   return (
     <div className="container mx-auto py-8">
-      <h1 className="text-2xl font-bold mb-6 text-center">Анкета ментора</h1>
+      <h1 className="text-2xl font-bold mb-6">Анкета ментора</h1>
       
       {error && (
         <div className="mb-6 p-4 bg-red-100 text-red-700 rounded-md">
