@@ -11,21 +11,24 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
-import { login } from "@/app/service/login"
 
 
 
 export function LoginForm({
   className,
+  onFormSubmit,
+  error,
   ...props
-}: React.ComponentProps<"div">) {
+}: React.ComponentProps<"div"> & {
+  onFormSubmit: (data: { email: string; password: string }) => void;
+  error: string | null;
+}) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    var res = await login(email, password);
-    console.log('Успешный вход:', res);
+    onFormSubmit({ email, password });
   };
 
   return (
@@ -56,6 +59,11 @@ export function LoginForm({
                 </div>
                 <Input id="password" type="password" required onChange={e => setPassword(e.target.value)} />
               </div>
+              {error && (
+                <div className="text-red-500 text-sm text-center">
+                  {error}
+                </div>
+              )}
               <div className="flex flex-col gap-3">
                 <a
                   href="/login/pagem"
