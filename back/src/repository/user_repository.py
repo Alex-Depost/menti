@@ -16,16 +16,25 @@ async def get_user_by_email(email: str) -> User:
         return result.scalars().first()
 
 
+async def get_user_by_login(login: str) -> User:
+    async with session_scope() as session:
+        # Find user by login
+        result = await session.execute(
+            select(User).where(User.login == login)  # type: ignore
+        )  # type: ignore
+        return result.scalars().first()
+
+
 async def create_user(user_data: User) -> User:
     async with session_scope() as session:
         stmt = insert(User).values(
-            name=user_data.email.split("@")[0],
-            email=user_data.email,
+            name=user_data.name,
+            login=user_data.login,
             password_hash=user_data.password_hash,
         )
         await session.execute(stmt)
         await session.commit()
-        return await get_user_by_email(user_data.email)
+        return await get_user_by_login(user_data.login)
 
 
 async def update_user_avatar(db: AsyncSession, user_id: int, avatar_uuid: Optional[uuid.UUID]) -> None:

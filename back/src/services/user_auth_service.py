@@ -1,4 +1,6 @@
 from datetime import timedelta
+import re
+from transliterate import translit
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -15,23 +17,60 @@ from src.security.auth import (
 )
 
 
+async def generate_unique_login(name: str) -> str:
+    """
+    Генерирует уникальный логин на основе имени.
+    Если имя на русском, транслитерирует его.
+    Если логин не уникален, добавляет число в конец.
+    
+    Args:
+        name: Имя пользователя
+        
+    Returns:
+        Уникальный логин
+    """
+    # Проверка на русские символы
+    if re.search('[а-яА-Я]', name):
+        login = translit(name, 'ru', reversed=True)
+    else:
+        login = name
+        
+    # Делаем логин в нижнем регистре и заменяем пробелы на подчеркивания
+    login = login.lower().replace(' ', '_')
+    
+    # Проверяем, существует ли такой логин
+    existing_user = await user_repo.get_user_by_login(login)
+    
+    if not existing_user:
+        return login
+    
+    # Если логин существует, добавляем число
+    counter = 1
+    while True:
+        new_login = f"{login}{counter}"
+        existing_user = await user_repo.get_user_by_login(new_login)
+        if not existing_user:
+            return new_login
+        counter += 1
+
+
 async def register_user(user_data: UserCreationSchema) -> User:
-    existing_user = await user_repo.get_user_by_email(user_data.email)
-
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
-        )
-
-    # Create new user
+    # Генерируем уникальный логин
+    login = await generate_unique_login(user_data.name)
+    
+    # Создаем хеш пароля
     hashed_password = get_password_hash(user_data.password)
-    new_user = User(email=user_data.email, password_hash=hashed_password)
+    
+    # Создаем нового пользователя
+    new_user = User(
+        name=user_data.name,
+        login=login,
+        password_hash=hashed_password
+    )
 
     try:
         await user_repo.create_user(new_user)
-
-        created_user = await user_repo.get_user_by_email(user_data.email)
+        created_user = await user_repo.get_user_by_login(login)
         return created_user
     except IntegrityError:
         raise HTTPException(
@@ -39,8 +78,8 @@ async def register_user(user_data: UserCreationSchema) -> User:
         )
 
 
-async def authenticate_user(email: str, password: str):
-    user = await user_repo.get_user_by_email(email)
+async def authenticate_user(login: str, password: str):
+    user = await user_repo.get_user_by_login(login)
 
     if not user:
         return False
@@ -51,7 +90,7 @@ async def authenticate_user(email: str, password: str):
     # Generate JWT token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        role=Roles.USER, data={"sub": user.email}, expires_delta=access_token_expires
+        role=Roles.USER, data={"sub": user.login}, expires_delta=access_token_expires
     )
     return {"access_token": access_token, "token_type": "bearer"}
 
@@ -71,7 +110,7 @@ async def update_user_profile_service(user_id: int, update_data: UserUpdateSchem
         HTTPException: Если пользователь не найден
     """
     # Преобразуем данные в словарь и удаляем None значения
-    update_dict = update_data.dict(exclude_unset=True)
+    update_dict = update_data.dict(exclude_unset=True, exclude_none=False)
     
     # Если передан пароль, хэшируем его
     if "password" in update_dict:

@@ -8,8 +8,8 @@ from passlib.context import CryptContext
 
 from src.config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY, Roles
 from src.data.models import Mentor, User
-from src.repository.mentor_repository import get_mentor_by_email
-from src.repository.user_repository import get_user_by_email
+from src.repository.mentor_repository import get_mentor_by_login
+from src.repository.user_repository import get_user_by_login
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -49,17 +49,17 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
+        login: str = payload.get("sub")
         role = payload.get("role")
 
-        if email is None:
+        if login is None:
             raise credentials_exception
     except jwt.PyJWTError:
         raise credentials_exception
 
     if role != Roles.USER:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Users only")
-    user = await get_user_by_email(email)
+    user = await get_user_by_login(login)
 
     if user is None:
         raise credentials_exception
@@ -81,10 +81,10 @@ async def get_current_mentor(token: str = Depends(oauth2_scheme)) -> Mentor:
 
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        email: str = payload.get("sub")
+        login: str = payload.get("sub")
         role = payload.get("role")
 
-        if email is None:
+        if login is None:
             raise credentials_exception
     except jwt.PyJWTError:
         raise credentials_exception
@@ -93,7 +93,7 @@ async def get_current_mentor(token: str = Depends(oauth2_scheme)) -> Mentor:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Mentors only"
         )
-    mentor = await get_mentor_by_email(email)
+    mentor = await get_mentor_by_login(login)
 
     if mentor is None:
         raise credentials_exception

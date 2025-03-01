@@ -18,15 +18,25 @@ async def get_mentor_by_email(email: str) -> Mentor:
         return result.scalars().first()
 
 
+async def get_mentor_by_login(login: str) -> Mentor:
+    async with session_scope() as session:
+        # Find Mentor by login
+        result = await session.execute(
+            select(Mentor).where(Mentor.login == login)  # type: ignore
+        )  # type: ignore
+        return result.scalars().first()
+
+
 async def create_mentor(mentor: Mentor) -> Mentor:
     async with session_scope() as session:
         stmt = insert(Mentor).values(
-            name=mentor.email.split("@")[0],
-            email=mentor.email,
+            name=mentor.name,
+            login=mentor.login,
             password_hash=mentor.password_hash,
         )
         await session.execute(stmt)
-    return await get_mentor_by_email(mentor.email)
+        await session.commit()
+    return await get_mentor_by_login(mentor.login)
 
 
 async def update_mentor_avatar(db: AsyncSession, mentor_id: int, avatar_uuid: Optional[uuid.UUID]) -> None:

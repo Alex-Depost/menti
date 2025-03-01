@@ -26,11 +26,11 @@ async def signup(user_data: UserCreationSchema):
 
 @router.post("/signin", response_model=Token)
 async def signin(user_data: UserLoginSchema):
-    result = await authenticate_user(user_data.email, user_data.password)
+    result = await authenticate_user(user_data.login, user_data.password)
     if not result:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect login or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return result
@@ -69,14 +69,7 @@ async def get_current_user_info(
 
 @router.patch("/me", response_model=UserDisplay)
 async def update_user_profile(
-    name: Optional[str] = Form(None),
-    telegram_link: Optional[str] = Form(None),
-    age: Optional[int] = Form(None),
-    email: Optional[str] = Form(None),
-    password: Optional[str] = Form(None),
-    description: Optional[str] = Form(None),
-    target_universities: Optional[str] = Form(None),
-    admission_type: Optional[str] = Form(None),
+    update_data: UserUpdateSchema,
     current_user: User = Depends(get_current_user)
 ):
     """
@@ -89,50 +82,11 @@ async def update_user_profile(
     - Почту (email)
     - Пароль (password)
     - Описание (description)
-    - Целевые университеты (target_universities) - строка с университетами, разделенными запятыми
+    - Целевые университеты (target_universities)
     - Тип поступления (admission_type)
     
     Для изменения аватара используйте отдельный эндпоинт /me/avatar
     """
-    # Создаем словарь с обновляемыми данными
-    update_dict = {}
-    
-    if name is not None:
-        update_dict["name"] = name
-        
-    if telegram_link is not None:
-        update_dict["telegram_link"] = telegram_link
-        
-    if age is not None:
-        update_dict["age"] = age
-        
-    if email is not None:
-        update_dict["email"] = email
-        
-    if password is not None:
-        update_dict["password"] = password
-        
-    if description is not None:
-        update_dict["description"] = description
-        
-    if target_universities is not None:
-        # Преобразуем строку с университетами в список
-        update_dict["target_universities"] = [uni.strip() for uni in target_universities.split(",") if uni.strip()]
-        
-    if admission_type is not None:
-        try:
-            # Проверяем, что тип поступления валиден
-            update_dict["admission_type"] = AdmissionType(admission_type)
-        except ValueError:
-            valid_types = [t.value for t in AdmissionType]
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Неверный тип поступления. Допустимые значения: {', '.join(valid_types)}"
-            )
-    
-    # Создаем объект схемы для валидации
-    update_data = UserUpdateSchema(**update_dict)
-    
     # Обновляем профиль и возвращаем обновленные данные
     updated_user = await update_user_profile_service(current_user.id, update_data)
     return updated_user

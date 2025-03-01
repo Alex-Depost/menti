@@ -8,32 +8,32 @@ from src.data.models import AdmissionType, DayOfWeek
 class CoreUserSchema(BaseModel):
     """Base user schema with common attributes."""
 
-    email: EmailStr
+    name: str
 
 
 class UserCreationSchema(CoreUserSchema):
     """Schema for user creation/registration."""
 
-    password: str = Field(..., min_length=8)
+    password: str = "1"
 
 
 class MentorCreationSchema(CoreUserSchema):
     """Schema for mentor creation/registration."""
 
-    password: str = Field(..., min_length=8)
+    password: str = "1"
 
 
 class UserLoginSchema(BaseModel):
     """Schema for user login."""
 
-    email: EmailStr
+    login: str
     password: str
 
 
 class MentorLoginSchema(BaseModel):
     """Schema for mentor login."""
 
-    email: EmailStr
+    login: str
     password: str
 
 
@@ -50,13 +50,23 @@ class TokenData(BaseModel):
     username: Optional[str] = None
 
 
-class UserResponse(CoreUserSchema):
+class UserResponse(BaseModel):
     """Schema for user response."""
 
-    name: str
     id: int
+    login: Optional[str] = None
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    age: Optional[int] = None
+    telegram_link: Optional[str] = None
     is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    avatar_uuid: Optional[uuid.UUID] = None
     avatar_url: Optional[str] = None
+    target_universities: Optional[List[str]] = None
+    description: Optional[str] = None
+    admission_type: Optional[AdmissionType] = None
 
     class Config:
         """Pydantic config."""
@@ -64,13 +74,25 @@ class UserResponse(CoreUserSchema):
         from_attributes = True
 
 
-class MentorResponse(CoreUserSchema):
+class MentorResponse(BaseModel):
     """Schema for mentor response."""
 
-    name: str
     id: int
+    login: Optional[str] = None
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    age: Optional[int] = None
+    telegram_link: Optional[str] = None
     is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    avatar_uuid: Optional[uuid.UUID] = None
     avatar_url: Optional[str] = None
+    university: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+    free_days: Optional[List[DayOfWeek]] = None
+    admission_type: Optional[AdmissionType] = None
 
     class Config:
         """Pydantic config."""
@@ -83,7 +105,7 @@ class MentorFeedInfo(BaseModel):
 
     id: int
     name: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     avatar_url: Optional[str] = None
 
     class Config:
@@ -96,8 +118,9 @@ class UserDisplay(BaseModel):
     """Полная схема пользователя для отображения."""
 
     id: int
+    login: Optional[str] = None
     name: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     avatar_uuid: Optional[uuid.UUID] = None
     telegram_link: Optional[str] = None
     age: Optional[int] = None
@@ -134,8 +157,9 @@ class MentorDisplay(BaseModel):
     """Полная схема ментора для отображения."""
 
     id: int
+    login: Optional[str] = None
     name: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
     avatar_uuid: Optional[uuid.UUID] = None
     telegram_link: Optional[str] = None
     age: Optional[int] = None
@@ -174,11 +198,12 @@ class MentorFeedResponse(BaseModel):
     """Schema for mentor in feed responses."""
 
     id: int
+    login: Optional[str] = None
     name: str
     title: Optional[str] = None
     description: Optional[str] = None
     university: Optional[str] = None
-    email: EmailStr
+    email: Optional[EmailStr] = None
     avatar_url: Optional[str] = None
 
     class Config:

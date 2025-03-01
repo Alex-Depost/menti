@@ -29,7 +29,7 @@ async def signup(user_data: MentorCreationSchema):
 
 @router.post("/signin", response_model=Token)
 async def signin(user_data: MentorLoginSchema):
-    _, access_token = await authenticate_mentor(user_data.email, user_data.password)
+    _, access_token = await authenticate_mentor(user_data.login, user_data.password)
     return {"access_token": access_token, "token_type": "bearer"}
 
 
@@ -48,10 +48,13 @@ async def get_current_user_info(
     mentor_dict = {
         "id": current_user.id,
         "name": current_user.name,
-        "email": current_user.email,
         "is_active": current_user.is_active,
         "avatar_url": avatar_url
     }
+    
+    # Добавляем email, только если он существует
+    if hasattr(current_user, "email") and current_user.email:
+        mentor_dict["email"] = current_user.email
     
     return mentor_dict
 

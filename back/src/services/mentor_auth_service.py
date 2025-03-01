@@ -1,4 +1,6 @@
 from datetime import timedelta
+import re
+from transliterate import translit
 
 from fastapi import HTTPException, status
 from sqlalchemy.exc import IntegrityError
@@ -15,37 +17,74 @@ from src.security.auth import (
 )
 
 
+async def generate_unique_login(name: str) -> str:
+    """
+    Генерирует уникальный логин на основе имени.
+    Если имя на русском, транслитерирует его.
+    Если логин не уникален, добавляет число в конец.
+    
+    Args:
+        name: Имя пользователя
+        
+    Returns:
+        Уникальный логин
+    """
+    # Проверка на русские символы
+    if re.search('[а-яА-Я]', name):
+        login = translit(name, 'ru', reversed=True)
+    else:
+        login = name
+        
+    # Делаем логин в нижнем регистре и заменяем пробелы на подчеркивания
+    login = login.lower().replace(' ', '_')
+    
+    # Проверяем, существует ли такой логин
+    existing_mentor = await mentor_repo.get_mentor_by_login(login)
+    
+    if not existing_mentor:
+        return login
+    
+    # Если логин существует, добавляем число
+    counter = 1
+    while True:
+        new_login = f"{login}{counter}"
+        existing_mentor = await mentor_repo.get_mentor_by_login(new_login)
+        if not existing_mentor:
+            return new_login
+        counter += 1
+
+
 async def register_mentor(user_data: MentorCreationSchema) -> Mentor:
-    existing_user = await mentor_repo.get_mentor_by_email(user_data.email)
-
-    if existing_user:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
-        )
-
-    # Create new user
+    # Генерируем уникальный логин
+    login = await generate_unique_login(user_data.name)
+    
+    # Создаем хеш пароля
     hashed_password = get_password_hash(user_data.password)
-    new_user = Mentor(email=user_data.email, password_hash=hashed_password)
+    
+    # Создаем нового ментора
+    new_mentor = Mentor(
+        name=user_data.name,
+        login=login,
+        password_hash=hashed_password
+    )
 
     try:
-        await mentor_repo.create_mentor(new_user)
-
-        created_user = await mentor_repo.get_mentor_by_email(user_data.email)
-        return created_user
+        await mentor_repo.create_mentor(new_mentor)
+        created_mentor = await mentor_repo.get_mentor_by_login(login)
+        return created_mentor
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Registration failed"
         )
 
 
-async def authenticate_mentor(email: str, password: str) -> tuple[Mentor, str]:
-    entity = await mentor_repo.get_mentor_by_email(email)
+async def authenticate_mentor(login: str, password: str) -> tuple[Mentor, str]:
+    entity = await mentor_repo.get_mentor_by_login(login)
     # Verify user exists and password is correct
     if not entity or not verify_password(password, entity.password_hash):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect login or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -53,7 +92,7 @@ async def authenticate_mentor(email: str, password: str) -> tuple[Mentor, str]:
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
         Roles.MENTOR,
-        data={"sub": entity.email}, expires_delta=access_token_expires
+        data={"sub": entity.login}, expires_delta=access_token_expires
     )
 
     return entity, access_token
