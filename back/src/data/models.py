@@ -78,7 +78,7 @@ class User(Base):
     target_universities = cast(
         list[str], Column(ARRAY(String), nullable=True, default=[])
     )
-    description = cast(str, Column(String(500), nullable=True))
+    description = cast(str, Column(String, nullable=True))
     admission_type = cast(str, Column(Enum(AdmissionType), nullable=True))
     
 
