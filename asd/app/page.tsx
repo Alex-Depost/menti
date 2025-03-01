@@ -1,23 +1,32 @@
-import { AppSidebar } from "@/components/app-sidebar"
+"use client"
+import { MentorSidebar } from "@/components/mentor-sidebar"
 import {
   SidebarInset,
   SidebarProvider
 } from "@/components/ui/sidebar"
+import Link from "next/link"
+import authService from "./service/auth"
 
 export default function Page() {
+  const loadFeed = async () => {
+    const response = await fetch("/")
+  }
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <MentorSidebar />
       <SidebarInset>
         <header className="flex sticky top-0 bg-background h-16 shrink-0 items-center gap-2 border-b px-4">
           <div className="container mx-auto px-4">
             <div className="flex items-center justify-between h-16">
               <div className="text-xl font-bold flex items-center gap-2">
-                Name
+                SEARCH WILL BE HERE
               </div>
-              <a href="/login" className="flex items-center gap-1 hover:text-indigo-200">
-                Войти
-              </a>
+              {
+                !authService.isAuthenticated() ?
+                  <Link href="/auth/signin" className="flex items-center gap-1 hover:text-indigo-200">
+                    Войти
+                  </Link> : <p></p>
+              }
             </div>
           </div>
         </header>

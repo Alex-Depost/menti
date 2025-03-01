@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
+import Link from "next/link"
 
 
 
@@ -18,10 +19,12 @@ export function LoginForm({
   className,
   onFormSubmit,
   error,
+  userType = "user",
   ...props
 }: React.ComponentProps<"div"> & {
   onFormSubmit: (data: { email: string; password: string }) => void;
   error: string | null;
+  userType?: "user" | "mentor";
 }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -37,7 +40,7 @@ export function LoginForm({
         <CardHeader>
           <CardTitle>Войдите в свой аккаунт</CardTitle>
           <CardDescription>
-            Введите свой E-mail для входа в аккаунт
+            Введите свой E-mail для входа в аккаунт {userType === "mentor" ? "ментора" : "пользователя"}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -65,12 +68,6 @@ export function LoginForm({
                 </div>
               )}
               <div className="flex flex-col gap-3">
-                <a
-                  href="/login/pagem"
-                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-                >
-                  Войти, как ментор
-                </a>
                 <Button type="submit" className="w-full">
                   Войти
                 </Button>
@@ -78,9 +75,12 @@ export function LoginForm({
             </div>
             <div className="mt-4 text-center text-sm">
               Нет аккаунта?{" "}
-              <a href="/signup" className="underline underline-offset-4">
+              <Link
+                href="/auth/signup"
+                className="underline underline-offset-4"
+              >
                 Зарегистрироваться
-              </a>
+              </Link>
             </div>
           </form>
         </CardContent>

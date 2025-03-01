@@ -1,0 +1,56 @@
+"use client"
+import authService from "@/app/service/auth";
+import { LoginForm } from "@/components/login-form"
+import { TabsAuth } from "@/components/tabs-auth";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+
+export default function SignInPage() {
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const defaultTab = searchParams.get('type') === 'mentor' ? 'mentor' : 'user';
+
+    // State for user authentication
+    const [userError, setUserError] = useState<string | null>(null);
+    const handleUserFormSubmit = async ({ email, password }: { email: string; password: string; }) => {
+        try {
+            await authService.loginAsUser(email, password);
+            router.push("/")
+        } catch (error) {
+            setUserError(error instanceof Error ? error.message : "Ошибка авторизации");
+        }
+    };
+
+    // State for mentor authentication
+    const [mentorError, setMentorError] = useState<string | null>(null);
+    const handleMentorFormSubmit = async ({ email, password }: { email: string; password: string; }) => {
+        try {
+            await authService.loginAsMentor(email, password);
+            router.push("/")
+        } catch (error) {
+            setMentorError(error instanceof Error ? error.message : "Ошибка авторизации");
+        }
+    };
+
+    return (
+        <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
+            <TabsAuth
+                defaultValue={defaultTab}
+                renderUser={(isActive) => (
+                    <LoginForm
+                        onFormSubmit={handleUserFormSubmit}
+                        error={userError}
+                        userType="user"
+                    />
+                )}
+                renderMentor={(isActive) => (
+                    <LoginForm
+                        onFormSubmit={handleMentorFormSubmit}
+                        error={mentorError}
+                        userType="mentor"
+                    />
+                )}
+            />
+        </div>
+    )
+}

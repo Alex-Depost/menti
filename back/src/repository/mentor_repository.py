@@ -16,6 +16,7 @@ async def get_mentor_by_email(email: str) -> Mentor:
 async def create_mentor(mentor: Mentor) -> Mentor:
     async with session_scope() as session:
         stmt = insert(Mentor).values(
+            name=mentor.email.split("@")[0],
             email=mentor.email,
             password_hash=mentor.password_hash,
         )

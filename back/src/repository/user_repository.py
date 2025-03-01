@@ -16,6 +16,7 @@ async def get_user_by_email(email: str) -> User:
 async def create_user(user_data: User) -> User:
     async with session_scope() as session:
         stmt = insert(User).values(
+            name=user_data.email.split("@")[0],
             email=user_data.email,
             password_hash=user_data.password_hash,
         )

@@ -51,6 +51,7 @@ class TokenData(BaseModel):
 class UserResponse(CoreUserSchema):
     """Schema for user response."""
 
+    name: str
     id: int
     is_active: bool
 
@@ -63,6 +64,7 @@ class UserResponse(CoreUserSchema):
 class MentorResponse(CoreUserSchema):
     """Schema for mentor response."""
 
+    name: str
     id: int
     is_active: bool
 

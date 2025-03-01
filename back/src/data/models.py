@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import cast
-
+from sqlalchemy.ext.asyncio import AsyncAttrs
 from sqlalchemy import (
     Boolean,
     Column,
@@ -42,6 +42,7 @@ class User(Base):
     __tablename__ = "users"
 
     id = cast(int, Column(Integer, primary_key=True, index=True))
+    name = cast(str, Column(String, nullable=True))
     email = cast(str, Column(String(100), nullable=False, index=True, unique=True))
     password_hash = cast(str, Column(String(128), nullable=False))
     is_active = cast(bool, Column(Boolean, default=True))
@@ -57,6 +58,7 @@ class Mentor(Base):
     __tablename__ = "mentors"
 
     id = cast(int, Column(Integer, primary_key=True, index=True))
+    name = cast(str, Column(String, nullable=True))
     email = cast(str, Column(String(100), nullable=False, index=True, unique=True))
     password_hash = cast(str, Column(String(128), nullable=False))
     is_active = cast(bool, Column(Boolean, default=True))
@@ -73,7 +75,7 @@ class Mentor(Base):
         return f"<Mentor(id={self.id}, email={self.email})>"
 
 
-class MentorResume(Base):
+class MentorResume(AsyncAttrs, Base):
     """Mentor resume model for mentorship management."""
 
     __tablename__ = "mentor_resumes"

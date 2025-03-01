@@ -1,4 +1,4 @@
-import { userLogin } from "./userlogin"
+import { baseLogin } from "./login"
 
 enum AuthType {
     user = "user",
@@ -6,31 +6,27 @@ enum AuthType {
     mentor = "mentor"
 }
 class AuthService {
-    getToken() {
-        return window.localStorage.getItem("token")
-    }
-    setToken(token: string) {
-        window.localStorage.setItem("token", token)
-    }
-    removeToken() {
-        window.localStorage.removeItem("token")
-    }
-    setAuthType(authType: AuthType) {
-        window.localStorage.setItem("authType", authType)
-    }
-    getAuthType() {
-        return window.localStorage.getItem("authType")
-    }
-
     async loginAsUser(username: string, password: string) {
         try {
-            const userData = await userLogin(username, password);
+            const userData = await baseLogin(username, password, "/auth/users/signin");
             if (userData) {
                 this.setToken(userData.access_token);
                 this.setAuthType(AuthType.user);
             }
         } catch (error) {
-            this.removeToken();
+            await this.logout();
+            throw error;
+        }
+    }
+    async loginAsMentor(username: string, password: string) {
+        try {
+            const userData = await baseLogin(username, password, "/auth/mentors/signin");
+            if (userData) {
+                this.setToken(userData.access_token);
+                this.setAuthType(AuthType.mentor);
+            }
+        } catch (error) {
+            await this.logout();
             throw error;
         }
     }
@@ -38,6 +34,33 @@ class AuthService {
     async logout() {
         this.removeToken();
         window.localStorage.removeItem("authType");
+    }
+    getToken() {
+        return window.localStorage.getItem("token")
+    }
+    getAuthType() {
+        return window.localStorage.getItem("authType")
+    }
+    isAuthenticated() {
+        return !!this.getToken()
+    }
+
+    isMentor() {
+        return this.getAuthType() === AuthType.mentor;
+    }
+
+    isUser() {
+        return this.getAuthType() === AuthType.user;
+    }
+
+    private setToken(token: string) {
+        window.localStorage.setItem("token", token)
+    }
+    private removeToken() {
+        window.localStorage.removeItem("token")
+    }
+    private setAuthType(authType: AuthType) {
+        window.localStorage.setItem("authType", authType)
     }
 }
 
