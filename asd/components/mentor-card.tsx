@@ -1,5 +1,7 @@
+"use client";
+
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { FeedItem } from "@/app/service/feed";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -27,7 +29,7 @@ export function MentorCard({ item, onTagClick }: MentorCardProps) {
         for (let i = 0; i < name.length; i++) {
             hash = name.charCodeAt(i) + ((hash << 5) - hash);
         }
-        
+
         // Generate pastel color (higher lightness, lower saturation)
         const h = hash % 360;
         return `hsl(${h}, 70%, 85%)`;
@@ -36,51 +38,57 @@ export function MentorCard({ item, onTagClick }: MentorCardProps) {
     const avatarColor = generatePastelColor(item.mentor.name);
 
     return (
-        <Card className="w-full h-full overflow-hidden transition-all hover:shadow-md hover:translate-y-[-2px] duration-300 flex flex-col group">
-            <CardHeader className="pb-2 relative">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="flex items-center gap-3 mb-2 relative">
-                    <Avatar className="h-12 w-12 border border-border shadow-sm">
-                        <AvatarFallback 
-                            className="text-primary-foreground text-sm font-medium"
+        <Card className="w-full overflow-hidden transition-all hover:shadow-md hover:border-primary/20 duration-300 flex flex-col group">
+            <div className="p-5">
+                {/* Header section with mentor info */}
+                <div className="flex items-center gap-4 pb-4 border-b border-border/30">
+                    <Avatar className="h-16 w-16 border border-border/50 ring-2 ring-background">
+                        <AvatarFallback
+                            className="text-primary-foreground text-base font-medium"
                             style={{ backgroundColor: avatarColor }}
                         >
                             {getInitials(item.mentor.name)}
                         </AvatarFallback>
                     </Avatar>
-                    <div>
-                        <CardTitle className="text-lg font-medium">{item.title}</CardTitle>
-                        <CardDescription className="text-xs flex items-center gap-1">
-                            {item.mentor.name} • {item.mentor.email}
-                        </CardDescription>
+                    <div className="flex-1">
+                        <h3 className="font-medium text-lg">{item.mentor.name}</h3>
+                        <p className="text-sm text-muted-foreground">{item.mentor.email}</p>
                     </div>
-                </div>
-            </CardHeader>
-            <CardContent className="flex flex-col flex-grow">
-                <p className="text-sm text-muted-foreground mb-auto pb-4 line-clamp-3">{item.description}</p>
-                <div className="space-y-3">
-                    <div className="flex flex-wrap gap-1.5">
-                        {item.tags.map((tag) => (
-                            <Badge
-                                key={tag}
-                                variant="secondary"
-                                className="cursor-pointer hover:bg-secondary/80 text-xs py-0.5 transition-colors"
-                                onClick={() => onTagClick(tag)}
-                            >
-                                {tag}
-                            </Badge>
-                        ))}
-                    </div>
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        className="w-full mt-2 gap-2 text-xs group-hover:bg-primary group-hover:text-primary-foreground transition-colors"
+                    <Button
+                        variant="default"
+                        size="sm"
+                        className="gap-2 text-sm whitespace-nowrap"
                     >
-                        <MessageSquare className="h-3.5 w-3.5" />
-                        Связаться с ментором
+                        <MessageSquare className="h-4 w-4" />
+                        Связаться
                     </Button>
                 </div>
-            </CardContent>
+
+                {/* Resume content section */}
+                <div className="mt-4 space-y-4">
+                    {/* Title and description together */}
+                    <div>
+                        <h4 className="font-medium mb-2">{item.title}</h4>
+                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                    </div>
+
+                    {/* Tags */}
+                    <div className="pt-2">
+                        <div className="flex flex-wrap gap-1.5">
+                            {item.tags.map((tag) => (
+                                <Badge
+                                    key={tag}
+                                    variant="secondary"
+                                    className="cursor-pointer hover:bg-secondary/80 text-xs py-0.5 px-2 transition-colors"
+                                    onClick={() => onTagClick(tag)}
+                                >
+                                    {tag}
+                                </Badge>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
         </Card>
     );
 }
