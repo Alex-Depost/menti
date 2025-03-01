@@ -1,7 +1,10 @@
-from sqlalchemy import select
+from sqlalchemy import select, update
 from src.data.base import session_scope
 from src.data.models import User
 from sqlalchemy import insert
+import uuid
+from typing import Optional
+from sqlalchemy.ext.asyncio import AsyncSession
 
 
 async def get_user_by_email(email: str) -> User:
@@ -23,3 +26,17 @@ async def create_user(user_data: User) -> User:
         await session.execute(stmt)
         await session.commit()
         return await get_user_by_email(user_data.email)
+
+
+async def update_user_avatar(db: AsyncSession, user_id: int, avatar_uuid: Optional[uuid.UUID]) -> None:
+    """
+    Обновляет UUID аватарки пользователя
+    
+    Args:
+        db: Сессия базы данных
+        user_id: ID пользователя
+        avatar_uuid: UUID аватарки или None для удаления
+    """
+    stmt = update(User).where(User.id == user_id).values(avatar_uuid=avatar_uuid)
+    await db.execute(stmt)
+    await db.commit()

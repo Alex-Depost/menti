@@ -4,6 +4,7 @@ from typing import cast
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import CreateSchema
+from sqlalchemy import text
 
 from src.config import CONNECTION_STRING
 from src.data.models import SCHEMA_NAME, Base
@@ -39,7 +40,7 @@ async def session_scope():
 async def create_schema():
     """Create schema if not exists."""
     async with main_engine.begin() as connection:
-        # await drop_all_tables()
+        await drop_all_tables()  # Временно раскомментировано для пересоздания схемы
         await connection.execute(CreateSchema(SCHEMA_NAME, if_not_exists=True))
         await connection.run_sync(Base.metadata.create_all)
         await connection.commit()
@@ -48,5 +49,6 @@ async def create_schema():
 async def drop_all_tables():
     """Drop all tables in the database."""
     async with main_engine.begin() as connection:
-        await connection.run_sync(Base.metadata.drop_all)
+        # Используем CASCADE для корректного удаления таблиц с зависимостями
+        await connection.execute(text(f"DROP SCHEMA IF EXISTS {SCHEMA_NAME} CASCADE"))
         await connection.commit()

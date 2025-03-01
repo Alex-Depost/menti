@@ -1,7 +1,9 @@
 from typing import Optional
 from math import ceil
+import os
+from urllib.parse import urljoin
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy import func, select
 
 from src.data.base import session_scope
@@ -16,6 +18,7 @@ router = APIRouter(
 
 @router.get("/", response_model=FeedResponse)
 async def get_all_resumes(
+    request: Request,
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Number of items per page"),
     tag: Optional[str] = Query(None, description="Filter resumes by tag"),
@@ -54,8 +57,17 @@ async def get_all_resumes(
             mentor = await resume.awaitable_attrs.mentor
             tags = await resume.awaitable_attrs.tags
 
+            # Формируем URL для аватара
+            avatar_url = None
+            if mentor.avatar_uuid:
+                base_url = str(request.base_url)
+                avatar_url = urljoin(base_url, f"api/v1/storage/avatar/{mentor.avatar_uuid}")
+
             mentor_info = MentorFeedInfo(
-                id=mentor.id, name=mentor.name, email=mentor.email
+                id=mentor.id, 
+                name=mentor.name, 
+                email=mentor.email,
+                avatar_url=avatar_url
             )
 
             items.append(

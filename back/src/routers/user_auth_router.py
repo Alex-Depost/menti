@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, status, Request
+from urllib.parse import urljoin
 
 from src.data.models import User
 from src.schemas.schemas import (
@@ -27,5 +28,23 @@ async def signin(user_data: UserLoginSchema):
 
 
 @router.get("/me", response_model=UserResponse)
-async def get_current_user_info(current_user: User = Depends(get_current_user)):
-    return current_user
+async def get_current_user_info(
+    request: Request,
+    current_user: User = Depends(get_current_user)
+):
+    # Формируем URL для аватара
+    avatar_url = None
+    if current_user.avatar_uuid:
+        base_url = str(request.base_url)
+        avatar_url = urljoin(base_url, f"api/v1/storage/avatar/{current_user.avatar_uuid}")
+    
+    # Создаем копию объекта пользователя и добавляем avatar_url
+    user_dict = {
+        "id": current_user.id,
+        "name": current_user.name,
+        "email": current_user.email,
+        "is_active": current_user.is_active,
+        "avatar_url": avatar_url
+    }
+    
+    return user_dict

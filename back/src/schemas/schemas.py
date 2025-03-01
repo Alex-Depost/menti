@@ -1,6 +1,8 @@
 from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
+import uuid
+from src.data.models import AdmissionType
 
 
 class CoreUserSchema(BaseModel):
@@ -54,11 +56,12 @@ class UserResponse(CoreUserSchema):
     name: str
     id: int
     is_active: bool
+    avatar_url: Optional[str] = None
 
     class Config:
         """Pydantic config."""
 
-        orm_mode = True
+        from_attributes = True
 
 
 class MentorResponse(CoreUserSchema):
@@ -67,11 +70,12 @@ class MentorResponse(CoreUserSchema):
     name: str
     id: int
     is_active: bool
+    avatar_url: Optional[str] = None
 
     class Config:
         """Pydantic config."""
 
-        orm_mode = True
+        from_attributes = True
 
 
 class TagSchema(BaseModel):
@@ -83,7 +87,7 @@ class TagSchema(BaseModel):
     class Config:
         """Pydantic config."""
 
-        orm_mode = True
+        from_attributes = True
 
 
 class MentorResumeBase(BaseModel):
@@ -120,7 +124,7 @@ class MentorResumeResponse(MentorResumeBase):
     class Config:
         """Pydantic config."""
 
-        orm_mode = True
+        from_attributes = True
 
 
 class MentorFeedInfo(BaseModel):
@@ -129,11 +133,12 @@ class MentorFeedInfo(BaseModel):
     id: int
     name: str
     email: EmailStr
+    avatar_url: Optional[str] = None
 
     class Config:
         """Pydantic config."""
 
-        orm_mode = True
+        from_attributes = True
 
 
 class MentorResumeFeedResponse(BaseModel):
@@ -148,7 +153,7 @@ class MentorResumeFeedResponse(BaseModel):
     class Config:
         """Pydantic config."""
 
-        orm_mode = True
+        from_attributes = True
 
 
 class FeedResponse(BaseModel):
@@ -163,4 +168,43 @@ class FeedResponse(BaseModel):
     class Config:
         """Pydantic config."""
 
-        orm_mode = True
+        from_attributes = True
+
+
+class UserDisplay(BaseModel):
+    """Полная схема пользователя для отображения."""
+
+    id: int
+    name: str
+    email: EmailStr
+    avatar_uuid: Optional[uuid.UUID] = None
+    telegram_link: Optional[str] = None
+    age: Optional[int] = None
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+    target_universities: Optional[List[str]] = None
+    description: Optional[str] = None
+    admission_type: Optional[AdmissionType] = None
+
+    class Config:
+        """Pydantic config."""
+        from_attributes = True
+
+
+class MentorDisplay(BaseModel):
+    """Полная схема ментора для отображения."""
+
+    id: int
+    name: str
+    email: EmailStr
+    avatar_uuid: Optional[uuid.UUID] = None
+    telegram_link: Optional[str] = None
+    age: Optional[int] = None
+    is_active: bool
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        """Pydantic config."""
+        from_attributes = True
