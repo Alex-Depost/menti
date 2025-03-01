@@ -1,9 +1,9 @@
 "use client";
 
+import { FeedResponse } from "@/app/service/feed";
 import { MentorCard } from "@/components/mentor-card";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import { FeedItem, FeedResponse } from "@/app/service/feed";
 import { Users, X } from "lucide-react";
 
 interface FeedListProps {
@@ -16,7 +16,7 @@ interface FeedListProps {
   handleClearAllTags: () => void;
 }
 
-export function FeedList({
+export function MentorsFeedList({
   isLoading,
   feedData,
   currentPage,
