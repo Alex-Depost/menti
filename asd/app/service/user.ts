@@ -1,5 +1,5 @@
 import { authService } from "./auth";
-import { API_URL } from "./config";
+import { API_URL, AVATAR_URL } from "./config";
 import { uploadAvatar as apiUploadAvatar } from "@/app/api/profile";
 
 export interface UserData {
@@ -8,7 +8,6 @@ export interface UserData {
     id: number;
     is_active: boolean;
     avatar_uuid?: string;
-    avatar_url?: string;
     telegram_link?: string;
     age?: number;
     created_at?: string;
@@ -45,7 +44,14 @@ export class UserService {
                 throw new Error('Failed to fetch user data');
             }
 
-            return await response.json();
+            const userData = await response.json();
+            
+            // Если у пользователя есть avatar_uuid, но нет avatar_url, добавляем его
+            if (userData.avatar_uuid && !userData.avatar_url) {
+                userData.avatar_url = `${AVATAR_URL}/${userData.avatar_uuid}`;
+            }
+
+            return userData;
         } catch (error) {
             console.error('Error fetching user data:', error);
             return null;
@@ -57,8 +63,10 @@ export class UserService {
             // Используем функцию из API для загрузки аватара
             await apiUploadAvatar(file);
             
-            // Обновляем данные пользователя после загрузки аватара
-            return await this.getCurrentUser() as UserData;
+            // Получаем обновленные данные пользователя
+            const userData = await this.getCurrentUser() as UserData;
+            
+            return userData;
         } catch (error) {
             console.error('Error uploading avatar:', error);
             throw error;
