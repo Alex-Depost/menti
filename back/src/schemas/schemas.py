@@ -121,3 +121,46 @@ class MentorResumeResponse(MentorResumeBase):
         """Pydantic config."""
 
         orm_mode = True
+
+
+class MentorFeedInfo(BaseModel):
+    """Schema for mentor information in feed responses."""
+
+    id: int
+    name: str
+    email: EmailStr
+
+    class Config:
+        """Pydantic config."""
+
+        orm_mode = True
+
+
+class MentorResumeFeedResponse(BaseModel):
+    """Schema for mentor resume in feed responses."""
+
+    id: int
+    title: str
+    description: str
+    mentor: MentorFeedInfo
+    tags: List[TagSchema] = []
+
+    class Config:
+        """Pydantic config."""
+
+        orm_mode = True
+
+
+class FeedResponse(BaseModel):
+    """Schema for paginated feed responses."""
+
+    items: List[MentorResumeFeedResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+    class Config:
+        """Pydantic config."""
+
+        orm_mode = True

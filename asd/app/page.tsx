@@ -8,9 +8,6 @@ import Link from "next/link"
 import authService from "./service/auth"
 
 export default function Page() {
-  const loadFeed = async () => {
-    const response = await fetch("/")
-  }
   return (
     <SidebarProvider>
       <MentorSidebar />
