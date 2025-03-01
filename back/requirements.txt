@@ -5,3 +5,5 @@ asyncpg
 pyjwt
 passlib[bcrypt]
 pydantic[email]
+greenlet
+uvicorn
