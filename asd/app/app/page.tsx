@@ -105,7 +105,7 @@ export default function FeedPage() {
         handleTagClick={handleTagClick}
       />
 
-      <MentorsFeedHero />
+      {currentPage === 1 && <MentorsFeedHero />}
 
       <MentorsFeedList
         isLoading={isLoading}
