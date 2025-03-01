@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from src.config import Roles
 from src.data.models import User
 import src.repository.user_repository as user_repo
-from src.routers.schemas import UserCreationSchema
+from src.schemas.schemas import UserCreationSchema
 from src.security.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,

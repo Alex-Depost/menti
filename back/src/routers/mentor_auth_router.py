@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, status
 
 from src.data.models import Mentor
-from src.routers.schemas import (
-    Token,
+from src.schemas.schemas import (
     MentorCreationSchema,
     MentorLoginSchema,
     MentorResponse,
+    Token,
 )
-from src.security.auth import get_current_user
+from src.security.auth import get_current_mentor
 from src.services.mentor_auth_service import authenticate_mentor, register_mentor
 
 router = APIRouter(tags=["authentication"])
@@ -27,5 +27,5 @@ async def signin(user_data: MentorLoginSchema):
 
 
 @router.get("/me", response_model=MentorResponse)
-async def get_current_user_info(current_user: Mentor = Depends(get_current_user)):
+async def get_current_user_info(current_user: Mentor = Depends(get_current_mentor)):
     return current_user

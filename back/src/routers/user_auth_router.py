@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 
 from src.data.models import User
-from src.routers.schemas import (
+from src.schemas.schemas import (
     Token,
     UserCreationSchema,
     UserLoginSchema,

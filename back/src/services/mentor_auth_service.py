@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from src.config import Roles
 from src.data.models import Mentor
 import src.repository.mentor_repository as mentor_repo
-from src.routers.schemas import MentorCreationSchema
+from src.schemas.schemas import MentorCreationSchema
 from src.security.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,

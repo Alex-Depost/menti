@@ -13,7 +13,7 @@ from src.repository.user_repository import get_user_by_email
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/signin")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/users/signin")
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -40,7 +40,7 @@ def create_access_token(
     return encoded_jwt
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)) -> User | Mentor:
+async def get_current_user(token: str = Depends(oauth2_scheme)) -> User:
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -57,17 +57,50 @@ async def get_current_user(token: str = Depends(oauth2_scheme)) -> User | Mentor
     except jwt.PyJWTError:
         raise credentials_exception
 
-    if role == Roles.MENTOR:
-        entity = await get_mentor_by_email(email)
-    else:
-        entity = await get_user_by_email(email)
+    if role != Roles.USER:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Users only")
+    user = await get_user_by_email(email)
 
-    if entity is None:
+    if user is None:
         raise credentials_exception
 
-    if not entity.is_active:
+    if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
         )
 
-    return entity
+    return user
+
+
+async def get_current_mentor(token: str = Depends(oauth2_scheme)) -> Mentor:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        email: str = payload.get("sub")
+        role = payload.get("role")
+
+        if email is None:
+            raise credentials_exception
+    except jwt.PyJWTError:
+        raise credentials_exception
+
+    if role != Roles.MENTOR:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Mentors only"
+        )
+    mentor = await get_mentor_by_email(email)
+
+    if mentor is None:
+        raise credentials_exception
+
+    if not mentor.is_active:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN, detail="Inactive user"
+        )
+
+    return mentor
