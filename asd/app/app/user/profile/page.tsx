@@ -17,6 +17,7 @@ import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/hooks/use-auth";
 import userService, { UserData, UserUpdateData } from "@/app/service/user";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { TiptapEditor } from "@/components/ui/tiptap-editor";
 
 export default function UserProfilePage() {
     const { isAuthenticated, isUser } = useAuth();
@@ -82,6 +83,13 @@ export default function UserProfilePage() {
         setFormData(prev => ({
             ...prev,
             target_universities: universities.length > 0 ? universities : null
+        }));
+    };
+
+    const handleDescriptionChange = (value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            description: value || null
         }));
     };
 
@@ -267,13 +275,10 @@ export default function UserProfilePage() {
 
                                     <div className="space-y-2">
                                         <Label htmlFor="description">Описание</Label>
-                                        <textarea
-                                            id="description"
-                                            name="description"
-                                            value={formData.description || ""}
-                                            onChange={handleChange}
+                                        <TiptapEditor
+                                            value={formData.description || ''}
+                                            onChange={handleDescriptionChange}
                                             placeholder="Расскажите о себе"
-                                            className="w-full min-h-[100px] p-2 border rounded-md"
                                         />
                                     </div>
 
