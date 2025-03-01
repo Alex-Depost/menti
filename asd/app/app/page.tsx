@@ -3,9 +3,9 @@
 import { useEffect, useState } from "react";
 import { authService } from "../service/auth";
 import feedService, { FeedResponse } from "../service/feed";
-import { FeedHeader } from "@/components/feed/feed-header";
-import { FeedHero } from "@/components/feed/feed-hero";
-import { FeedList } from "@/components/feed/feed-list";
+import { MentorsFeedHeader } from "@/components/feed/feed-header";
+import { MentorsFeedHero } from "@/components/feed/feed-hero";
+import { MentorsFeedList } from "@/components/feed/feed-list";
 
 export default function FeedPage() {
   const [feedData, setFeedData] = useState<FeedResponse>({
@@ -91,7 +91,7 @@ export default function FeedPage() {
 
   return (
     <>
-      <FeedHeader
+      <MentorsFeedHeader
         isAuthenticated={isAuthenticated}
         tagFilter={tagFilter}
         setTagFilter={setTagFilter}
@@ -104,10 +104,10 @@ export default function FeedPage() {
         allTags={allTags}
         handleTagClick={handleTagClick}
       />
-      
-      <FeedHero />
-      
-      <FeedList
+
+      {currentPage === 1 && <MentorsFeedHero />}
+
+      <MentorsFeedList
         isLoading={isLoading}
         feedData={feedData}
         currentPage={currentPage}

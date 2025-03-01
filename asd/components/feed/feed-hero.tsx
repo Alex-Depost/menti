@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { Sparkles, Users } from "lucide-react";
 
-export function FeedHero() {
+export function MentorsFeedHero() {
   return (
     <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
       <div className="container mx-auto px-4 py-8 md:py-12">
