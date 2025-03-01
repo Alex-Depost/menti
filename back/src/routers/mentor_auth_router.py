@@ -1,17 +1,23 @@
-from fastapi import APIRouter, Depends, status, Request
+from fastapi import APIRouter, Depends, status, Request, HTTPException, Form, UploadFile, File
 from urllib.parse import urljoin
+from typing import Optional
 
+import logging
 from src.data.models import Mentor
 from src.schemas.schemas import (
     MentorCreationSchema,
     MentorLoginSchema,
     MentorResponse,
     Token,
+    MentorUpdateSchema,
+    MentorDisplay,
 )
 from src.security.auth import get_current_mentor
-from src.services.mentor_auth_service import authenticate_mentor, register_mentor
+from src.services.mentor_auth_service import authenticate_mentor, register_mentor, update_mentor_profile_service
 
 router = APIRouter(tags=["authentication"])
+
+logger = logging.getLogger(__name__)
 
 
 @router.post(
@@ -48,3 +54,75 @@ async def get_current_user_info(
     }
     
     return mentor_dict
+
+
+@router.patch("/me", response_model=MentorDisplay)
+async def update_mentor_profile(
+    request: Request,
+    name: Optional[str] = Form(None),
+    telegram_link: Optional[str] = Form(None),
+    age: Optional[int] = Form(None),
+    email: Optional[str] = Form(None),
+    password: Optional[str] = Form(None),
+    description: Optional[str] = Form(None),
+    current_mentor: Mentor = Depends(get_current_mentor)
+):
+    """
+    Обновление профиля текущего ментора
+    
+    Позволяет изменить:
+    - Имя (name)
+    - Ссылку на телеграм (telegram_link)
+    - Возраст (age)
+    - Почту (email)
+    - Пароль (password)
+    - Описание (description)
+    
+    Для изменения аватара используйте отдельный эндпоинт /me/avatar
+    """
+    # Создаем словарь с обновляемыми данными
+    update_dict = {}
+    
+    if name is not None:
+        update_dict["name"] = name
+    logger.error(f"Обновление имени ментора: {name}")
+        
+    if telegram_link is not None:
+        update_dict["telegram_link"] = telegram_link
+        
+    if age is not None:
+        update_dict["age"] = age
+        
+    if email is not None:
+        update_dict["email"] = email
+        
+    if password is not None:
+        update_dict["password"] = password
+        
+    if description is not None:
+        update_dict["description"] = description
+    
+    # Создаем объект схемы для валидации
+    update_data = MentorUpdateSchema(**update_dict)
+    
+    # Обновляем профиль и возвращаем обновленные данные
+    updated_mentor = await update_mentor_profile_service(current_mentor.id, update_data)
+    
+    # Формируем URL для аватара
+    avatar_url = None
+    if updated_mentor.avatar_uuid:
+        base_url = str(request.base_url)
+        avatar_url = urljoin(base_url, f"api/v1/storage/avatar/{updated_mentor.avatar_uuid}")
+    
+    # Возвращаем полный объект ментора
+    return MentorDisplay(
+        id=updated_mentor.id,
+        name=updated_mentor.name,
+        email=updated_mentor.email,
+        avatar_uuid=updated_mentor.avatar_uuid,
+        telegram_link=updated_mentor.telegram_link,
+        age=updated_mentor.age,
+        is_active=updated_mentor.is_active,
+        created_at=updated_mentor.created_at,
+        updated_at=updated_mentor.updated_at
+    )

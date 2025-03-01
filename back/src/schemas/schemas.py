@@ -2,7 +2,7 @@ from typing import Optional, List
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 import uuid
-from src.data.models import AdmissionType
+from src.data.models import AdmissionType, DayOfWeek
 
 
 class CoreUserSchema(BaseModel):
@@ -90,43 +90,6 @@ class TagSchema(BaseModel):
         from_attributes = True
 
 
-class MentorResumeBase(BaseModel):
-    """Base schema for mentor resume."""
-
-    university: str
-    title: str
-    description: str
-
-
-class MentorResumeCreate(MentorResumeBase):
-    """Schema for mentor resume creation."""
-
-    pass
-
-
-class MentorResumeUpdate(BaseModel):
-    """Schema for mentor resume update."""
-
-    university: Optional[str] = None
-    title: Optional[str] = None
-    description: Optional[str] = None
-
-
-class MentorResumeResponse(MentorResumeBase):
-    """Schema for mentor resume response."""
-
-    id: int
-    mentor_id: int
-    created_at: datetime
-    updated_at: datetime
-    tags: List[TagSchema] = []
-
-    class Config:
-        """Pydantic config."""
-
-        from_attributes = True
-
-
 class MentorFeedInfo(BaseModel):
     """Schema for mentor information in feed responses."""
 
@@ -134,36 +97,6 @@ class MentorFeedInfo(BaseModel):
     name: str
     email: EmailStr
     avatar_url: Optional[str] = None
-
-    class Config:
-        """Pydantic config."""
-
-        from_attributes = True
-
-
-class MentorResumeFeedResponse(BaseModel):
-    """Schema for mentor resume in feed responses."""
-
-    id: int
-    title: str
-    description: str
-    mentor: MentorFeedInfo
-    tags: List[TagSchema] = []
-
-    class Config:
-        """Pydantic config."""
-
-        from_attributes = True
-
-
-class FeedResponse(BaseModel):
-    """Schema for paginated feed responses."""
-
-    items: List[MentorResumeFeedResponse]
-    total: int
-    page: int
-    size: int
-    pages: int
 
     class Config:
         """Pydantic config."""
@@ -221,7 +154,63 @@ class MentorDisplay(BaseModel):
     is_active: bool
     created_at: datetime
     updated_at: datetime
+    description: Optional[str] = None
+    university: Optional[str] = None
+    title: Optional[str] = None
+    free_days: Optional[List[DayOfWeek]] = None
+    tags: List[TagSchema] = []
 
     class Config:
         """Pydantic config."""
+        from_attributes = True
+
+
+class MentorUpdateSchema(BaseModel):
+    """Схема для обновления профиля ментора."""
+
+    name: Optional[str] = None
+    telegram_link: Optional[str] = None
+    age: Optional[int] = None
+    email: Optional[EmailStr] = None
+    password: Optional[str] = None
+    description: Optional[str] = None
+    university: Optional[str] = None
+    title: Optional[str] = None
+    free_days: Optional[List[DayOfWeek]] = None
+
+    class Config:
+        """Pydantic config."""
+        from_attributes = True
+
+
+class MentorFeedResponse(BaseModel):
+    """Schema for mentor in feed responses."""
+
+    id: int
+    name: str
+    title: Optional[str] = None
+    description: Optional[str] = None
+    university: Optional[str] = None
+    email: EmailStr
+    avatar_url: Optional[str] = None
+    tags: List[TagSchema] = []
+
+    class Config:
+        """Pydantic config."""
+
+        from_attributes = True
+
+
+class FeedResponse(BaseModel):
+    """Schema for paginated feed responses."""
+
+    items: List[MentorFeedResponse]
+    total: int
+    page: int
+    size: int
+    pages: int
+
+    class Config:
+        """Pydantic config."""
+
         from_attributes = True

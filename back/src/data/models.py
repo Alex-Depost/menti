@@ -27,14 +27,14 @@ Base = declarative_base(
     metadata=METADATA,
 )
 
-# Association table for MentorResume and Tag (many-to-many)
-resume_tags = Table(
-    "resume_tags",
+# Association table for Mentor and Tag (many-to-many)
+mentor_tags = Table(
+    "mentor_tags",
     Base.metadata,
     Column(
-        "resume_id",
+        "mentor_id",
         Integer,
-        ForeignKey(f"{SCHEMA_NAME}.mentor_resumes.id"),
+        ForeignKey(f"{SCHEMA_NAME}.mentors.id"),
         primary_key=True,
     ),
     Column("tag_id", Integer, ForeignKey(f"{SCHEMA_NAME}.tags.id"), primary_key=True),
@@ -83,7 +83,7 @@ class User(Base):
     
 
 
-class Mentor(Base):
+class Mentor(AsyncAttrs, Base):
     """Mentor model for mentorship management."""
 
     __tablename__ = "mentors"
@@ -100,41 +100,17 @@ class Mentor(Base):
         datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
     )
     avatar_uuid =  Column(UUID(as_uuid=True), nullable=True)
-
-    resumes = relationship(
-        "MentorResume", back_populates="mentor", cascade="all, delete-orphan"
-    )
+    # Профессиональная информация
+    university = cast(str, Column(String(100), nullable=True))
+    free_days = cast(list[str], Column(ARRAY(Enum(DayOfWeek)), nullable=True, default=[]))
+    title = cast(str, Column(String(100), nullable=True))
+    description = cast(str, Column(String(500), nullable=True))
+    
+    # Связь с тегами
+    tags = relationship("Tag", secondary=mentor_tags, back_populates="mentors")
 
     def __repr__(self):
         return f"<Mentor(id={self.id}, email={self.email})>"
-
-
-class MentorResume(AsyncAttrs, Base):
-    """Mentor resume model for mentorship management."""
-
-    __tablename__ = "mentor_resumes"
-
-    id = cast(int, Column(Integer, primary_key=True, index=True))
-    mentor_id = cast(
-        int,
-        Column(
-            Integer, ForeignKey(f"{SCHEMA_NAME}.mentors.id"), nullable=False, index=True
-        ),
-    )
-    university = cast(str, Column(String(100), nullable=False))
-    free_days = cast(list[str], Column(ARRAY(Enum(DayOfWeek)), nullable=True, default=[]))
-    title = cast(str, Column(String(100), nullable=False))
-    description = cast(str, Column(String(500), nullable=False))
-    created_at = cast(datetime, Column(DateTime, default=datetime.now))
-    updated_at = cast(
-        datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    )
-
-    mentor = relationship("Mentor", back_populates="resumes")
-    tags = relationship("Tag", secondary=resume_tags, back_populates="mentor_resumes")
-
-    def __repr__(self):
-        return f"<MentorResume(id={self.id}, mentor_id={self.mentor_id})>"
 
 
 class Tag(Base):
@@ -148,8 +124,9 @@ class Tag(Base):
     updated_at = cast(
         datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
     )
-    mentor_resumes = relationship(
-        "MentorResume", secondary=resume_tags, back_populates="tags"
+    # Связь с менторами
+    mentors = relationship(
+        "Mentor", secondary=mentor_tags, back_populates="tags"
     )
 
     def __repr__(self):

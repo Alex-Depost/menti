@@ -6,7 +6,7 @@ from sqlalchemy.exc import IntegrityError
 from src.config import Roles
 from src.data.models import Mentor
 import src.repository.mentor_repository as mentor_repo
-from src.schemas.schemas import MentorCreationSchema
+from src.schemas.schemas import MentorCreationSchema, MentorUpdateSchema
 from src.security.auth import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     create_access_token,
@@ -57,3 +57,36 @@ async def authenticate_mentor(email: str, password: str) -> tuple[Mentor, str]:
     )
 
     return entity, access_token
+
+
+async def update_mentor_profile_service(mentor_id: int, update_data: MentorUpdateSchema) -> Mentor:
+    """
+    Обновляет профиль ментора
+    
+    Args:
+        mentor_id: ID ментора
+        update_data: Данные для обновления
+        
+    Returns:
+        Обновленный объект ментора
+    
+    Raises:
+        HTTPException: Если ментор не найден
+    """
+    # Преобразуем данные в словарь и удаляем None значения
+    update_dict = update_data.dict(exclude_unset=True)
+    
+    # Если передан пароль, хэшируем его
+    if "password" in update_dict:
+        update_dict["password_hash"] = get_password_hash(update_dict.pop("password"))
+    
+    # Обновляем профиль
+    updated_mentor = await mentor_repo.update_mentor_profile(mentor_id, update_dict)
+    
+    if not updated_mentor:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ментор не найден",
+        )
+    
+    return updated_mentor
