@@ -1,9 +1,9 @@
 "use client";
 
+import { FeedResponse } from "@/app/service/feed";
 import { MentorCard } from "@/components/mentor-card";
 import { Button } from "@/components/ui/button";
 import { Pagination } from "@/components/ui/pagination";
-import { FeedItem, FeedResponse } from "@/app/service/feed";
 import { Users, X } from "lucide-react";
 
 interface FeedListProps {
@@ -16,7 +16,7 @@ interface FeedListProps {
   handleClearAllTags: () => void;
 }
 
-export function FeedList({
+export function MentorsFeedList({
   isLoading,
   feedData,
   currentPage,
@@ -28,26 +28,37 @@ export function FeedList({
   return (
     <main className="container mx-auto px-4 py-8">
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="rounded-xl overflow-hidden border bg-card">
-              <div className="p-4 space-y-3">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-muted/60 animate-pulse" />
-                  <div className="space-y-2 flex-1">
-                    <div className="h-5 bg-muted/60 rounded animate-pulse w-3/4" />
-                    <div className="h-3 bg-muted/60 rounded animate-pulse w-1/2" />
+            <div key={index} className="rounded-xl overflow-hidden border bg-card p-5">
+              {/* Header section with mentor info */}
+              <div className="flex items-center gap-4 pb-4 border-b border-border/30">
+                <div className="w-16 h-16 rounded-full bg-muted/60 animate-pulse" />
+                <div className="space-y-2 flex-1">
+                  <div className="h-5 bg-muted/60 rounded animate-pulse w-3/4" />
+                  <div className="h-4 bg-muted/60 rounded animate-pulse w-1/2" />
+                </div>
+                <div className="h-9 bg-muted/60 rounded animate-pulse w-24" />
+              </div>
+
+              {/* Resume content section */}
+              <div className="mt-4 space-y-4">
+                {/* Title and description */}
+                <div className="space-y-2">
+                  <div className="h-5 bg-muted/60 rounded animate-pulse w-1/2" />
+                  <div className="space-y-1">
+                    <div className="h-4 bg-muted/60 rounded animate-pulse w-full" />
+                    <div className="h-4 bg-muted/60 rounded animate-pulse w-3/4" />
                   </div>
                 </div>
-                <div className="space-y-2">
-                  <div className="h-3 bg-muted/60 rounded animate-pulse w-full" />
-                  <div className="h-3 bg-muted/60 rounded animate-pulse w-full" />
-                  <div className="h-3 bg-muted/60 rounded animate-pulse w-2/3" />
-                </div>
-                <div className="flex gap-1.5 pt-2">
-                  <div className="h-5 bg-muted/60 rounded-full animate-pulse w-16" />
-                  <div className="h-5 bg-muted/60 rounded-full animate-pulse w-20" />
-                  <div className="h-5 bg-muted/60 rounded-full animate-pulse w-12" />
+
+                {/* Tags */}
+                <div className="pt-2">
+                  <div className="flex flex-wrap gap-1.5">
+                    <div className="h-5 bg-muted/60 rounded-full animate-pulse w-16" />
+                    <div className="h-5 bg-muted/60 rounded-full animate-pulse w-20" />
+                    <div className="h-5 bg-muted/60 rounded-full animate-pulse w-12" />
+                  </div>
                 </div>
               </div>
             </div>
@@ -55,7 +66,7 @@ export function FeedList({
         </div>
       ) : feedData.items.length > 0 ? (
         <div className="space-y-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {feedData.items.map((item) => (
               <MentorCard key={item.id} item={item} onTagClick={handleTagClick} />
             ))}

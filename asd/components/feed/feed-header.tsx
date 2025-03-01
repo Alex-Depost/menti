@@ -5,7 +5,6 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Filter, X } from "lucide-react";
-import Link from "next/link";
 
 interface FeedHeaderProps {
   isAuthenticated: boolean;
@@ -21,7 +20,7 @@ interface FeedHeaderProps {
   handleTagClick: (tag: string) => void;
 }
 
-export function FeedHeader({
+export function MentorsFeedHeader({
   isAuthenticated,
   tagFilter,
   setTagFilter,
@@ -55,19 +54,6 @@ export function FeedHeader({
                 <Filter className="h-4 w-4" />
               </Button>
             </div>
-
-            {!isAuthenticated ? (
-              <Link
-                href="/auth/signin"
-                className="flex items-center gap-2 text-sm font-medium px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
-              >
-                Войти
-              </Link>
-            ) : (
-              <Button variant="ghost" size="sm" className="text-sm">
-                Мой профиль
-              </Button>
-            )}
           </div>
 
           {/* Active filters */}
