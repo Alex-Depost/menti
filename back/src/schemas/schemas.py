@@ -1,4 +1,5 @@
-from typing import Optional
+from typing import Optional, List
+from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field
 
 
@@ -64,6 +65,55 @@ class MentorResponse(CoreUserSchema):
 
     id: int
     is_active: bool
+
+    class Config:
+        """Pydantic config."""
+
+        orm_mode = True
+
+
+class TagSchema(BaseModel):
+    """Schema for tag."""
+
+    id: int
+    name: str
+
+    class Config:
+        """Pydantic config."""
+
+        orm_mode = True
+
+
+class MentorResumeBase(BaseModel):
+    """Base schema for mentor resume."""
+
+    university: str
+    title: str
+    description: str
+
+
+class MentorResumeCreate(MentorResumeBase):
+    """Schema for mentor resume creation."""
+
+    pass
+
+
+class MentorResumeUpdate(BaseModel):
+    """Schema for mentor resume update."""
+
+    university: Optional[str] = None
+    title: Optional[str] = None
+    description: Optional[str] = None
+
+
+class MentorResumeResponse(MentorResumeBase):
+    """Schema for mentor resume response."""
+
+    id: int
+    mentor_id: int
+    created_at: datetime
+    updated_at: datetime
+    tags: List[TagSchema] = []
 
     class Config:
         """Pydantic config."""
