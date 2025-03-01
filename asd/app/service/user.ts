@@ -1,5 +1,6 @@
 import { authService } from "./auth";
 import { API_URL } from "./config";
+import { uploadAvatar as apiUploadAvatar } from "@/app/api/profile";
 
 export interface UserData {
     email: string;
@@ -48,6 +49,19 @@ export class UserService {
         } catch (error) {
             console.error('Error fetching user data:', error);
             return null;
+        }
+    }
+
+    async uploadAvatar(file: File): Promise<UserData> {
+        try {
+            // Используем функцию из API для загрузки аватара
+            await apiUploadAvatar(file);
+            
+            // Обновляем данные пользователя после загрузки аватара
+            return await this.getCurrentUser() as UserData;
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            throw error;
         }
     }
 

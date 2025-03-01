@@ -15,6 +15,7 @@ export default function UserProfilePage() {
     const router = useRouter();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
+    const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [userData, setUserData] = useState<UserData | null>(null);
     const [formData, setFormData] = useState<UserUpdateData>({});
     const [error, setError] = useState<string | null>(null);
@@ -77,6 +78,22 @@ export default function UserProfilePage() {
         }
     };
 
+    const handleAvatarUpload = async (file: File) => {
+        setError(null);
+        setSuccess(null);
+        setUploadingAvatar(true);
+
+        try {
+            const updatedUser = await userService.uploadAvatar(file);
+            setUserData(updatedUser);
+            setSuccess("Аватар успешно обновлен");
+        } catch (err) {
+            setError(err instanceof Error ? err.message : "Произошла ошибка при загрузке аватара");
+        } finally {
+            setUploadingAvatar(false);
+        }
+    };
+
     if (loading) {
         return <LoadingProfile />;
     }
@@ -88,7 +105,11 @@ export default function UserProfilePage() {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Левая колонка - информация о профиле */}
                 <div className="md:col-span-1">
-                    <ProfileInfo userData={userData} />
+                    <ProfileInfo
+                        userData={userData}
+                        onAvatarUpload={handleAvatarUpload}
+                        uploadingAvatar={uploadingAvatar}
+                    />
                 </div>
 
                 {/* Правая колонка - форма редактирования */}

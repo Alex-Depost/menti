@@ -1,5 +1,6 @@
 "use client";
 
+import { useRef } from "react";
 import {
     Card,
     CardHeader,
@@ -7,23 +8,67 @@ import {
     CardDescription,
     CardContent
 } from "@/components/ui/card";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserData } from "@/app/service/user";
 
 interface ProfileInfoProps {
     userData: UserData | null;
+    onAvatarUpload?: (file: File) => Promise<void>;
+    uploadingAvatar?: boolean;
 }
 
-export function ProfileInfo({ userData }: ProfileInfoProps) {
+export function ProfileInfo({ userData, onAvatarUpload, uploadingAvatar = false }: ProfileInfoProps) {
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !onAvatarUpload) return;
+
+        // Проверка типа файла
+        if (!file.type.startsWith('image/')) {
+            alert('Пожалуйста, выберите изображение');
+            return;
+        }
+
+        // Вызываем обработчик
+        onAvatarUpload(file);
+    };
+
+    const triggerFileInput = () => {
+        fileInputRef.current?.click();
+    };
     return (
         <Card>
             <CardHeader className="text-center">
-                <div className="flex justify-center mb-4">
-                    <Avatar className="w-24 h-24">
+                <div className="flex flex-col items-center mb-4">
+                    <Avatar className="w-24 h-24 mb-2">
+                        {userData?.avatar_url && (
+                            <AvatarImage src={userData.avatar_url} alt={userData?.name || "Аватар пользователя"} />
+                        )}
                         <AvatarFallback className="text-2xl">
                             {userData?.name ? userData.name.substring(0, 2).toUpperCase() : "ПП"}
                         </AvatarFallback>
                     </Avatar>
+                    
+                    {onAvatarUpload && (
+                        <>
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                onChange={handleFileChange}
+                                accept="image/*"
+                                className="hidden"
+                            />
+                            <button
+                                type="button"
+                                onClick={triggerFileInput}
+                                disabled={uploadingAvatar}
+                                className="text-xs text-blue-600 hover:text-blue-800 mt-1"
+                            >
+                                {uploadingAvatar ? "Загрузка..." : "Изменить аватар"}
+                            </button>
+                        </>
+                    )}
                 </div>
                 <CardTitle>{userData?.name || "Пользователь"}</CardTitle>
                 <CardDescription>{userData?.email}</CardDescription>
