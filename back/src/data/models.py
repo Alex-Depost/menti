@@ -105,6 +105,7 @@ class Mentor(AsyncAttrs, Base):
     free_days = cast(list[str], Column(ARRAY(Enum(DayOfWeek)), nullable=True, default=[]))
     title = cast(str, Column(String(100), nullable=True))
     description = cast(str, Column(String(500), nullable=True))
+    admission_type = cast(str, Column(Enum(AdmissionType), nullable=True))
     
     # Связь с тегами
     tags = relationship("Tag", secondary=mentor_tags, back_populates="mentors")
