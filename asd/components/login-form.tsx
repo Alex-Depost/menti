@@ -11,6 +11,7 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useState } from "react"
+import { login } from "@/app/service/login"
 
 
 
@@ -20,6 +21,13 @@ export function LoginForm({
 }: React.ComponentProps<"div">) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    var res = await login(email, password);
+    console.log('Успешный вход:', res);
+  };
+
   return (
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
@@ -30,7 +38,7 @@ export function LoginForm({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
                 <Label htmlFor="email">Email</Label>
@@ -49,13 +57,13 @@ export function LoginForm({
                 <Input id="password" type="password" required onChange={e => setPassword(e.target.value)} />
               </div>
               <div className="flex flex-col gap-3">
-              <a
-                href="/login/pagem"
-                className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
-              >
-                Войти, как ментор
-              </a>
-                <Button type="submit" className="w-full" >
+                <a
+                  href="/login/pagem"
+                  className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
+                >
+                  Войти, как ментор
+                </a>
+                <Button type="submit" className="w-full">
                   Войти
                 </Button>
               </div>

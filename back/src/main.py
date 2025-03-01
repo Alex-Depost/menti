@@ -10,7 +10,7 @@ app = FastAPI(title="JWT Authentication API")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # React dev server default port
+    allow_origins=["*"],  # React dev server default port
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

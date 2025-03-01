@@ -25,7 +25,12 @@ Base = declarative_base(
 resume_tags = Table(
     "resume_tags",
     Base.metadata,
-    Column("resume_id", Integer, ForeignKey(f"{SCHEMA_NAME}.mentor_resumes.id"), primary_key=True),
+    Column(
+        "resume_id",
+        Integer,
+        ForeignKey(f"{SCHEMA_NAME}.mentor_resumes.id"),
+        primary_key=True,
+    ),
     Column("tag_id", Integer, ForeignKey(f"{SCHEMA_NAME}.tags.id"), primary_key=True),
     Column("created_at", DateTime, default=datetime.now),
 )
@@ -37,6 +42,13 @@ class User(Base):
     __tablename__ = "users"
 
     id = cast(int, Column(Integer, primary_key=True, index=True))
+    email = cast(str, Column(String(100), nullable=False, index=True, unique=True))
+    password_hash = cast(str, Column(String(128), nullable=False))
+    is_active = cast(bool, Column(Boolean, default=True))
+    created_at = cast(datetime, Column(DateTime, default=datetime.now))
+    updated_at = cast(
+        datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    )
 
 
 class Mentor(Base):
@@ -98,9 +110,10 @@ class Tag(Base):
     created_at = cast(datetime, Column(DateTime, default=datetime.now))
     updated_at = cast(
         datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
-    )    
-    mentor_resumes = relationship("MentorResume", secondary=resume_tags, back_populates="tags")
-
+    )
+    mentor_resumes = relationship(
+        "MentorResume", secondary=resume_tags, back_populates="tags"
+    )
 
     def __repr__(self):
         return f"<Tag(id={self.id}, name={self.name})>"

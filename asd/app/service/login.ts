@@ -1,8 +1,8 @@
-const API_URL = 'https://cf5tf7sp-8000.euw.devtunnels.ms/';
+import { API_URL } from "./config";
 
 async function login(email: string, password: string) {
   try {
-    const response = await fetch(`${API_URL}/auth/users/signin`, { 
+    const response = await fetch(`${API_URL}/auth/users/signin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -22,7 +22,7 @@ async function login(email: string, password: string) {
 
 async function register(email: string, password: string) {
   try {
-    const response = await fetch(`${API_URL}/auth/users/signup`, { 
+    const response = await fetch(`${API_URL}/auth/users/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password })
@@ -39,3 +39,5 @@ async function register(email: string, password: string) {
     console.error('Ошибка регистрации:', error);
   }
 }
+
+export { login, register };
