@@ -25,6 +25,7 @@ interface ProfileEditFormProps {
     success: string | null;
     saving: boolean;
     onSubmit: (e: React.FormEvent) => Promise<void>;
+    fieldErrors?: Record<string, string>;
 }
 
 export function ProfileEditForm({
@@ -34,7 +35,8 @@ export function ProfileEditForm({
     error,
     success,
     saving,
-    onSubmit
+    onSubmit,
+    fieldErrors = {}
 }: ProfileEditFormProps) {
     const router = useRouter();
 
@@ -91,6 +93,7 @@ export function ProfileEditForm({
                                 value={formData.name || ""}
                                 onChange={handleChange}
                                 placeholder="Ваше имя"
+                                error={fieldErrors.name}
                             />
                             <FormField
                                 id="email"
@@ -99,6 +102,7 @@ export function ProfileEditForm({
                                 value={formData.email || ""}
                                 onChange={handleChange}
                                 placeholder="example@mail.com"
+                                error={fieldErrors.email}
                             />
                         </div>
 
@@ -109,6 +113,7 @@ export function ProfileEditForm({
                                 value={formData.telegram_link || ""}
                                 onChange={handleChange}
                                 placeholder="@username"
+                                error={fieldErrors.telegram_link}
                             />
                             <FormField
                                 id="age"
@@ -117,6 +122,7 @@ export function ProfileEditForm({
                                 value={formData.age || ""}
                                 onChange={handleChange}
                                 placeholder="Ваш возраст"
+                                error={fieldErrors.age}
                             />
                         </div>
 
@@ -127,6 +133,7 @@ export function ProfileEditForm({
                             value={formData.password || ""}
                             onChange={handleChange}
                             placeholder="Оставьте пустым, чтобы не менять"
+                            error={fieldErrors.password}
                         />
 
                         <Separator />
@@ -137,6 +144,7 @@ export function ProfileEditForm({
                                 label="Описание"
                                 value={formData.description || ""}
                                 onChange={() => {}}
+                                error={fieldErrors.description}
                             >
                                 <TiptapEditor
                                     value={formData.description || ''}
@@ -153,6 +161,7 @@ export function ProfileEditForm({
                             onChange={handleTargetUniversitiesChange}
                             placeholder="МГУ, МФТИ, ВШЭ (через запятую)"
                             helpText="Укажите через запятую"
+                            error={fieldErrors.target_universities}
                         />
 
                         <div className="space-y-2">
@@ -161,6 +170,7 @@ export function ProfileEditForm({
                                 label="Тип поступления"
                                 value={formData.admission_type || ""}
                                 onChange={handleChange}
+                                error={fieldErrors.admission_type}
                             >
                                 <select
                                     id="admission_type"

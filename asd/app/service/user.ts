@@ -91,7 +91,27 @@ export class UserService {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.detail || 'Ошибка при обновлении профиля');
+                
+                // Handle complex error structure
+                if (errorData.detail && Array.isArray(errorData.detail)) {
+                    // Extract field-specific errors
+                    const fieldErrors: Record<string, string> = {};
+                    const errorMessages = errorData.detail.map((error: any) => {
+                        // Get the field name from the location path
+                        if (error.loc && error.loc.length > 1) {
+                            const fieldName = error.loc[1];
+                            fieldErrors[fieldName] = error.msg;
+                        }
+                        return error.msg;
+                    });
+                    
+                    // Create a structured error object with both message and field errors
+                    const structuredError: any = new Error(errorMessages.join(', '));
+                    structuredError.fieldErrors = fieldErrors;
+                    throw structuredError;
+                }
+                
+                throw new Error(typeof errorData.detail === 'string' ? errorData.detail : 'Ошибка при обновлении профиля');
             }
 
             return await response.json();

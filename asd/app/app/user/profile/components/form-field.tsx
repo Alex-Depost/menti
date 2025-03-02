@@ -12,6 +12,7 @@ interface FormFieldProps {
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
     placeholder?: string;
     helpText?: string;
+    error?: string;
     children?: ReactNode;
 }
 
@@ -23,6 +24,7 @@ export function FormField({
     onChange,
     placeholder,
     helpText,
+    error,
     children
 }: FormFieldProps) {
     return (
@@ -36,8 +38,10 @@ export function FormField({
                     value={value}
                     onChange={onChange}
                     placeholder={placeholder}
+                    className={error ? "border-red-500" : ""}
                 />
             )}
+            {error && <p className="text-xs text-red-500">{error}</p>}
             {helpText && <p className="text-xs text-muted-foreground">{helpText}</p>}
         </div>
     );

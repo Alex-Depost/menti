@@ -11,14 +11,15 @@ import { ProfileInfo } from "./components/profile-info";
 import { ProfileEditForm } from "./components/profile-edit-form";
 
 export default function UserProfilePage() {
-    const { isAuthenticated, isUser } = useAuth();
     const router = useRouter();
+    const { isAuthenticated, isUser } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
     const [userData, setUserData] = useState<UserData | null>(null);
     const [formData, setFormData] = useState<UserUpdateData>({});
     const [error, setError] = useState<string | null>(null);
+    const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
     const [success, setSuccess] = useState<string | null>(null);
 
     useEffect(() => {
@@ -56,6 +57,7 @@ export default function UserProfilePage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError(null);
+        setFieldErrors({});
         setSuccess(null);
         setSaving(true);
 
@@ -72,8 +74,14 @@ export default function UserProfilePage() {
             const updatedUser = await userService.updateUserProfile(dataToSend);
             setUserData(updatedUser);
             setSuccess("Профиль успешно обновлен");
-        } catch (err) {
-            setError(err instanceof Error ? err.message : "Произошла ошибка при обновлении профиля");
+        } catch (err: any) {
+            // Проверяем, есть ли у ошибки поле fieldErrors
+            if (err.fieldErrors) {
+                setFieldErrors(err.fieldErrors);
+                setError("Пожалуйста, исправьте ошибки в форме");
+            } else {
+                setError(err instanceof Error ? err.message : "Произошла ошибка при обновлении профиля");
+            }
         } finally {
             setSaving(false);
         }
@@ -120,6 +128,7 @@ export default function UserProfilePage() {
                         formData={formData}
                         setFormData={setFormData}
                         error={error}
+                        fieldErrors={fieldErrors}
                         success={success}
                         saving={saving}
                         onSubmit={handleSubmit}
