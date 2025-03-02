@@ -36,10 +36,10 @@ export function ProfileInfo({ userData, onAvatarUpload, uploadingAvatar = false 
             <CardHeader className="text-center">
                 <div className="flex flex-col items-center mb-4">
                     <Avatar className="w-24 h-24 mb-2">
-                        {userData?.avatar_uuid && (
+                        {(userData?.avatar_url || userData?.avatar_uuid) && (
                             <AvatarImage
                                 key={userData.avatar_uuid}
-                                src={`${AVATAR_URL}/${userData.avatar_uuid}`}
+                                src={userData.avatar_url || `${AVATAR_URL}/${userData.avatar_uuid}`}
                                 alt={userData?.name || "Аватар пользователя"}
                             />
                         )}

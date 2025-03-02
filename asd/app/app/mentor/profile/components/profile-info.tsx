@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MentorData } from "@/app/service/mentor";
 import { AvatarEditor } from "@/components/ui/avatar-editor";
+import { AVATAR_URL } from "@/app/service/config";
 
 interface ProfileInfoProps {
     mentorData: MentorData | null;
@@ -94,9 +95,12 @@ export function ProfileInfo({ mentorData, onAvatarUpload, uploadingAvatar }: Pro
                     onDrop={handleDrop}
                 >
                     <Avatar className="h-32 w-32 mb-4 cursor-pointer hover:opacity-90 transition-opacity" onClick={openAvatarEditor}>
-                        {mentorData?.avatar_url ? (
-                            <AvatarImage src={mentorData.avatar_url} alt={mentorData.name} />
-                        ) : null}
+                        {(mentorData?.avatar_url || mentorData?.avatar_uuid) && (
+                            <AvatarImage
+                                src={mentorData.avatar_url || `${AVATAR_URL}/${mentorData.avatar_uuid}`}
+                                alt={mentorData?.name || "Аватар ментора"}
+                            />
+                        )}
                         <AvatarFallback className="text-2xl bg-primary/10 text-primary">
                             {mentorData?.name ? getInitials(mentorData.name) : 'М'}
                         </AvatarFallback>

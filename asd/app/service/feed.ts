@@ -9,6 +9,7 @@ export interface FeedItem {
     university: string | null;
     email: string | null;
     avatar_url: string | null;
+    avatar_uuid?: string;
 }
 
 export interface FeedResponse {
