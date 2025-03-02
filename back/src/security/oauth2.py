@@ -56,13 +56,19 @@ async def get_current_mentor(
         return MentorDisplay(
             id=mentor.id,
             name=mentor.name,
+            login=mentor.login,
             email=mentor.email,
-            avatar_uuid=mentor.avatar_uuid,
+            avatar_uuid=mentor.avatar_uuid,  # type: ignore
             telegram_link=mentor.telegram_link,
             age=mentor.age,
             is_active=mentor.is_active,
             created_at=mentor.created_at,
             updated_at=mentor.updated_at,
+            description=mentor.description,
+            university=mentor.university,
+            title=mentor.title,
+            free_days=mentor.free_days,  # type: ignore
+            admission_type=mentor.admission_type  # type: ignore
         )
     except HTTPException:
         return None 

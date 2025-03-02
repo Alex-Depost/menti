@@ -1,14 +1,15 @@
 from typing import Optional, List
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, validator
 import uuid
+import re
 from src.data.models import AdmissionType, DayOfWeek
 
 
 class CoreUserSchema(BaseModel):
     """Base user schema with common attributes."""
 
-    name: str
+    name: str = Field(..., min_length=3, max_length=20, description="Имя должно содержать от 3 до 20 символов")
 
 
 class UserCreationSchema(CoreUserSchema):
@@ -16,11 +17,27 @@ class UserCreationSchema(CoreUserSchema):
 
     password: str = "1"
 
+    # password: str = Field(..., min_length=10, max_length=30, description="Пароль должен содержать от 10 до 30 символов, включая буквы, цифры и специальные символы")
+    
+    # @validator('password')
+    # def password_complexity(cls, v):
+    #     """Проверка сложности пароля."""
+    #     if not (re.search(r'[A-Za-z]', v) and re.search(r'\d', v) and re.search(r'[^A-Za-z\d]', v)):
+    #         raise ValueError('Пароль должен содержать буквы, цифры и специальные символы')
+    #     return v
+
 
 class MentorCreationSchema(CoreUserSchema):
     """Schema for mentor creation/registration."""
-
     password: str = "1"
+    # password: str = Field(..., min_length=10, max_length=30, description="Пароль должен содержать от 10 до 30 символов, включая буквы, цифры и специальные символы")
+    
+    # @validator('password')
+    # def password_complexity(cls, v):
+    #     """Проверка сложности пароля."""
+    #     if not (re.search(r'[A-Za-z]', v) and re.search(r'\d', v) and re.search(r'[^A-Za-z\d]', v)):
+    #         raise ValueError('Пароль должен содержать буквы, цифры и специальные символы')
+    #     return v
 
 
 class UserLoginSchema(BaseModel):
@@ -55,9 +72,9 @@ class UserResponse(BaseModel):
 
     id: int
     login: Optional[str] = None
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=3, max_length=20)
     email: Optional[EmailStr] = None
-    age: Optional[int] = None
+    age: Optional[int] = Field(None, ge=10, le=100)
     telegram_link: Optional[str] = None
     is_active: bool
     created_at: datetime
@@ -65,8 +82,24 @@ class UserResponse(BaseModel):
     avatar_uuid: Optional[uuid.UUID] = None
     avatar_url: Optional[str] = None
     target_universities: Optional[List[str]] = None
-    description: Optional[str] = None
+    description: Optional[str] = Field(None, min_length=10, max_length=300)
     admission_type: Optional[AdmissionType] = None
+    
+    @validator('telegram_link')
+    def validate_telegram_link(cls, v):
+        """Проверка формата ссылки на телеграм."""
+        if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
+            raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        return v
+    
+    @validator('target_universities')
+    def validate_universities(cls, v):
+        """Проверка названий университетов."""
+        if v:
+            for uni in v:
+                if len(uni) < 2 or len(uni) > 50:
+                    raise ValueError('Название каждого университета должно содержать от 2 до 50 символов')
+        return v
 
     class Config:
         """Pydantic config."""
@@ -79,20 +112,27 @@ class MentorResponse(BaseModel):
 
     id: int
     login: Optional[str] = None
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=3, max_length=20)
     email: Optional[EmailStr] = None
-    age: Optional[int] = None
+    age: Optional[int] = Field(None, ge=10, le=100)
     telegram_link: Optional[str] = None
     is_active: bool
     created_at: datetime
     updated_at: datetime
     avatar_uuid: Optional[uuid.UUID] = None
     avatar_url: Optional[str] = None
-    university: Optional[str] = None
+    university: Optional[str] = Field(None, min_length=2, max_length=50)
     title: Optional[str] = None
-    description: Optional[str] = None
+    description: Optional[str] = Field(None, min_length=10, max_length=300)
     free_days: Optional[List[DayOfWeek]] = None
     admission_type: Optional[AdmissionType] = None
+    
+    @validator('telegram_link')
+    def validate_telegram_link(cls, v):
+        """Проверка формата ссылки на телеграм."""
+        if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
+            raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        return v
 
     class Config:
         """Pydantic config."""
@@ -104,7 +144,7 @@ class MentorFeedInfo(BaseModel):
     """Schema for mentor information in feed responses."""
 
     id: int
-    name: str
+    name: str = Field(..., min_length=3, max_length=20)
     email: Optional[EmailStr] = None
     avatar_url: Optional[str] = None
 
@@ -119,17 +159,33 @@ class UserDisplay(BaseModel):
 
     id: int
     login: Optional[str] = None
-    name: str
+    name: str = Field(..., min_length=3, max_length=20)
     email: Optional[EmailStr] = None
     avatar_uuid: Optional[uuid.UUID] = None
     telegram_link: Optional[str] = None
-    age: Optional[int] = None
+    age: Optional[int] = Field(None, ge=10, le=100)
     is_active: bool
     created_at: datetime
     updated_at: datetime
     target_universities: Optional[List[str]] = None
-    description: Optional[str] = None
+    description: Optional[str] = Field(None, min_length=10, max_length=300)
     admission_type: Optional[AdmissionType] = None
+    
+    @validator('telegram_link')
+    def validate_telegram_link(cls, v):
+        """Проверка формата ссылки на телеграм."""
+        if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
+            raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        return v
+    
+    @validator('target_universities')
+    def validate_universities(cls, v):
+        """Проверка названий университетов."""
+        if v:
+            for uni in v:
+                if len(uni) < 2 or len(uni) > 50:
+                    raise ValueError('Название каждого университета должно содержать от 2 до 50 символов')
+        return v
 
     class Config:
         """Pydantic config."""
@@ -139,14 +195,37 @@ class UserDisplay(BaseModel):
 class UserUpdateSchema(BaseModel):
     """Схема для обновления профиля пользователя."""
 
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=3, max_length=20)
     telegram_link: Optional[str] = None
-    age: Optional[int] = None
+    age: Optional[int] = Field(None, ge=10, le=100)
     email: Optional[EmailStr] = None
-    password: Optional[str] = None
-    description: Optional[str] = None
+    password: Optional[str] = Field(None, min_length=10, max_length=30)
+    description: Optional[str] = Field(None, min_length=10, max_length=300)
     target_universities: Optional[List[str]] = None
     admission_type: Optional[AdmissionType] = None
+    
+    @validator('password')
+    def password_complexity(cls, v):
+        """Проверка сложности пароля."""
+        if v and not (re.search(r'[A-Za-z]', v) and re.search(r'\d', v) and re.search(r'[^A-Za-z\d]', v)):
+            raise ValueError('Пароль должен содержать буквы, цифры и специальные символы')
+        return v
+    
+    @validator('telegram_link')
+    def validate_telegram_link(cls, v):
+        """Проверка формата ссылки на телеграм."""
+        if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
+            raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        return v
+    
+    @validator('target_universities')
+    def validate_universities(cls, v):
+        """Проверка названий университетов."""
+        if v:
+            for uni in v:
+                if len(uni) < 2 or len(uni) > 50:
+                    raise ValueError('Название каждого университета должно содержать от 2 до 50 символов')
+        return v
 
     class Config:
         """Pydantic config."""
@@ -158,18 +237,25 @@ class MentorDisplay(BaseModel):
 
     id: int
     login: Optional[str] = None
-    name: str
+    name: str = Field(..., min_length=3, max_length=20)
     email: Optional[EmailStr] = None
     avatar_uuid: Optional[uuid.UUID] = None
     telegram_link: Optional[str] = None
-    age: Optional[int] = None
+    age: Optional[int] = Field(None, ge=10, le=100)
     is_active: bool
     created_at: datetime
     updated_at: datetime
-    description: Optional[str] = None
-    university: Optional[str] = None
+    description: Optional[str] = Field(None, min_length=10, max_length=300)
+    university: Optional[str] = Field(None, min_length=2, max_length=50)
     title: Optional[str] = None
     free_days: Optional[List[DayOfWeek]] = None
+    
+    @validator('telegram_link')
+    def validate_telegram_link(cls, v):
+        """Проверка формата ссылки на телеграм."""
+        if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
+            raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        return v
 
     class Config:
         """Pydantic config."""
@@ -179,15 +265,29 @@ class MentorDisplay(BaseModel):
 class MentorUpdateSchema(BaseModel):
     """Схема для обновления профиля ментора."""
 
-    name: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=3, max_length=20)
     telegram_link: Optional[str] = None
-    age: Optional[int] = None
+    age: Optional[int] = Field(None, ge=10, le=100)
     email: Optional[EmailStr] = None
-    password: Optional[str] = None
-    description: Optional[str] = None
-    university: Optional[str] = None
+    password: Optional[str] = Field(None, min_length=10, max_length=30)
+    description: Optional[str] = Field(None, min_length=10, max_length=300)
+    university: Optional[str] = Field(None, min_length=2, max_length=50)
     title: Optional[str] = None
     free_days: Optional[List[DayOfWeek]] = None
+    
+    @validator('password')
+    def password_complexity(cls, v):
+        """Проверка сложности пароля."""
+        if v and not (re.search(r'[A-Za-z]', v) and re.search(r'\d', v) and re.search(r'[^A-Za-z\d]', v)):
+            raise ValueError('Пароль должен содержать буквы, цифры и специальные символы')
+        return v
+    
+    @validator('telegram_link')
+    def validate_telegram_link(cls, v):
+        """Проверка формата ссылки на телеграм."""
+        if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
+            raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        return v
 
     class Config:
         """Pydantic config."""
@@ -199,10 +299,10 @@ class MentorFeedResponse(BaseModel):
 
     id: int
     login: Optional[str] = None
-    name: str
+    name: str = Field(..., min_length=3, max_length=20)
     title: Optional[str] = None
-    description: Optional[str] = None
-    university: Optional[str] = None
+    description: Optional[str] = Field(None, min_length=10, max_length=300)
+    university: Optional[str] = Field(None, min_length=2, max_length=50)
     email: Optional[EmailStr] = None
     avatar_url: Optional[str] = None
 

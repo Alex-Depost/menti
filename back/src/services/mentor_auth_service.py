@@ -125,6 +125,11 @@ async def update_mentor_profile_service(
     # Если передан пароль, хэшируем его
     if "password" in update_dict:
         update_dict["password_hash"] = get_password_hash(update_dict.pop("password"))
+    
+    # Убеждаемся, что поле login не может быть изменено
+    if "login" in update_dict:
+        # Убираем логин из обновляемых данных
+        update_dict.pop("login")
 
     # Обновляем профиль
     updated_mentor = await mentor_repo.update_mentor_profile(mentor_id, update_dict)

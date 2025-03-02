@@ -32,9 +32,14 @@ async def get_current_mentor_profile(
         avatar_url = urljoin(base_url, f"img/{mentor.avatar_uuid}")
     
     # Создаем объект для ответа
+    # Это автоматически включит поле login из модели ментора
     mentor_display = MentorDisplay.from_orm(mentor)
-    mentor_display.avatar_url = avatar_url
     
+    # Явно устанавливаем login, чтобы избежать возврата null
+    if mentor.login:
+        mentor_display.login = mentor.login
+    
+    # Логин ментора автоматически копируется из модели через from_orm
     return mentor_display
 
 
@@ -58,7 +63,12 @@ async def get_mentor_profile(
         avatar_url = urljoin(base_url, f"img/{mentor.avatar_uuid}")
     
     # Создаем объект для ответа
+    # Это автоматически включит поле login из модели ментора
     mentor_display = MentorDisplay.from_orm(mentor)
-    mentor_display.avatar_url = avatar_url
     
+    # Явно устанавливаем login, чтобы избежать возврата null
+    if mentor.login:
+        mentor_display.login = mentor.login
+    
+    # Логин ментора автоматически копируется из модели через from_orm
     return mentor_display

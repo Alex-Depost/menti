@@ -5,7 +5,6 @@ from urllib.parse import urljoin
 from fastapi import (
     APIRouter,
     Depends,
-    Form,
     HTTPException,
     Request,
     status,
@@ -63,6 +62,7 @@ async def get_current_user_info(
     mentor_dict = {
         "id": current_user.id,
         "name": current_user.name,
+        "login": current_user.login,
         "is_active": current_user.is_active,
         "avatar_url": avatar_url,
         "created_at": current_user.created_at,
@@ -79,12 +79,7 @@ async def get_current_user_info(
 @router.patch("/me", response_model=MentorDisplay)
 async def update_mentor_profile(
     request: Request,
-    name: Optional[str] = Form(None),
-    telegram_link: Optional[str] = Form(None),
-    age: Optional[int] = Form(None),
-    email: Optional[str] = Form(None),
-    password: Optional[str] = Form(None),
-    description: Optional[str] = Form(None),
+    update_data: MentorUpdateSchema,
     current_mentor: Mentor = Depends(get_current_mentor),
 ):
     """
@@ -100,31 +95,6 @@ async def update_mentor_profile(
 
     Для изменения аватара используйте отдельный эндпоинт /me/avatar
     """
-    # Создаем словарь с обновляемыми данными
-    update_dict = {}
-
-    if name is not None:
-        update_dict["name"] = name
-    logger.error(f"Обновление имени ментора: {name}")
-
-    if telegram_link is not None:
-        update_dict["telegram_link"] = telegram_link
-
-    if age is not None:
-        update_dict["age"] = age
-
-    if email is not None:
-        update_dict["email"] = email
-
-    if password is not None:
-        update_dict["password"] = password
-
-    if description is not None:
-        update_dict["description"] = description
-
-    # Создаем объект схемы для валидации
-    update_data = MentorUpdateSchema(**update_dict)
-
     # Обновляем профиль и возвращаем обновленные данные
     updated_mentor = await update_mentor_profile_service(current_mentor.id, update_data)
 

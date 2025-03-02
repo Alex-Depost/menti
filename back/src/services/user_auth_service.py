@@ -122,6 +122,11 @@ async def update_user_profile_service(user_id: int, update_data: UserUpdateSchem
     if "password" in update_dict:
         update_dict["password_hash"] = get_password_hash(update_dict.pop("password"))
     
+    # Убеждаемся, что поле login не может быть изменено
+    if "login" in update_dict:
+        # Убираем логин из обновляемых данных
+        update_dict.pop("login")
+    
     # Обновляем профиль
     updated_user = await user_repo.update_user_profile(user_id, update_dict)
     
