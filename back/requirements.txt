@@ -8,3 +8,4 @@ pydantic[email]
 greenlet
 uvicorn
 transliterate
+prometheus_client

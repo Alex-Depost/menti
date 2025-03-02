@@ -47,6 +47,42 @@ services:
     networks:
       - app-network
 
+  # Database management tool
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: pgadmin
+    restart: unless-stopped
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+      - PGADMIN_DEFAULT_PASSWORD=admin
+      - PGADMIN_CONFIG_SERVER_MODE=False
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    networks:
+      - app-network
+    depends_on:
+      - postgresprod
+
+  # Monitoring tool
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+    ports:
+      - "3002:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - app-network
+    depends_on:
+      - postgresprod
+
   nginx:
     image: nginx:alpine
     container_name: nginx
@@ -66,7 +102,10 @@ services:
 volumes:
   postgres-data:
     driver: local
-
+  pgadmin-data:
+    driver: local
+  grafana-data:
+    driver: local
 networks:
   app-network:
     driver: bridge
