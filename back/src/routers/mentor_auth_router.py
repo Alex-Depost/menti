@@ -102,6 +102,7 @@ async def update_mentor_profile(
     return MentorDisplay(
         id=updated_mentor.id,
         name=updated_mentor.name,
+        description=updated_mentor.description,
         email=updated_mentor.email,
         avatar_uuid=updated_mentor.avatar_uuid,  # type: ignore
         telegram_link=updated_mentor.telegram_link,
