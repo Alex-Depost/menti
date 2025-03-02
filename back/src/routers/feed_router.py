@@ -8,7 +8,7 @@ from src.data.models import User, Mentor, AdmissionType
 from src.repository.mentor_repository import get_mentors, get_filtered_mentors
 from src.repository.user_repository import get_users, get_filtered_users
 from src.schemas.schemas import FeedResponse, MentorFeedResponse, UserFeedResponse
-from src.security.auth import get_current_user, get_current_mentor
+from src.security.auth import get_current_user, get_current_mentor, get_optional_current_user, get_optional_current_mentor
 
 router = APIRouter(
     tags=["feed"],
@@ -19,8 +19,7 @@ router = APIRouter(
 @router.get("/mentors", response_model=FeedResponse)
 async def get_mentors_feed(
     request: Request,
-    current_user: Optional[User] = Depends(get_current_user),
-    # current_mentor: Optional[Mentor] = Depends(get_current_mentor),
+    current_user: Optional[User] = Depends(get_optional_current_user),
     filtered: bool = Query(True, description="Whether to filter by profile parameters"),
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Number of items per page"),
@@ -92,8 +91,7 @@ async def get_mentors_feed(
 @router.get("/users", response_model=FeedResponse)
 async def get_users_feed(
     request: Request,
-    # current_user: Optional[User] = Depends(get_current_user),
-    current_mentor: Optional[Mentor] = Depends(get_current_mentor),
+    current_mentor: Optional[Mentor] = Depends(get_optional_current_mentor),
     filtered: bool = Query(True, description="Whether to filter by profile parameters"),
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Number of items per page"),

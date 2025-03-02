@@ -17,6 +17,7 @@ class UserCreationSchema(CoreUserSchema):
 
     password: str = "1"
 
+    # Временно закомментировано для демонстрации
     # password: str = Field(..., min_length=10, max_length=30, description="Пароль должен содержать от 10 до 30 символов, включая буквы, цифры и специальные символы")
     
     # @validator('password')
@@ -30,6 +31,9 @@ class UserCreationSchema(CoreUserSchema):
 class MentorCreationSchema(CoreUserSchema):
     """Schema for mentor creation/registration."""
     password: str = "1"
+    
+    
+    # Временно закомментировано для демонстрации
     # password: str = Field(..., min_length=10, max_length=30, description="Пароль должен содержать от 10 до 30 символов, включая буквы, цифры и специальные символы")
     
     # @validator('password')
