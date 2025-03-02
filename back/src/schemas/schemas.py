@@ -1,4 +1,4 @@
-from typing import Optional, List
+from typing import Optional, List, Union
 from datetime import datetime
 from pydantic import BaseModel, EmailStr, Field, validator
 import uuid
@@ -312,10 +312,27 @@ class MentorFeedResponse(BaseModel):
         from_attributes = True
 
 
+class UserFeedResponse(BaseModel):
+    """Schema for user in feed responses."""
+
+    id: int
+    login: Optional[str] = None
+    name: str = Field(..., min_length=3, max_length=20)
+    description: Optional[str] = Field(None, min_length=10, max_length=300)
+    target_universities: Optional[List[str]] = None
+    admission_type: Optional[AdmissionType] = None
+    email: Optional[EmailStr] = None
+    avatar_url: Optional[str] = None
+
+    class Config:
+        """Pydantic config."""
+        from_attributes = True
+
+
 class FeedResponse(BaseModel):
     """Schema for paginated feed responses."""
 
-    items: List[MentorFeedResponse]
+    items: List[Union[MentorFeedResponse, UserFeedResponse]]
     total: int
     page: int
     size: int
@@ -323,5 +340,4 @@ class FeedResponse(BaseModel):
 
     class Config:
         """Pydantic config."""
-
         from_attributes = True

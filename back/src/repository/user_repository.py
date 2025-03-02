@@ -3,7 +3,7 @@ from src.data.base import session_scope
 from src.data.models import User
 from sqlalchemy import insert
 import uuid
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Tuple
 from sqlalchemy.ext.asyncio import AsyncSession
 
 
@@ -79,3 +79,22 @@ async def update_user_profile(user_id: int, update_data: Dict[str, Any]) -> User
         # Получаем и возвращаем обновленного пользователя
         result = await session.execute(user_query)
         return result.scalars().first()
+
+
+async def get_users(page: int = 1, size: int = 10) -> Tuple[List[User], int]:
+    """Получить список пользователей с пагинацией."""
+    async with session_scope() as session:
+        query = select(User)
+        
+        # Считаем общее количество
+        count_result = await session.execute(select(User.id).select_from(query.subquery()))
+        total = len(count_result.all())
+        
+        # Применяем пагинацию
+        skip = (page - 1) * size
+        query = query.offset(skip).limit(size)
+        
+        result = await session.execute(query)
+        users = list(result.scalars().all())
+        
+        return users, total
