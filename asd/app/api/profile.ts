@@ -100,7 +100,7 @@ export async function updateMentorResume(resumeId: number, resumeData: Partial<M
 }
 
 // Загрузка аватарки
-export async function uploadAvatar(file: File): Promise<string> {
+export async function uploadAvatar(file: File): Promise<void> {
   const token = getAuthToken();
   
   if (!token) {
@@ -121,9 +121,6 @@ export async function uploadAvatar(file: File): Promise<string> {
   if (!response.ok) {
     throw new Error('Не удалось загрузить аватарку');
   }
-  
-  const data = await response.json();
-  return data.avatar_url || '';
 }
 
 // Удаление аватарки

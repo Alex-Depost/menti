@@ -124,7 +124,7 @@ export function ProfileEditForm({
                             id="password"
                             label="Новый пароль"
                             type="password"
-                            value={""}
+                            value={formData.password || ""}
                             onChange={handleChange}
                             placeholder="Оставьте пустым, чтобы не менять"
                         />
@@ -160,7 +160,7 @@ export function ProfileEditForm({
                                 id="admission_type"
                                 label="Тип поступления"
                                 value={formData.admission_type || ""}
-                                onChange={() => {}}
+                                onChange={handleChange}
                             >
                                 <select
                                     id="admission_type"

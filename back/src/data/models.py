@@ -1,23 +1,20 @@
 from datetime import datetime
-from typing import cast
-from sqlalchemy.ext.asyncio import AsyncAttrs
 from enum import Enum as PyEnum
-from sqlalchemy.dialects.postgresql import UUID
-import uuid
+from typing import cast
 
 from sqlalchemy import (
+    ARRAY,
     Boolean,
     Column,
     DateTime,
     Enum,
-    ForeignKey,
     Integer,
     MetaData,
     String,
-    Table,
-    ARRAY,
 )
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.asyncio import AsyncAttrs
+from sqlalchemy.orm import declarative_base
 
 SCHEMA_NAME = "prod"
 METADATA = MetaData(
@@ -87,7 +84,7 @@ class Mentor(AsyncAttrs, Base):
     updated_at = cast(
         datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
     )
-    avatar_uuid =  Column(UUID(as_uuid=True), nullable=True)
+    avatar_uuid =  cast(str, Column(UUID(as_uuid=True), nullable=True))
     # Профессиональная информация
     university = cast(str, Column(String(100), nullable=True))
     free_days = cast(list[str], Column(ARRAY(Enum(DayOfWeek)), nullable=True, default=[]))

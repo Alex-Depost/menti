@@ -1,18 +1,17 @@
-from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, status
-from fastapi.responses import FileResponse
-import uuid
 import os
+import uuid
 from typing import Optional
 
-from src.security.oauth2 import get_current_user, get_current_mentor
-from src.schemas.schemas import UserDisplay, MentorDisplay
+from fastapi import APIRouter, Depends, File, HTTPException, UploadFile, status
+from fastapi.responses import FileResponse
+
+from src.schemas.schemas import MentorDisplay, UserDisplay
+from src.security.oauth2 import get_current_mentor, get_current_user
 from src.services.avatar_service import (
-    save_avatar,
     delete_avatar,
     get_avatar_path,
-    AVATARS_DIR,
+    save_avatar,
 )
-
 
 router = APIRouter(tags=["Images"])
 
@@ -39,7 +38,7 @@ async def upload_avatar(
     if current_user:
         user_id = current_user.id
     else:
-        mentor_id = current_mentor.id
+        mentor_id = current_mentor.id # type: ignore
     
     # Сохраняем аватарку и обновляем avatar_uuid в базе данных
     avatar_uuid, _ = await save_avatar(file, avatar_uuid, user_id, mentor_id)
@@ -82,8 +81,8 @@ async def remove_avatar(
         user_id = current_user.id
         avatar_uuid = current_user.avatar_uuid
     else:
-        mentor_id = current_mentor.id
-        avatar_uuid = current_mentor.avatar_uuid
+        mentor_id = current_mentor.id # type: ignore
+        avatar_uuid = current_mentor.avatar_uuid # type: ignore
     
     # Проверяем, есть ли аватарка для удаления
     if not avatar_uuid:

@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserData } from "@/app/service/user";
+import { AVATAR_URL } from "@/app/service/config";
 
 interface ProfileInfoProps {
     userData: UserData | null;
@@ -42,14 +43,18 @@ export function ProfileInfo({ userData, onAvatarUpload, uploadingAvatar = false 
             <CardHeader className="text-center">
                 <div className="flex flex-col items-center mb-4">
                     <Avatar className="w-24 h-24 mb-2">
-                        {userData?.avatar_url && (
-                            <AvatarImage src={userData.avatar_url} alt={userData?.name || "Аватар пользователя"} />
+                        {userData?.avatar_uuid && (
+                            <AvatarImage
+                                key={userData.avatar_uuid}
+                                src={`${AVATAR_URL}/${userData.avatar_uuid}`}
+                                alt={userData?.name || "Аватар пользователя"}
+                            />
                         )}
                         <AvatarFallback className="text-2xl">
                             {userData?.name ? userData.name.substring(0, 2).toUpperCase() : "ПП"}
                         </AvatarFallback>
                     </Avatar>
-                    
+
                     {onAvatarUpload && (
                         <>
                             <input

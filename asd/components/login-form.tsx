@@ -13,8 +13,6 @@ import { Label } from "@/components/ui/label"
 import { useState } from "react"
 import Link from "next/link"
 
-
-
 export function LoginForm({
   className,
   onFormSubmit,
@@ -22,16 +20,15 @@ export function LoginForm({
   userType = "user",
   ...props
 }: React.ComponentProps<"div"> & {
-  onFormSubmit: (data: { email: string; password: string }) => void;
+  onFormSubmit: (data: { login: string }) => void;
   error: string | null;
   userType?: "user" | "mentor";
 }) {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [login, setLogin] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    onFormSubmit({ email, password });
+    onFormSubmit({ login });
   };
 
   return (
@@ -40,27 +37,21 @@ export function LoginForm({
         <CardHeader>
           <CardTitle>Войдите в свой аккаунт</CardTitle>
           <CardDescription>
-            Введите свой E-mail для входа в аккаунт {userType === "mentor" ? "ментора" : "пользователя"}
+            Введите своё имя для входа в аккаунт {userType === "mentor" ? "ментора" : "пользователя"}
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="login">Имя</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
+                  id="login"
+                  type="text"
+                  placeholder="Иван Иванов"
                   required
-                  onChange={e => setEmail(e.target.value)}
+                  onChange={e => setLogin(e.target.value)}
                 />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input id="password" type="password" required onChange={e => setPassword(e.target.value)} />
               </div>
               {error && (
                 <div className="text-red-500 text-sm text-center">

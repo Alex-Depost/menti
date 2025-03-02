@@ -33,7 +33,7 @@ export function MentorCard({ item }: MentorCardProps) {
         return `hsl(${h}, 70%, 85%)`;
     };
 
-    const avatarColor = generatePastelColor(item.mentor.name);
+    const avatarColor = generatePastelColor(item.name || '');
 
     return (
         <Card className="w-full overflow-hidden transition-all hover:shadow-md hover:border-primary/20 duration-300 flex flex-col group">
@@ -45,12 +45,12 @@ export function MentorCard({ item }: MentorCardProps) {
                             className="text-primary-foreground text-base font-medium"
                             style={{ backgroundColor: avatarColor }}
                         >
-                            {getInitials(item.mentor.name)}
+                            {getInitials(item.name || '')}
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
-                        <h3 className="font-medium text-lg">{item.mentor.name}</h3>
-                        <p className="text-sm text-muted-foreground">{item.mentor.email}</p>
+                        <h3 className="font-medium text-lg">{item.name}</h3>
+                        <p className="text-sm text-muted-foreground">{item.email}</p>
                     </div>
                     <Button
                         variant="default"
