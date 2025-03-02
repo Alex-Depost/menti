@@ -47,8 +47,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-primary bg-primary/10 border-primary/20">
               {isUser ? 'Пользователь' : 'Ментор'}
             </span>
-            {profileData?.email && (
-              <span className="text-xs text-muted-foreground mt-1">{profileData.email}</span>
+            {profileData?.login && (
+              <span className="text-xs text-muted-foreground mt-1">{profileData.login}</span>
             )}
           </div>
         ) : (
@@ -145,9 +145,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/profile" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <Link href="/app/profile" className="flex gap-3">
-                    <User className={`h-4 w-4 ${pathname === "/app/profile" ? "" : "text-muted-foreground"}`} />
+                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/mentor/profile" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/mentor/profile" className="flex gap-3">
+                    <User className={`h-4 w-4 ${pathname === "/app/mentor/profile" ? "" : "text-muted-foreground"}`} />
                     <span>Профиль</span>
                   </Link>
                 </SidebarMenuButton>

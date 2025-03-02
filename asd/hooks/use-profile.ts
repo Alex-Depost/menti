@@ -9,6 +9,7 @@ export type ProfileData = {
   name: string;
   id: number;
   is_active: boolean;
+  login?: string;
   avatar_uuid?: string;
   avatar_url?: string | null;
 };
