@@ -11,8 +11,8 @@ import { useCallback, useEffect, useState } from "react";
 import feedService, { FeedResponse } from "../service/feed";
 
 export default function FeedPage() {
-  const { isAuthenticated, authType, isUser } = useAuth();
-  const isMentor = authType === "mentor";
+  // Use the improved auth hook that includes isMentor
+  const { isAuthenticated, authType, isUser, isMentor } = useAuth();
   
   // Feed state
   const [feedData, setFeedData] = useState<FeedResponse>({
@@ -46,10 +46,12 @@ export default function FeedPage() {
     }
   }, [currentPage, isMentor]);
 
-  // Load initial data
+  // Load initial data and refetch when auth state changes
   useEffect(() => {
     fetchFeed();
-  }, [fetchFeed]);
+    // Adding isMentor to the dependency array ensures the feed is refetched
+    // when the user's role changes
+  }, [fetchFeed, isMentor]);
 
   // Handle page change
   const handlePageChange = (page: number) => {

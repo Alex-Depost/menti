@@ -1,6 +1,7 @@
 import { authService } from "./auth";
 import { API_URL, AVATAR_URL } from "./config";
 import { uploadAvatar as apiUploadAvatar } from "@/app/api/profile";
+import { removeNullFields } from "@/lib/utils";
 
 export interface MentorData {
     email: string;
@@ -84,13 +85,16 @@ export class MentorService {
                 throw new Error('Не авторизован');
             }
 
+            // Remove null fields from the data before sending
+            const cleanData = removeNullFields(data);
+
             const response = await fetch(`${API_URL}/auth/mentors/me`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify(cleanData)
             });
 
             if (!response.ok) {
