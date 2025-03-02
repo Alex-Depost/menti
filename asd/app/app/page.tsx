@@ -3,10 +3,18 @@
 import { MentorsFeedHeader } from "@/components/feed/feed-header";
 import { MentorsFeedHero } from "@/components/feed/feed-hero";
 import { MentorsFeedList } from "@/components/feed/feed-list";
+import { UserFeedHeader } from "@/components/feed/user-feed-header";
+import { UserFeedHero } from "@/components/feed/user-feed-hero";
+import { UserFeedList } from "@/components/feed/user-feed-list";
+import { useAuth } from "@/hooks/use-auth";
 import { useCallback, useEffect, useState } from "react";
 import feedService, { FeedResponse } from "../service/feed";
 
 export default function FeedPage() {
+  const { isAuthenticated, authType, isUser } = useAuth();
+  const isMentor = authType === "mentor";
+  
+  // Feed state
   const [feedData, setFeedData] = useState<FeedResponse>({
     items: [],
     total: 0,
@@ -19,10 +27,16 @@ export default function FeedPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   
+  // Fetch feed based on user type
   const fetchFeed = useCallback(async (page: number = currentPage) => {
     setIsLoading(true);
     try {
-      const data = await feedService.getFeed(page, 10);
+      // If user is a mentor, show users feed
+      // If user is a regular user, show mentors feed
+      const data = isMentor 
+        ? await feedService.getUsersFeed(page, 10)
+        : await feedService.getMentorsFeed(page, 10);
+      
       setFeedData(data);
       setCurrentPage(data.page);
     } catch (error) {
@@ -30,12 +44,14 @@ export default function FeedPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage]);
+  }, [currentPage, isMentor]);
 
+  // Load initial data
   useEffect(() => {
     fetchFeed();
   }, [fetchFeed]);
 
+  // Handle page change
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
     fetchFeed(page);
@@ -43,27 +59,52 @@ export default function FeedPage() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // Handle search
   const handleSearch = () => {
     setCurrentPage(1);
     fetchFeed(1);
   };
 
-  return (
-    <>
-      <MentorsFeedHeader
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        handleSearch={handleSearch}
-        showFilters={showFilters}
-        setShowFilters={setShowFilters}
-      />
-      <MentorsFeedHero />
-      <MentorsFeedList
-        isLoading={isLoading}
-        feedData={feedData}
-        currentPage={currentPage}
-        handlePageChange={handlePageChange}
-      />
-    </>
-  );
+  // Render appropriate components based on user type
+  if (isMentor) {
+    // Mentors see users
+    return (
+      <>
+        <UserFeedHeader
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleSearch={handleSearch}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+        />
+        <UserFeedHero />
+        <UserFeedList
+          isLoading={isLoading}
+          feedData={feedData}
+          currentPage={currentPage}
+          handlePageChange={handlePageChange}
+        />
+      </>
+    );
+  } else {
+    // Users see mentors
+    return (
+      <>
+        <MentorsFeedHeader
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          handleSearch={handleSearch}
+          showFilters={showFilters}
+          setShowFilters={setShowFilters}
+        />
+        <MentorsFeedHero />
+        <MentorsFeedList
+          isLoading={isLoading}
+          feedData={feedData}
+          currentPage={currentPage}
+          handlePageChange={handlePageChange}
+        />
+      </>
+    );
+  }
 }

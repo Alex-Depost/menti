@@ -120,24 +120,24 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ) : (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/dashboard" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <Link href="/app/dashboard" className="flex gap-3">
-                    <MessageSquare className={`h-4 w-4 ${pathname === "/app/dashboard" ? "" : "text-muted-foreground"}`} />
-                    <span>Мои отклики</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
                 <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/search" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <Link href="/app/search" className="flex gap-3">
+                  <Link href="/app" className="flex gap-3">
                     <Search className={`h-4 w-4 ${pathname === "/app/search" ? "" : "text-muted-foreground"}`} />
                     <span>Поиск менти</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
+                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/dashboard" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/mentor/dashboard" className="flex gap-3">
+                    <MessageSquare className={`h-4 w-4 ${pathname === "/app/dashboard" ? "" : "text-muted-foreground"}`} />
+                    <span>Заявки на менторство</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname.startsWith("/app/students") ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <Link href="/app/students" className="flex gap-3">
+                  <Link href="/app/mentor/students" className="flex gap-3">
                     <Users className={`h-4 w-4 ${pathname.startsWith("/app/students") ? "" : "text-muted-foreground"}`} />
                     <span>Мои студенты</span>
                   </Link>
@@ -162,10 +162,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/settings" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                    <Link href="/app/settings" className="flex gap-3">
-                      <Settings className={`h-4 w-4 ${pathname === "/app/settings" ? "" : "text-muted-foreground"}`} />
-                      <span>Настройки</span>
-                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

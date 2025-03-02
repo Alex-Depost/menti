@@ -17,6 +17,7 @@ const eslintConfig = [
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-empty-object-type': 'off',
       '@next/next/no-img-element': 'off',
+      '@typescript-eslint/no-unused-vars': 'warn',
     },
   }),
 ];
