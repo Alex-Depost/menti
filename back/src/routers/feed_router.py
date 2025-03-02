@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException, Query, Request, Depends
 
 from src.data.models import User, Mentor, AdmissionType
 from src.repository.mentor_repository import get_mentors, get_filtered_mentors
-from src.repository.user_repository import get_users
+from src.repository.user_repository import get_users, get_filtered_users
 from src.schemas.schemas import FeedResponse, MentorFeedResponse, UserFeedResponse
 from src.security.auth import get_current_user, get_current_mentor
 
@@ -19,7 +19,7 @@ router = APIRouter(
 @router.get("/mentors", response_model=FeedResponse)
 async def get_mentors_feed(
     request: Request,
-    # current_user: Optional[User] = Depends(get_current_user),
+    current_user: Optional[User] = Depends(get_current_user),
     # current_mentor: Optional[Mentor] = Depends(get_current_mentor),
     filtered: bool = Query(True, description="Whether to filter by profile parameters"),
     page: int = Query(1, ge=1, description="Page number"),
@@ -92,7 +92,7 @@ async def get_mentors_feed(
 @router.get("/users", response_model=FeedResponse)
 async def get_users_feed(
     request: Request,
-    current_user: Optional[User] = Depends(get_current_user),
+    # current_user: Optional[User] = Depends(get_current_user),
     current_mentor: Optional[Mentor] = Depends(get_current_mentor),
     filtered: bool = Query(True, description="Whether to filter by profile parameters"),
     page: int = Query(1, ge=1, description="Page number"),
@@ -114,8 +114,24 @@ async def get_users_feed(
     items = []
     total = 0
     
-    # Получаем всех пользователей
-    users, total = await get_users(page=page, size=size)
+    # Если filtered=true и есть авторизованный ментор, применяем фильтры
+    if filtered and current_mentor:
+        # Фильтрация по параметрам профиля
+        university = current_mentor.university
+        admission_type_value = ""
+        
+        if current_mentor and current_mentor.admission_type:
+            admission_type_value = str(current_mentor.admission_type)
+        
+        users, total = await get_filtered_users(
+            university=university,
+            admission_type=admission_type_value,
+            page=page,
+            size=size,
+        )
+    else:
+        # Возвращаем всех пользователей без фильтрации
+        users, total = await get_users(page=page, size=size)
     
     # Формируем ответ
     for user in users:
