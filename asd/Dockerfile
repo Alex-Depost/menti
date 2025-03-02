@@ -1,16 +1,19 @@
 FROM node:lts AS dependencies
 WORKDIR /asd
+ENV MODE production
 COPY package*.json ./
 RUN npm install
 
 FROM node:lts AS builder
 WORKDIR /asd
+ENV MODE production
 COPY . .
 COPY --from=dependencies /asd/node_modules ./node_modules
 RUN npm run build
 
 FROM node:lts AS runner
 WORKDIR /asd
+ENV MODE production
 ENV NODE_ENV production
 
 COPY --from=builder /asd/public ./public
