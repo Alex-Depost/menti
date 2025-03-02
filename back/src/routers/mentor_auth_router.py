@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, status, Request, HTTPException, Form, Up
 from urllib.parse import urljoin
 from typing import Optional
 from datetime import timedelta
+from src.config import ACCESS_TOKEN_EXPIRE_MINUTES, ALGORITHM, SECRET_KEY, Roles
 
 import logging
 from src.data.models import Mentor
@@ -31,12 +32,7 @@ async def signup(user_data: MentorCreationSchema):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Registration failed",
         )
-    # Форматируем результат как токен
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        role=Roles.MENTOR, data={"sub": result.login}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return result
 
 
 @router.post("/signin", response_model=Token)
