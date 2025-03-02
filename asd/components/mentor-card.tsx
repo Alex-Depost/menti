@@ -5,6 +5,7 @@ import { FeedItem } from "@/app/service/feed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
+import { AVATAR_URL } from "@/app/service/config";
 
 interface MentorCardProps {
     item: FeedItem;
@@ -41,9 +42,12 @@ export function MentorCard({ item }: MentorCardProps) {
                 {/* Header section with mentor info */}
                 <div className="flex items-center gap-4 pb-4 border-b border-border/30">
                     <Avatar className="h-16 w-16 border border-border/50 ring-2 ring-background">
-                        {item.avatar_url ? (
-                            <AvatarImage src={item.avatar_url} alt={item.name || ''} />
-                        ) : null}
+                        {(item.avatar_url || item.avatar_uuid) && (
+                            <AvatarImage
+                                src={item.avatar_url || `${AVATAR_URL}/${item.avatar_uuid}`}
+                                alt={item.name || ''}
+                            />
+                        )}
                         <AvatarFallback
                             className="text-primary-foreground text-base font-medium"
                             style={{ backgroundColor: avatarColor }}

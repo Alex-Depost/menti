@@ -9,6 +9,7 @@ export interface UserData {
     is_active: boolean;
     login?: string;
     avatar_uuid?: string;
+    avatar_url?: string;
     telegram_link?: string;
     age?: number;
     created_at?: string;
