@@ -52,27 +52,15 @@ async def get_current_user_info(
     """
     # Формируем URL для аватара
     avatar_url = None
-    avatar_uuid = None
     if current_user.avatar_uuid: # type: ignore
-        avatar_uuid = str(current_user.avatar_uuid) # type: ignore
         base_url = str(request.base_url)
         avatar_url = urljoin(base_url, f"img/{current_user.avatar_uuid}")
     
-    # Создаем полный объект для отображения
-    return UserDisplay(
-        id=current_user.id,
-        name=current_user.name,
-        email=current_user.email,
-        avatar_uuid=current_user.avatar_uuid, # type: ignore
-        telegram_link=current_user.telegram_link,
-        age=current_user.age,
-        is_active=current_user.is_active,
-        created_at=current_user.created_at,
-        updated_at=current_user.updated_at,
-        target_universities=current_user.target_universities,
-        description=current_user.description,
-        admission_type=current_user.admission_type
-    )
+    # Создаем полный объект для отображения с использованием from_orm
+    # Это автоматически включит поле login из модели
+    user_display = UserDisplay.from_orm(current_user)
+    
+    return user_display
 
 
 @router.patch("/me", response_model=UserDisplay)
