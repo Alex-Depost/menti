@@ -19,7 +19,7 @@ export function UserFeedList({
   handlePageChange
 }: UserFeedListProps) {
   return (
-    <main className="container mx-auto px-4 py-8">
+    <main id="users-list" className="container mx-auto px-4 py-8">
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 6 }).map((_, index) => (
