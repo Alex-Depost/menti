@@ -24,36 +24,12 @@ deploy_to_production:
   stage: deploy
   variables:
     REMOTE_DIR: "/home/$SSH_USER/app"
-    COMPOSE_FILE: "docker-compose.yml"
   script:
+    # Create main directory on remote server
     - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR"
-    - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR/nginx"
-    - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR/back/static"
     
-    # Copy docker-compose file
-    - scp $COMPOSE_FILE $SSH_ADDRESS:$REMOTE_DIR/
-    
-    # Copy nginx configuration
-    - scp nginx/nginx.conf $SSH_ADDRESS:$REMOTE_DIR/nginx/
-    
-    # Copy backend Dockerfile
-    - scp back/Dockerfile $SSH_ADDRESS:$REMOTE_DIR/back/
-    - scp back/requirements.txt $SSH_ADDRESS:$REMOTE_DIR/back/
-    
-    # Copy frontend Dockerfile
-    - scp asd/Dockerfile $SSH_ADDRESS:$REMOTE_DIR/asd/
-    
-    # Create necessary directories for backend source code
-    - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR/back/src"
-    
-    # Copy backend source code
-    - scp -r back/src/* $SSH_ADDRESS:$REMOTE_DIR/back/src/
-    
-    # Create necessary directories for frontend
-    - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR/asd"
-    
-    # Copy frontend files
-    - scp -r asd/* $SSH_ADDRESS:$REMOTE_DIR/asd/
+    # Copy the entire repository to the remote server
+    - scp -r ./* $SSH_ADDRESS:$REMOTE_DIR/
     
     # Run the containers
     - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker-compose down || true"
