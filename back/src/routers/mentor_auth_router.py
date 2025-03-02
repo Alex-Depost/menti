@@ -102,6 +102,8 @@ async def update_mentor_profile(
     return MentorDisplay(
         id=updated_mentor.id,
         name=updated_mentor.name,
+        login=updated_mentor.login,
+        university=updated_mentor.university,
         description=updated_mentor.description,
         email=updated_mentor.email,
         avatar_uuid=updated_mentor.avatar_uuid,  # type: ignore
@@ -110,4 +112,5 @@ async def update_mentor_profile(
         is_active=updated_mentor.is_active,
         created_at=updated_mentor.created_at,
         updated_at=updated_mentor.updated_at,
+        free_days=updated_mentor.free_days,
     )

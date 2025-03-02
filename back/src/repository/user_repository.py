@@ -98,3 +98,51 @@ async def get_users(page: int = 1, size: int = 10) -> Tuple[List[User], int]:
         users = list(result.scalars().all())
         
         return users, total
+
+
+async def get_filtered_users(
+    university: Optional[str] = None,
+    admission_type: Optional[str] = None,
+    page: int = 1,
+    size: int = 10,
+) -> Tuple[List[User], int]:
+    """
+    Получить список пользователей с фильтрацией по университету
+    и типу поступления
+    
+    Args:
+        university: Университет для фильтрации
+        admission_type: Тип поступления для фильтрации
+        page: Номер страницы для пагинации
+        size: Размер страницы для пагинации
+        
+    Returns:
+        Кортеж из списка пользователей и общего количества пользователей
+    """
+    async with session_scope() as session:
+        # Базовый запрос
+        query = select(User)
+        count_query = select(User)
+        
+        # Фильтрация по университету (ищем в target_universities)
+        if university:
+            query = query.where(User.target_universities.any(university))  # type: ignore
+            count_query = count_query.where(User.target_universities.any(university))  # type: ignore
+        
+        # Фильтрация по типу поступления
+        if admission_type:
+            query = query.where(User.admission_type == admission_type)  # type: ignore
+            count_query = count_query.where(User.admission_type == admission_type)  # type: ignore
+        
+        # Считаем общее количество
+        count_result = await session.execute(select(User.id).select_from(count_query.subquery()))
+        total = len(count_result.all())
+        
+        # Применяем пагинацию
+        skip = (page - 1) * size
+        query = query.offset(skip).limit(size)
+        
+        result = await session.execute(query)
+        users = list(result.scalars().all())
+        
+        return users, total

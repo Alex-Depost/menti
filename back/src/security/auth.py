@@ -14,6 +14,7 @@ from src.repository.user_repository import get_user_by_login
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/users/signin")
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/auth/users/signin", auto_error=False)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
@@ -104,3 +105,45 @@ async def get_current_mentor(token: str = Depends(oauth2_scheme)) -> Mentor:
         )
 
     return mentor
+
+
+async def get_optional_current_user(token: str = Depends(oauth2_scheme_optional)) -> Optional[User]:
+    if not token:
+        return None
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        login: str = payload.get("sub")
+        role = payload.get("role")
+
+        if login is None or role != Roles.USER:
+            return None
+            
+        user = await get_user_by_login(login)
+        if user is None or not user.is_active:
+            return None
+            
+        return user
+    except (jwt.PyJWTError, HTTPException):
+        return None
+
+
+async def get_optional_current_mentor(token: str = Depends(oauth2_scheme_optional)) -> Optional[Mentor]:
+    if not token:
+        return None
+    
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        login: str = payload.get("sub")
+        role = payload.get("role")
+
+        if login is None or role != Roles.MENTOR:
+            return None
+            
+        mentor = await get_mentor_by_login(login)
+        if mentor is None or not mentor.is_active:
+            return None
+            
+        return mentor
+    except (jwt.PyJWTError, HTTPException):
+        return None
