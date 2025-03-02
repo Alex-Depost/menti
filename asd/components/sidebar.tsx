@@ -139,7 +139,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname.startsWith("/app/students") ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
                   <Link href="/app/mentor/students" className="flex gap-3">
                     <Users className={`h-4 w-4 ${pathname.startsWith("/app/students") ? "" : "text-muted-foreground"}`} />
-                    <span>Мои студенты</span>
+                    <span>Мои отклики</span>
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

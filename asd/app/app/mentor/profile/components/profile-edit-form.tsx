@@ -15,6 +15,7 @@ import { TiptapEditor } from "@/components/ui/tiptap-editor";
 import { useRouter } from "next/navigation";
 import { FormField } from "./form-field";
 import { Notification } from "./notification";
+import { TagInput } from "./tag-input";
 
 interface ProfileEditFormProps {
     formData: MentorUpdateData;
@@ -54,8 +55,7 @@ export function ProfileEditForm({
         }
     };
 
-    const handleFreeDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const days = e.target.value.split(',').map(day => day.trim()).filter(Boolean);
+    const handleFreeDaysChange = (days: string[]) => {
         setFormData(prev => ({
             ...prev,
             free_days: days.length > 0 ? days : null
@@ -133,13 +133,24 @@ export function ProfileEditForm({
                                 error={fieldErrors.university}
                             />
                             <FormField
-                                id="title"
-                                label="Должность"
-                                value={formData.title || ""}
+                                id="admission_type"
+                                label="Тип поступления"
+                                value={formData.admission_type || ""}
                                 onChange={handleChange}
-                                placeholder="Ваша должность"
-                                error={fieldErrors.title}
-                            />
+                                error={fieldErrors.admission_type}
+                            >
+                                <select
+                                    id="admission_type"
+                                    name="admission_type"
+                                    value={formData.admission_type || ""}
+                                    onChange={handleChange}
+                                    className="w-full p-2 border rounded-md"
+                                >
+                                    <option value="">Не выбрано</option>
+                                    <option value="ЕГЭ">ЕГЭ</option>
+                                    <option value="олимпиады">Олимпиады</option>
+                                </select>
+                            </FormField>
                         </div>
 
                         <FormField
@@ -169,15 +180,25 @@ export function ProfileEditForm({
                             </FormField>
                         </div>
 
-                        <FormField
-                            id="free_days"
-                            label="Свободные дни"
-                            value={formData.free_days?.join(", ") || ""}
-                            onChange={handleFreeDaysChange}
-                            placeholder="Понедельник, Среда, Пятница (через запятую)"
-                            helpText="Укажите через запятую"
-                            error={fieldErrors.free_days}
-                        />
+                        <div className="space-y-2">
+                            <label htmlFor="free_days" className="block text-sm font-medium">
+                                Свободные дни
+                            </label>
+                            <TagInput
+                                value={formData.free_days || []}
+                                onChange={handleFreeDaysChange}
+                                suggestions={[
+                                    "Понедельник", "Вторник", "Среда", "Четверг",
+                                    "Пятница", "Суббота", "Воскресенье"
+                                ]}
+                                placeholder="Выберите дни недели"
+                                error={fieldErrors.free_days}
+                            />
+                            <p className="text-sm text-gray-500">
+                                Нажмите Enter или пробел, чтобы добавить день
+                            </p>
+                        </div>
+
                     </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">
