@@ -67,7 +67,7 @@ export function LoginForm({
             <div className="mt-4 text-center text-sm">
               Нет аккаунта?{" "}
               <Link
-                href="/auth/signup"
+                href={`/auth/signup?type=${userType}`}
                 className="underline underline-offset-4"
               >
                 Зарегистрироваться

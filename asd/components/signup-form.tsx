@@ -82,7 +82,7 @@ export function SignupForm({
             <div className="mt-4 text-center text-sm">
               Уже есть аккаунт?{" "}
               <Link
-                href="/auth/signin"
+                href={`/auth/signin?type=${userType}`}
                 className="underline underline-offset-4"
               >
                 Войти
