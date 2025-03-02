@@ -6,12 +6,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.data.base import session_scope
 from src.data.models import Request, RequestStatus, EntityType, User, Mentor
 from src.schemas.request_schemas import RequestCreate, RequestResponse
-from src.security.auth import get_current_user, get_current_mentor
+from src.security.auth import get_optional_current_user, get_optional_current_mentor
 
 
 async def get_current_user_or_mentor(
-    user: User = Depends(get_current_user, use_cache=True),
-    mentor: Mentor = Depends(get_current_mentor, use_cache=True)
+    user: User = Depends(get_optional_current_user),
+    mentor: Mentor = Depends(get_optional_current_mentor)
 ) -> Union[User, Mentor]:
     """Получить текущего пользователя или ментора."""
     if user:
@@ -35,7 +35,14 @@ async def send_request(
     request_data: RequestCreate,
     current_user: Union[User, Mentor] = Depends(get_current_user_or_mentor),
 ):
-    """Отправить заявку."""
+    """
+    Отправить заявку на менторство.
+    
+    - Пользователь может отправить заявку ментору
+    - Ментор может отправить заявку пользователю
+    - Нельзя отправить заявку самому себе
+    - Нельзя отправить заявку, если уже есть активная заявка к этому получателю
+    """
     # Определяем тип отправителя
     sender_type = EntityType.USER if isinstance(current_user, User) else EntityType.MENTOR
 
@@ -107,7 +114,12 @@ async def send_request(
 async def get_sent_requests(
     current_user: Union[User, Mentor] = Depends(get_current_user_or_mentor),
 ):
-    """Получить отправленные заявки."""
+    """
+    Получить список отправленных заявок.
+    
+    - Для пользователей: список заявок, отправленных менторам
+    - Для менторов: список заявок, отправленных пользователям
+    """
     # Определяем тип отправителя
     sender_type = EntityType.USER if isinstance(current_user, User) else EntityType.MENTOR
 
@@ -127,7 +139,12 @@ async def get_sent_requests(
 async def get_received_requests(
     current_user: Union[User, Mentor] = Depends(get_current_user_or_mentor),
 ):
-    """Получить полученные заявки."""
+    """
+    Получить список полученных заявок.
+    
+    - Для пользователей: список заявок, полученных от менторов
+    - Для менторов: список заявок, полученных от пользователей
+    """
     # Определяем тип получателя
     receiver_type = EntityType.USER if isinstance(current_user, User) else EntityType.MENTOR
 
@@ -148,7 +165,13 @@ async def approve_request(
     request_id: int,
     current_user: Union[User, Mentor] = Depends(get_current_user_or_mentor),
 ):
-    """Подтвердить заявку."""
+    """
+    Подтвердить полученную заявку.
+    
+    - Пользователь может подтвердить заявку от ментора
+    - Ментор может подтвердить заявку от пользователя
+    - Можно подтвердить только заявки в статусе "в ожидании"
+    """
     # Определяем тип получателя
     receiver_type = EntityType.USER if isinstance(current_user, User) else EntityType.MENTOR
 
@@ -183,7 +206,13 @@ async def reject_request(
     request_id: int,
     current_user: Union[User, Mentor] = Depends(get_current_user_or_mentor),
 ):
-    """Отклонить заявку."""
+    """
+    Отклонить полученную заявку.
+    
+    - Пользователь может отклонить заявку от ментора
+    - Ментор может отклонить заявку от пользователя
+    - Можно отклонить только заявки в статусе "в ожидании"
+    """
     # Определяем тип получателя
     receiver_type = EntityType.USER if isinstance(current_user, User) else EntityType.MENTOR
 
