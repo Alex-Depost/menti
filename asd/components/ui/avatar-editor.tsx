@@ -240,14 +240,7 @@ export function AvatarEditor({ open, onClose, onSave, aspectRatio = 1, initialIm
                   />
                 </div>
 
-                <div className="flex justify-between mt-4">
-                  <Button variant="outline" onClick={triggerFileInput}>
-                    Выбрать другое изображение
-                  </Button>
-                  <Button variant="destructive" onClick={() => setImgSrc('')}>
-                    Отменить
-                  </Button>
-                </div>
+                {/* Image editing controls above */}
               </div>
             </>
           )}
