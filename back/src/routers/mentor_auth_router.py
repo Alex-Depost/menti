@@ -62,6 +62,12 @@ async def get_current_user_info(
     mentor_dict = {
         "id": current_user.id,
         "name": current_user.name,
+        "university": current_user.university,
+        "title": current_user.title,
+        "telegram_link": current_user.telegram_link,
+        "age": current_user.age,
+        "email": current_user.email,
+        "description": current_user.description,
         "login": current_user.login,
         "is_active": current_user.is_active,
         "avatar_url": avatar_url,
