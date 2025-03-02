@@ -71,8 +71,10 @@ async def get_current_user_info(
         "login": current_user.login,
         "is_active": current_user.is_active,
         "avatar_url": avatar_url,
+        "free_days": current_user.free_days,
         "created_at": current_user.created_at,
-        "updated_at": current_user.updated_at
+        "updated_at": current_user.updated_at,
+        "admission_type": current_user.admission_type,
     }
 
     # Добавляем email, только если он существует
