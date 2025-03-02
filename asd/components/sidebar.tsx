@@ -162,10 +162,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
               <>
                 <SidebarMenuItem>
                   <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/settings" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                    <Link href="/app/settings" className="flex gap-3">
-                      <Settings className={`h-4 w-4 ${pathname === "/app/settings" ? "" : "text-muted-foreground"}`} />
-                      <span>Настройки</span>
-                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

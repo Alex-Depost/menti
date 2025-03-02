@@ -1,6 +1,6 @@
 import { getAuthToken } from './auth';
 
-const API_URL = 'http://localhost:8000'; // Базовый URL API - замените на свой
+const API_URL = 'http://prod-team-12-lc5mhpv9.final.prodcontest.ru:8080/'; // Базовый URL API - замените на свой
 
 export interface MentorResumeData {
   university: string;
