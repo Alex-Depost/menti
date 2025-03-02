@@ -105,7 +105,7 @@ async def update_mentor_profile(
 
     if name is not None:
         update_dict["name"] = name
-    logger.error(f"Обновление имени ментора: {name}")
+    # logger.error(f"Обновление имени ментора: {name}")
 
     if telegram_link is not None:
         update_dict["telegram_link"] = telegram_link

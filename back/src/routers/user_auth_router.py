@@ -52,7 +52,9 @@ async def get_current_user_info(
     """
     # Формируем URL для аватара
     avatar_url = None
-    if current_user.avatar_uuid:
+    avatar_uuid = None
+    if current_user.avatar_uuid: # type: ignore
+        avatar_uuid = str(current_user.avatar_uuid) # type: ignore
         base_url = str(request.base_url)
         avatar_url = urljoin(base_url, f"img/{current_user.avatar_uuid}")
     
@@ -61,7 +63,7 @@ async def get_current_user_info(
         id=current_user.id,
         name=current_user.name,
         email=current_user.email,
-        avatar_uuid=current_user.avatar_uuid,
+        avatar_uuid=current_user.avatar_uuid, # type: ignore
         telegram_link=current_user.telegram_link,
         age=current_user.age,
         is_active=current_user.is_active,

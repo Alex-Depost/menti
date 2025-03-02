@@ -48,7 +48,7 @@ class User(Base):
 
     id = cast(int, Column(Integer, primary_key=True, index=True))
     name = cast(str, Column(String(100), nullable=False))
-    login = cast(str, Column(String, nullable=True, unique=True))
+    login = cast(str, Column(String, nullable=False, unique=True))
     telegram_link = cast(str, Column(String(100), nullable=True))
     age = cast(int, Column(Integer, nullable=True))
     email = cast(str, Column(String(100), nullable=True, index=True, unique=True))
@@ -74,7 +74,7 @@ class Mentor(AsyncAttrs, Base):
 
     id = cast(int, Column(Integer, primary_key=True, index=True))
     name = cast(str, Column(String, nullable=True))
-    login = cast(str, Column(String, nullable=True, unique=True))
+    login = cast(str, Column(String, nullable=False, unique=True))
     email = cast(str, Column(String(100), nullable=True, index=True, unique=True))
     age = cast(int, Column(Integer, nullable=True))
     telegram_link = cast(str, Column(String(100), nullable=True))
