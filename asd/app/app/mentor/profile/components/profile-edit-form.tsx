@@ -1,24 +1,22 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { MentorUpdateData } from "@/app/service/mentor";
+import { Button } from "@/components/ui/button";
 import {
     Card,
-    CardHeader,
-    CardTitle,
-    CardDescription,
     CardContent,
-    CardFooter
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { TiptapEditor } from "@/components/ui/tiptap-editor";
-import { MentorData, MentorUpdateData } from "@/app/service/mentor";
+import { useRouter } from "next/navigation";
 import { FormField } from "./form-field";
 import { Notification } from "./notification";
 
 interface ProfileEditFormProps {
-    mentorData: MentorData | null;
     formData: MentorUpdateData;
     setFormData: React.Dispatch<React.SetStateAction<MentorUpdateData>>;
     error: string | null;
@@ -29,7 +27,6 @@ interface ProfileEditFormProps {
 }
 
 export function ProfileEditForm({
-    mentorData,
     formData,
     setFormData,
     error,
@@ -162,13 +159,12 @@ export function ProfileEditForm({
                                 id="description"
                                 label="Описание"
                                 value={formData.description || ""}
-                                onChange={() => {}}
+                                onChange={() => { }}
                                 error={fieldErrors.description}
                             >
                                 <TiptapEditor
                                     value={formData.description || ''}
                                     onChange={handleDescriptionChange}
-                                    placeholder="Расскажите о себе и своем опыте"
                                 />
                             </FormField>
                         </div>

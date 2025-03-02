@@ -124,7 +124,6 @@ export default function UserProfilePage() {
                 {/* Правая колонка - форма редактирования */}
                 <div className="md:col-span-2">
                     <ProfileEditForm
-                        userData={userData}
                         formData={formData}
                         setFormData={setFormData}
                         error={error}

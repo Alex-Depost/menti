@@ -1,14 +1,14 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/use-auth";
 import mentorService, { MentorData, MentorUpdateData } from "@/app/service/mentor";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 // Import components
 import { LoadingProfile } from "@/app/app/mentor/profile/components/loading-profile";
-import { ProfileInfo } from "@/app/app/mentor/profile/components/profile-info";
 import { ProfileEditForm } from "@/app/app/mentor/profile/components/profile-edit-form";
+import { ProfileInfo } from "@/app/app/mentor/profile/components/profile-info";
 
 export default function MentorProfilePage() {
     const router = useRouter();
@@ -65,7 +65,7 @@ export default function MentorProfilePage() {
         try {
             // Only include fields that have values (not null or empty string)
             const dataToSend: MentorUpdateData = {};
-            
+
             if (formData.name) dataToSend.name = formData.name;
             if (formData.telegram_link) dataToSend.telegram_link = formData.telegram_link;
             if (formData.age) dataToSend.age = formData.age;
@@ -129,7 +129,6 @@ export default function MentorProfilePage() {
                 {/* Right column - edit form */}
                 <div className="md:col-span-2">
                     <ProfileEditForm
-                        mentorData={mentorData}
                         formData={formData}
                         setFormData={setFormData}
                         error={error}

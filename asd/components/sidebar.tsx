@@ -1,5 +1,8 @@
 "use client";
 
+import { authService } from "@/app/service/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import {
   Sidebar,
   SidebarContent,
@@ -7,22 +10,18 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail
-} from "@/components/ui/sidebar"
-import { MessageSquare, Search, User, Home, Settings, LogOut, BookOpen, Users } from "lucide-react"
-import * as React from "react"
-import { Separator } from "@/components/ui/separator"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
-import { authService, AuthType } from "@/app/service/auth"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
-import { useProfile } from "@/hooks/use-profile"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
+} from "@/components/ui/sidebar";
+import { useAuth } from "@/hooks/use-auth";
+import { useProfile } from "@/hooks/use-profile";
+import { BookOpen, Home, LogOut, MessageSquare, Search, Settings, User, Users } from "lucide-react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import * as React from "react";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
-  const { isAuthenticated, authType, isUser } = useAuth();
+  const { isAuthenticated, isUser } = useAuth();
   const { profileData, displayName, initials, avatarUrl } = useProfile();
 
   const handleLogout = () => {
