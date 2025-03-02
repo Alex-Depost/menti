@@ -1,16 +1,14 @@
 import { API_URL } from "./config";
 
-export interface Mentor {
-    id: number;
-    name: string;
-    email: string;
-}
-
 export interface FeedItem {
     id: number;
-    title: string;
-    description: string;
-    mentor: Mentor;
+    login: string | null;
+    name: string;
+    title: string | null;
+    description: string | null;
+    university: string | null;
+    email: string | null;
+    avatar_url: string | null;
 }
 
 export interface FeedResponse {
@@ -28,7 +26,7 @@ const getFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
         params.append('page', page.toString());
         params.append('size', size.toString());
 
-        const url = `${API_URL}/feed/?${params.toString()}`;
+        const url = `${API_URL}/feed/all/?${params.toString()}`;
         const response = await fetch(url);
 
         if (!response.ok) {
