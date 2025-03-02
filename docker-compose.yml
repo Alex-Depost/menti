@@ -55,6 +55,8 @@ services:
       - "80:80"
     volumes:
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/fullchain.pem:/etc/nginx/fullchain.pem
+      - ./nginx/privkey.pem:/etc/nginx/privkey.pem
     networks:
       - app-network
     depends_on:
