@@ -1,10 +1,10 @@
 "use client";
 
-import React, { useState, useRef, useCallback } from 'react';
-import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
+import React, { useCallback, useRef, useState } from 'react';
+import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
 
 interface AvatarEditorProps {
@@ -12,7 +12,6 @@ interface AvatarEditorProps {
   onClose: () => void;
   onSave: (blob: Blob) => Promise<void>;
   aspectRatio?: number;
-  initialImage?: File;
 }
 
 function centerAspectCrop(
@@ -35,7 +34,7 @@ function centerAspectCrop(
   );
 }
 
-export function AvatarEditor({ open, onClose, onSave, aspectRatio = 1, initialImage }: AvatarEditorProps) {
+export function AvatarEditor({ open, onClose, onSave, aspectRatio = 1 }: AvatarEditorProps) {
   const [imgSrc, setImgSrc] = useState<string>('');
   const imgRef = useRef<HTMLImageElement>(null);
   const [crop, setCrop] = useState<Crop>();
@@ -146,7 +145,7 @@ export function AvatarEditor({ open, onClose, onSave, aspectRatio = 1, initialIm
       console.error('Error saving cropped image:', e);
       setLoading(false);
     }
-  }, [completedCrop, imgRef, onSave, onClose, rotate, scale, aspectRatio]);
+  }, [completedCrop, imgRef, onSave, onClose, rotate, scale]);
 
   const triggerFileInput = () => {
     fileInputRef.current?.click();
@@ -201,7 +200,7 @@ export function AvatarEditor({ open, onClose, onSave, aspectRatio = 1, initialIm
                     ref={imgRef}
                     alt="Crop me"
                     src={imgSrc}
-                    style={{ 
+                    style={{
                       transform: `scale(${scale}) rotate(${rotate}deg)`,
                       maxHeight: '400px',
                       maxWidth: '100%'

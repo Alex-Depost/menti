@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { authService } from "../service/auth";
-import feedService, { FeedResponse } from "../service/feed";
 import { MentorsFeedHeader } from "@/components/feed/feed-header";
 import { MentorsFeedHero } from "@/components/feed/feed-hero";
 import { MentorsFeedList } from "@/components/feed/feed-list";
+import { useCallback, useEffect, useState } from "react";
+import feedService, { FeedResponse } from "../service/feed";
 
 export default function FeedPage() {
   const [feedData, setFeedData] = useState<FeedResponse>({
@@ -19,13 +18,8 @@ export default function FeedPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    setIsAuthenticated(authService.isAuthenticated());
-  }, []);
-
-  const fetchFeed = async (page: number = currentPage) => {
+  
+  const fetchFeed = useCallback(async (page: number = currentPage) => {
     setIsLoading(true);
     try {
       const data = await feedService.getFeed(page, 10);
@@ -36,11 +30,11 @@ export default function FeedPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [currentPage]);
 
   useEffect(() => {
     fetchFeed();
-  }, []);
+  }, [fetchFeed]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -57,14 +51,13 @@ export default function FeedPage() {
   return (
     <>
       <MentorsFeedHeader
-        isAuthenticated={isAuthenticated}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         handleSearch={handleSearch}
         showFilters={showFilters}
         setShowFilters={setShowFilters}
       />
-      <MentorsFeedHero isAuthenticated={isAuthenticated} />
+      <MentorsFeedHero />
       <MentorsFeedList
         isLoading={isLoading}
         feedData={feedData}

@@ -1,11 +1,12 @@
 "use client"
 import { authService } from "@/app/service/auth";
-import { LoginForm } from "@/components/login-form"
+import { LoginForm } from "@/components/login-form";
 import { TabsAuth } from "@/components/tabs-auth";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 
-export default function SignInPage() {
+// Component that uses useSearchParams wrapped in Suspense
+function SignInContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const defaultTab = searchParams.get('type') === 'mentor' ? 'mentor' : 'user';
@@ -33,24 +34,32 @@ export default function SignInPage() {
     };
 
     return (
+        <TabsAuth
+            defaultValue={defaultTab}
+            renderUser={() => (
+                <LoginForm
+                    onFormSubmit={handleUserFormSubmit}
+                    error={userError}
+                    userType="user"
+                />
+            )}
+            renderMentor={() => (
+                <LoginForm
+                    onFormSubmit={handleMentorFormSubmit}
+                    error={mentorError}
+                    userType="mentor"
+                />
+            )}
+        />
+    );
+}
+
+export default function SignInPage() {
+    return (
         <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-            <TabsAuth
-                defaultValue={defaultTab}
-                renderUser={(isActive) => (
-                    <LoginForm
-                        onFormSubmit={handleUserFormSubmit}
-                        error={userError}
-                        userType="user"
-                    />
-                )}
-                renderMentor={(isActive) => (
-                    <LoginForm
-                        onFormSubmit={handleMentorFormSubmit}
-                        error={mentorError}
-                        userType="mentor"
-                    />
-                )}
-            />
+            <Suspense fallback={<div>Loading...</div>}>
+                <SignInContent />
+            </Suspense>
         </div>
     )
 }

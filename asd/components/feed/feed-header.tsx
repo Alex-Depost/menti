@@ -6,7 +6,6 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Filter } from "lucide-react";
 
 interface FeedHeaderProps {
-  isAuthenticated: boolean;
   searchQuery: string;
   setSearchQuery: (value: string) => void;
   handleSearch: () => void;
@@ -15,7 +14,6 @@ interface FeedHeaderProps {
 }
 
 export function MentorsFeedHeader({
-  isAuthenticated,
   searchQuery,
   setSearchQuery,
   handleSearch,

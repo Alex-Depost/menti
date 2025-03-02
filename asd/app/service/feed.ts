@@ -1,3 +1,4 @@
+import { authService } from "./auth";
 import { API_URL } from "./config";
 
 export interface FeedItem {
@@ -28,7 +29,19 @@ const getFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
         params.append('size', size.toString());
 
         const url = `${API_URL}/feed/all/?${params.toString()}`;
-        const response = await fetch(url);
+        
+        // Get auth token
+        const token = authService.getToken();
+        
+        // Prepare headers
+        const headers: HeadersInit = {};
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+        
+        const response = await fetch(url, {
+            headers
+        });
 
         if (!response.ok) {
             throw new Error(`HTTP error! Status: ${response.status}`);

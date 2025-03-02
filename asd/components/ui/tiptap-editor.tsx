@@ -17,10 +17,9 @@ import {
 interface TiptapEditorProps {
     value: string
     onChange: (value: string) => void
-    placeholder?: string
 }
 
-export function TiptapEditor({ value, onChange, placeholder }: TiptapEditorProps) {
+export function TiptapEditor({ value, onChange }: TiptapEditorProps) {
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
