@@ -28,7 +28,7 @@ setup()
 app.include_router(user_auth, prefix="/auth/users")
 app.include_router(mentor_auth, prefix="/auth/mentors")
 app.include_router(feed, prefix="/feed")
-app.include_router(avatar, prefix="")  # Префикс пустой, так как пути уже содержат /me и /img
+app.include_router(avatar, prefix="")
 
 
 # Root endpoint
