@@ -40,8 +40,8 @@ export default function MentorProfilePage() {
                         age: data.age || null,
                         description: data.description || null,
                         university: data.university || null,
-                        title: data.title || null,
-                        free_days: data.free_days || null
+                        free_days: data.free_days || null,
+                        admission_type: data.admission_type || null
                     });
                 }
             } catch (err) {

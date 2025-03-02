@@ -2,8 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Sparkles, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function UserFeedHero() {
+  const router = useRouter();
+
+  const scrollToUsers = () => {
+    const usersSection = document.getElementById('users-list');
+    if (usersSection) {
+      usersSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="bg-gradient-to-r from-blue-500/5 to-blue-500/10 border-b">
       <div className="container mx-auto px-4 py-8 md:py-12">
@@ -14,11 +24,11 @@ export function UserFeedHero() {
               Общайтесь с другими пользователями, делитесь опытом и находите новые возможности для сотрудничества
             </p>
             <div className="flex gap-3">
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={scrollToUsers}>
                 <Users className="h-4 w-4" />
                 Найти пользователей
               </Button>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => router.push("/app/mentor/profile")}>
                 <Sparkles className="h-4 w-4" />
                 Обновить профиль
               </Button>

@@ -2,8 +2,18 @@
 
 import { Button } from "@/components/ui/button";
 import { Sparkles, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function MentorsFeedHero() {
+  const router = useRouter();
+
+  const scrollToMentors = () => {
+    const mentorsSection = document.getElementById('mentors-list');
+    if (mentorsSection) {
+      mentorsSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
       <div className="container mx-auto px-4 py-8 md:py-12">
@@ -14,11 +24,11 @@ export function MentorsFeedHero() {
               Получите персональную поддержку от опытных профессионалов, которые помогут вам достичь ваших целей
             </p>
             <div className="flex gap-3">
-              <Button className="gap-2">
+              <Button className="gap-2" onClick={scrollToMentors}>
                 <Users className="h-4 w-4" />
                 Найти ментора
               </Button>
-              <Button variant="outline" className="gap-2">
+              <Button variant="outline" className="gap-2" onClick={() => router.push("/auth/signup?type=mentor")}>
                 <Sparkles className="h-4 w-4" />
                 Стать ментором
               </Button>

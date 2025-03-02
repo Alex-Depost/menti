@@ -19,6 +19,7 @@ export interface MentorData {
     university?: string;
     title?: string;
     free_days?: string[];
+    admission_type?: "ЕГЭ" | "олимпиады" | null;
 }
 
 export interface MentorUpdateData {
@@ -29,8 +30,8 @@ export interface MentorUpdateData {
     password?: string | null;
     description?: string | null;
     university?: string | null;
-    title?: string | null;
     free_days?: string[] | null;
+    admission_type?: "ЕГЭ" | "олимпиады" | null;
 }
 
 export class MentorService {
