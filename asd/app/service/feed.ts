@@ -29,16 +29,16 @@ const getMentorsFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
         params.append('size', size.toString());
 
         const url = `${API_URL}/feed/mentors/?${params.toString()}`;
-        
+
         // Get auth token
         const token = authService.getToken();
-        
+
         // Prepare headers
         const headers: HeadersInit = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         const response = await fetch(url, {
             headers
         });
@@ -68,16 +68,16 @@ const getUsersFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
         params.append('size', size.toString());
 
         const url = `${API_URL}/feed/users/?${params.toString()}`;
-        
+        console.log(API_URL);
         // Get auth token
         const token = authService.getToken();
-        
+
         // Prepare headers
         const headers: HeadersInit = {};
         if (token) {
             headers['Authorization'] = `Bearer ${token}`;
         }
-        
+
         const response = await fetch(url, {
             headers
         });
