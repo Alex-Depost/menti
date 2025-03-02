@@ -35,6 +35,11 @@ async def get_current_mentor_profile(
     # Это автоматически включит поле login из модели ментора
     mentor_display = MentorDisplay.from_orm(mentor)
     
+    # Явно устанавливаем login, чтобы избежать возврата null
+    if mentor.login:
+        mentor_display.login = mentor.login
+    
+    # Логин ментора автоматически копируется из модели через from_orm
     return mentor_display
 
 
@@ -61,4 +66,9 @@ async def get_mentor_profile(
     # Это автоматически включит поле login из модели ментора
     mentor_display = MentorDisplay.from_orm(mentor)
     
+    # Явно устанавливаем login, чтобы избежать возврата null
+    if mentor.login:
+        mentor_display.login = mentor.login
+    
+    # Логин ментора автоматически копируется из модели через from_orm
     return mentor_display
