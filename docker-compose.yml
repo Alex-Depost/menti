@@ -65,6 +65,19 @@ services:
     depends_on:
       - postgresprod
 
+  prometheus:
+    image: prom/prometheus:v2.51.1
+    container_name: prometheus
+    hostname: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+    networks:
+      - app-network
+
   # Monitoring tool
   grafana:
     image: grafana/grafana:latest
@@ -78,10 +91,14 @@ services:
       - "3002:3000"
     volumes:
       - grafana-data:/var/lib/grafana
+      - ./infrastructure/grafana/prometheus_ds.yml:/etc/grafana/provisioning/datasources/prometheus_ds.yml
+      - ./infrastructure/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
+      # - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards
+
+    depends_on:
+      - prometheus
     networks:
       - app-network
-    depends_on:
-      - postgresprod
 
   nginx:
     image: nginx:alpine

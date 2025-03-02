@@ -30,7 +30,7 @@ app.include_router(user_auth, prefix="/auth/users")
 app.include_router(mentor_auth, prefix="/auth/mentors")
 app.include_router(feed, prefix="/feed")
 app.include_router(avatar, prefix="")
-app.include_router(metrics, prefix="/metrics")
+app.include_router(metrics)
 
 # Root endpoint
 @app.get("/")
