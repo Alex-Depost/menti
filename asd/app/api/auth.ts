@@ -1,4 +1,5 @@
 import { API_URL } from "../service/config";
+import { removeNullFields } from "@/lib/utils";
 
 interface LoginResponse {
   access_token: string;
@@ -27,12 +28,15 @@ export interface MentorResume {
 
 // Функция для авторизации ментора
 export async function loginMentor(email: string, password: string): Promise<LoginResponse> {
+  // Remove null fields from the login data
+  const loginData = removeNullFields({ email, password });
+  
   const response = await fetch(`${API_URL}/auth/mentors/signin`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify(loginData),
   });
   
   if (!response.ok) {

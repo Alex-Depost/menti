@@ -1,5 +1,6 @@
 import { API_URL } from '../service/config';
 import { getAuthToken } from './auth';
+import { removeNullFields } from '@/lib/utils';
 
 export interface MentorResumeData {
   university: string;
@@ -58,13 +59,16 @@ export async function createMentorResume(resumeData: MentorResumeData) {
     throw new Error('Требуется авторизация');
   }
   
+  // Remove null fields from the data before sending
+  const cleanData = removeNullFields(resumeData);
+  
   const response = await fetch(`${API_URL}/mentors/resumes/`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(resumeData),
+    body: JSON.stringify(cleanData),
   });
   
   if (!response.ok) {
@@ -82,13 +86,16 @@ export async function updateMentorResume(resumeId: number, resumeData: Partial<M
     throw new Error('Требуется авторизация');
   }
   
+  // Remove null fields from the data before sending
+  const cleanData = removeNullFields(resumeData);
+  
   const response = await fetch(`${API_URL}/mentors/resumes/${resumeId}`, {
     method: 'PUT',
     headers: {
       'Authorization': `Bearer ${token}`,
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(resumeData),
+    body: JSON.stringify(cleanData),
   });
   
   if (!response.ok) {

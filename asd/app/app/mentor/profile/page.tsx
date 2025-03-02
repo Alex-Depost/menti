@@ -63,20 +63,7 @@ export default function MentorProfilePage() {
         setSaving(true);
 
         try {
-            // Only include fields that have values (not null or empty string)
-            const dataToSend: MentorUpdateData = {};
-
-            if (formData.name) dataToSend.name = formData.name;
-            if (formData.telegram_link) dataToSend.telegram_link = formData.telegram_link;
-            if (formData.age) dataToSend.age = formData.age;
-            if (formData.email) dataToSend.email = formData.email;
-            if (formData.password) dataToSend.password = formData.password;
-            if (formData.description) dataToSend.description = formData.description;
-            if (formData.university) dataToSend.university = formData.university;
-            if (formData.title) dataToSend.title = formData.title;
-            if (formData.free_days && formData.free_days.length > 0) dataToSend.free_days = formData.free_days;
-
-            const updatedMentor = await mentorService.updateMentorProfile(dataToSend);
+            const updatedMentor = await mentorService.updateMentorProfile(formData);
             setMentorData(updatedMentor);
             setSuccess("Профиль успешно обновлен");
         } catch (err: any) {
