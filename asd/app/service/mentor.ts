@@ -6,6 +6,9 @@ export interface MentorData {
     name: string;
     id: number;
     is_active: boolean;
+    avatar_url: string | null;
+    created_at: string;
+    updated_at: string;
 }
 
 export class MentorService {

@@ -33,10 +33,29 @@ services:
     depends_on:
       - postgres
 
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana-data:/var/lib/grafana
+    networks:
+      - app-network
+    depends_on:
+      - postgres
+
 volumes:
   postgres-data:
     driver: local
   pgadmin-data:
+    driver: local
+  grafana-data:
     driver: local
 
 networks:

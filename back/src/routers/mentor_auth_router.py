@@ -57,7 +57,9 @@ async def get_current_user_info(
         "id": current_user.id,
         "name": current_user.name,
         "is_active": current_user.is_active,
-        "avatar_url": avatar_url
+        "avatar_url": avatar_url,
+        "created_at": current_user.created_at,
+        "updated_at": current_user.updated_at
     }
     
     # Добавляем email, только если он существует
