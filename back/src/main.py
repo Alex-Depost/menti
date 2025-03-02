@@ -7,6 +7,7 @@ from src.routers.user_auth_router import router as user_auth
 from src.routers.feed_router import router as feed
 from src.routers.avatar_router import router as avatar
 from src.routers.metrics_router import router as metrics
+from src.routers.request_router import router as request_router
 from src.setup import setup
 
 app = FastAPI()
@@ -31,6 +32,7 @@ app.include_router(mentor_auth, prefix="/auth/mentors")
 app.include_router(feed, prefix="/feed")
 app.include_router(avatar, prefix="")
 app.include_router(metrics)
+app.include_router(request_router)
 
 # Root endpoint
 @app.get("/")

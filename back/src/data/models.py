@@ -102,30 +102,35 @@ class RequestStatus(str, PyEnum):
     ACCEPTED = "accepted"
     REJECTED = "rejected"
 
-# class Request(Base):
-#     """Request model for request management."""
+class EntityType(str, PyEnum):
+    """Enum for entity types in requests."""
+    USER = "user"
+    MENTOR = "mentor"
 
-#     __tablename__ = "requests"
+class Request(Base):
+    """Request model for request management."""
 
-#     id = cast(int, Column(Integer, primary_key=True, index=True))
-#     sender_id = cast(str, Column(
-#         String,
-#         ForeignKey("prod.users.id", ondelete="CASCADE"),
-#         ForeignKey("prod.mentors.id", ondelete="CASCADE"),
-#         nullable=False
-#     ))
-#     sender_type = cast(str, Column(Enum(User, Mentor), nullable=False))
-#     receiver_id = cast(str, Column(
-#         String,
-#         ForeignKey("prod.users.id", ondelete="CASCADE"),
-#         ForeignKey("prod.mentors.id", ondelete="CASCADE"),
-#         nullable=False
-#     ))
-#     message = cast(str, Column(String(500), nullable=True))
-#     receiver_type = cast(str, Column(Enum(User, Mentor), nullable=False))
-#     status = cast(str, Column(Enum(RequestStatus), nullable=False))
+    __tablename__ = "requests"
+
+    id = cast(int, Column(Integer, primary_key=True, index=True))
+    sender_id = cast(int, Column(
+        Integer,
+        ForeignKey("prod.users.id", ondelete="CASCADE"),
+        ForeignKey("prod.mentors.id", ondelete="CASCADE"),
+        nullable=False
+    ))
+    sender_type = cast(str, Column(Enum(EntityType), nullable=False))
+    receiver_id = cast(int, Column(
+        Integer,
+        ForeignKey("prod.users.id", ondelete="CASCADE"),
+        ForeignKey("prod.mentors.id", ondelete="CASCADE"),
+        nullable=False
+    ))
+    message = cast(str, Column(String(500), nullable=True))
+    receiver_type = cast(str, Column(Enum(EntityType), nullable=False))
+    status = cast(str, Column(Enum(RequestStatus), nullable=False))
     
-#     created_at = cast(datetime, Column(DateTime, default=datetime.now))
-#     updated_at = cast(
-#         datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
-#     )
+    created_at = cast(datetime, Column(DateTime, default=datetime.now))
+    updated_at = cast(
+        datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    )
