@@ -16,31 +16,31 @@ from src.security.auth import get_current_mentor
 router = APIRouter(tags=["mentors"])
 
 
-@router.get("/me", response_model=MentorDisplay)
-async def get_current_mentor_profile(
-    request: Request,
-    current_mentor: Mentor = Depends(get_current_mentor)
-):
-    """Получить профиль текущего ментора."""
-    # Получаем ментора
-    mentor = await get_mentor_by_id(current_mentor.id)
+# @router.get("/me", response_model=MentorDisplay)
+# async def get_current_mentor_profile(
+#     request: Request,
+#     current_mentor: Mentor = Depends(get_current_mentor)
+# ):
+#     """Получить профиль текущего ментора."""
+#     # Получаем ментора
+#     mentor = await get_mentor_by_id(current_mentor.id)
     
-    # Формируем URL для аватара
-    avatar_url = None
-    if mentor.avatar_uuid:
-        base_url = str(request.base_url)
-        avatar_url = urljoin(base_url, f"img/{mentor.avatar_uuid}")
+#     # Формируем URL для аватара
+#     avatar_url = None
+#     if mentor.avatar_uuid:
+#         base_url = str(request.base_url)
+#         avatar_url = urljoin(base_url, f"img/{mentor.avatar_uuid}")
     
-    # Создаем объект для ответа
-    # Это автоматически включит поле login из модели ментора
-    mentor_display = MentorDisplay.from_orm(mentor)
+#     # Создаем объект для ответа
+#     # Это автоматически включит поле login из модели ментора
+#     mentor_display = MentorDisplay.from_orm(mentor)
     
-    # Явно устанавливаем login, чтобы избежать возврата null
-    if mentor.login:
-        mentor_display.login = mentor.login
+#     # Явно устанавливаем login, чтобы избежать возврата null
+#     if mentor.login:
+#         mentor_display.login = mentor.login
     
-    # Логин ментора автоматически копируется из модели через from_orm
-    return mentor_display
+#     # Логин ментора автоматически копируется из модели через from_orm
+#     return mentor_display
 
 
 @router.get("/{mentor_id}", response_model=MentorDisplay)

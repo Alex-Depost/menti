@@ -121,4 +121,5 @@ async def update_mentor_profile(
         created_at=updated_mentor.created_at,
         updated_at=updated_mentor.updated_at,
         free_days=updated_mentor.free_days,
+        admission_type=updated_mentor.admission_type,
     )

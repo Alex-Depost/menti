@@ -252,6 +252,7 @@ class MentorDisplay(BaseModel):
     description: Optional[str] = Field(None, min_length=10, max_length=300)
     university: Optional[str] = Field(None, min_length=2, max_length=50)
     title: Optional[str] = None
+    admission_type: Optional[AdmissionType] = None
     free_days: Optional[List[DayOfWeek]] = None
     
     @validator('telegram_link')
@@ -277,6 +278,7 @@ class MentorUpdateSchema(BaseModel):
     description: Optional[str] = Field(None, min_length=10, max_length=300)
     university: Optional[str] = Field(None, min_length=2, max_length=50)
     title: Optional[str] = None
+    admission_type: Optional[AdmissionType] = None
     free_days: Optional[List[DayOfWeek]] = None
     
     @validator('password')
