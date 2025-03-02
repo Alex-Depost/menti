@@ -3,17 +3,16 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { AuthType } from "@/app/service/auth";
 import mentorService, { MentorData, MentorUpdateData } from "@/app/service/mentor";
 
-// Импортируем созданные компоненты
-import { LoadingProfile } from "./components/loading-profile";
-import { ProfileInfo } from "./components/profile-info";
-import { ProfileEditForm } from "./components/profile-edit-form";
+// Import components
+import { LoadingProfile } from "@/app/app/mentor/profile/components/loading-profile";
+import { ProfileInfo } from "@/app/app/mentor/profile/components/profile-info";
+import { ProfileEditForm } from "@/app/app/mentor/profile/components/profile-edit-form";
 
 export default function MentorProfilePage() {
     const router = useRouter();
-    const { isAuthenticated, authType } = useAuth();
+    const { isAuthenticated, isUser } = useAuth();
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [uploadingAvatar, setUploadingAvatar] = useState(false);
@@ -25,21 +24,24 @@ export default function MentorProfilePage() {
 
     useEffect(() => {
         async function loadMentorData() {
-            if (!isAuthenticated || authType !== AuthType.mentor) {
+            if (!isAuthenticated || isUser) {
                 return;
             }
 
             try {
                 const data = await mentorService.getCurrentMentor();
                 setMentorData(data);
-                // Инициализируем форму данными ментора
+                // Initialize form with mentor data
                 if (data) {
                     setFormData({
                         name: data.name || null,
                         email: data.email || null,
                         telegram_link: data.telegram_link || null,
                         age: data.age || null,
-                        description: data.description || null
+                        description: data.description || null,
+                        university: data.university || null,
+                        title: data.title || null,
+                        free_days: data.free_days || null
                     });
                 }
             } catch (err) {
@@ -51,7 +53,7 @@ export default function MentorProfilePage() {
         }
 
         loadMentorData();
-    }, [isAuthenticated, authType, router]);
+    }, [isAuthenticated, isUser, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -61,20 +63,24 @@ export default function MentorProfilePage() {
         setSaving(true);
 
         try {
-            // Удаляем пустые поля перед отправкой
+            // Only include fields that have values (not null or empty string)
             const dataToSend: MentorUpdateData = {};
-            Object.entries(formData).forEach(([key, value]) => {
-                // Проверяем, что значение не undefined, не null и не пустая строка
-                if (value !== undefined && value !== null && value !== "") {
-                    dataToSend[key as keyof MentorUpdateData] = value;
-                }
-            });
+            
+            if (formData.name) dataToSend.name = formData.name;
+            if (formData.telegram_link) dataToSend.telegram_link = formData.telegram_link;
+            if (formData.age) dataToSend.age = formData.age;
+            if (formData.email) dataToSend.email = formData.email;
+            if (formData.password) dataToSend.password = formData.password;
+            if (formData.description) dataToSend.description = formData.description;
+            if (formData.university) dataToSend.university = formData.university;
+            if (formData.title) dataToSend.title = formData.title;
+            if (formData.free_days && formData.free_days.length > 0) dataToSend.free_days = formData.free_days;
 
             const updatedMentor = await mentorService.updateMentorProfile(dataToSend);
             setMentorData(updatedMentor);
             setSuccess("Профиль успешно обновлен");
         } catch (err: any) {
-            // Проверяем, есть ли у ошибки поле fieldErrors
+            // Check if error has fieldErrors
             if (err.fieldErrors) {
                 setFieldErrors(err.fieldErrors);
                 setError("Пожалуйста, исправьте ошибки в форме");
@@ -111,7 +117,7 @@ export default function MentorProfilePage() {
             <h1 className="text-2xl font-bold mb-6">Профиль ментора</h1>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Левая колонка - информация о профиле */}
+                {/* Left column - profile info */}
                 <div className="md:col-span-1">
                     <ProfileInfo
                         mentorData={mentorData}
@@ -120,7 +126,7 @@ export default function MentorProfilePage() {
                     />
                 </div>
 
-                {/* Правая колонка - форма редактирования */}
+                {/* Right column - edit form */}
                 <div className="md:col-span-2">
                     <ProfileEditForm
                         mentorData={mentorData}

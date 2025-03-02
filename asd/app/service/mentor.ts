@@ -27,6 +27,9 @@ export interface MentorUpdateData {
     email?: string | null;
     password?: string | null;
     description?: string | null;
+    university?: string | null;
+    title?: string | null;
+    free_days?: string[] | null;
 }
 
 export class MentorService {
@@ -81,21 +84,13 @@ export class MentorService {
                 throw new Error('Не авторизован');
             }
 
-            // Преобразуем данные в формат application/x-www-form-urlencoded
-            const formData = new URLSearchParams();
-            Object.entries(data).forEach(([key, value]) => {
-                if (value !== undefined && value !== null) {
-                    formData.append(key, String(value));
-                }
-            });
-
             const response = await fetch(`${API_URL}/auth/mentors/me`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/json'
                 },
-                body: formData
+                body: JSON.stringify(data)
             });
 
             if (!response.ok) {

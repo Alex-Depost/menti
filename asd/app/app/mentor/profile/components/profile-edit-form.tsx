@@ -43,7 +43,7 @@ export function ProfileEditForm({
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
 
-        // Для числовых полей преобразуем строку в число
+        // For numeric fields, convert string to number
         if (name === "age") {
             setFormData(prev => ({
                 ...prev,
@@ -55,6 +55,14 @@ export function ProfileEditForm({
                 [name]: value || null
             }));
         }
+    };
+
+    const handleFreeDaysChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const days = e.target.value.split(',').map(day => day.trim()).filter(Boolean);
+        setFormData(prev => ({
+            ...prev,
+            free_days: days.length > 0 ? days : null
+        }));
     };
 
     const handleDescriptionChange = (value: string) => {
@@ -104,7 +112,7 @@ export function ProfileEditForm({
                                 label="Ссылка на Telegram"
                                 value={formData.telegram_link || ""}
                                 onChange={handleChange}
-                                placeholder="@username"
+                                placeholder="t.me/username или https://t.me/username"
                                 error={fieldErrors.telegram_link}
                             />
                             <FormField
@@ -115,6 +123,25 @@ export function ProfileEditForm({
                                 onChange={handleChange}
                                 placeholder="Ваш возраст"
                                 error={fieldErrors.age}
+                            />
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <FormField
+                                id="university"
+                                label="Университет"
+                                value={formData.university || ""}
+                                onChange={handleChange}
+                                placeholder="Название университета"
+                                error={fieldErrors.university}
+                            />
+                            <FormField
+                                id="title"
+                                label="Должность"
+                                value={formData.title || ""}
+                                onChange={handleChange}
+                                placeholder="Ваша должность"
+                                error={fieldErrors.title}
                             />
                         </div>
 
@@ -141,10 +168,20 @@ export function ProfileEditForm({
                                 <TiptapEditor
                                     value={formData.description || ''}
                                     onChange={handleDescriptionChange}
-                                    placeholder="Расскажите о себе, вашем опыте и специализации"
+                                    placeholder="Расскажите о себе и своем опыте"
                                 />
                             </FormField>
                         </div>
+
+                        <FormField
+                            id="free_days"
+                            label="Свободные дни"
+                            value={formData.free_days?.join(", ") || ""}
+                            onChange={handleFreeDaysChange}
+                            placeholder="Понедельник, Среда, Пятница (через запятую)"
+                            helpText="Укажите через запятую"
+                            error={fieldErrors.free_days}
+                        />
                     </div>
                 </CardContent>
                 <CardFooter className="flex justify-between">

@@ -112,7 +112,7 @@ export function ProfileEditForm({
                                 label="Ссылка на Telegram"
                                 value={formData.telegram_link || ""}
                                 onChange={handleChange}
-                                placeholder="@username"
+                                placeholder="t.me/username или https://t.me/username"
                                 error={fieldErrors.telegram_link}
                             />
                             <FormField
