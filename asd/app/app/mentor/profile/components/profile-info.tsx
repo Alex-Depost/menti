@@ -5,6 +5,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MentorData } from "@/app/service/mentor";
+import { AvatarEditor } from "@/components/ui/avatar-editor";
 
 interface ProfileInfoProps {
     mentorData: MentorData | null;
@@ -14,6 +15,8 @@ interface ProfileInfoProps {
 
 export function ProfileInfo({ mentorData, onAvatarUpload, uploadingAvatar }: ProfileInfoProps) {
     const [dragActive, setDragActive] = useState(false);
+    const [isAvatarEditorOpen, setIsAvatarEditorOpen] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const handleDrag = (e: React.DragEvent) => {
@@ -33,18 +36,38 @@ export function ProfileInfo({ mentorData, onAvatarUpload, uploadingAvatar }: Pro
         setDragActive(false);
         
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            onAvatarUpload(e.dataTransfer.files[0]);
+            const file = e.dataTransfer.files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Пожалуйста, выберите изображение');
+                return;
+            }
+            setSelectedFile(file);
+            setIsAvatarEditorOpen(true);
         }
     };
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            onAvatarUpload(e.target.files[0]);
+            const file = e.target.files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Пожалуйста, выберите изображение');
+                return;
+            }
+            setSelectedFile(file);
+            setIsAvatarEditorOpen(true);
         }
     };
 
-    const handleButtonClick = () => {
-        fileInputRef.current?.click();
+    const handleAvatarSave = async (blob: Blob) => {
+        // Преобразуем Blob в File
+        const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+        
+        // Вызываем обработчик загрузки
+        await onAvatarUpload(file);
+    };
+
+    const openAvatarEditor = () => {
+        setIsAvatarEditorOpen(true);
     };
 
     // Получаем инициалы из имени
@@ -70,7 +93,7 @@ export function ProfileInfo({ mentorData, onAvatarUpload, uploadingAvatar }: Pro
                     onDragOver={handleDrag}
                     onDrop={handleDrop}
                 >
-                    <Avatar className="h-32 w-32 mb-4 cursor-pointer hover:opacity-90 transition-opacity" onClick={handleButtonClick}>
+                    <Avatar className="h-32 w-32 mb-4 cursor-pointer hover:opacity-90 transition-opacity" onClick={openAvatarEditor}>
                         {mentorData?.avatar_url ? (
                             <AvatarImage src={mentorData.avatar_url} alt={mentorData.name} />
                         ) : null}
@@ -85,10 +108,10 @@ export function ProfileInfo({ mentorData, onAvatarUpload, uploadingAvatar }: Pro
                         accept="image/*"
                         onChange={handleFileChange}
                     />
-                    <Button 
-                        variant="outline" 
-                        size="sm" 
-                        onClick={handleButtonClick}
+                    <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={openAvatarEditor}
                         disabled={uploadingAvatar}
                         className="mb-2"
                     >
@@ -97,6 +120,14 @@ export function ProfileInfo({ mentorData, onAvatarUpload, uploadingAvatar }: Pro
                     <p className="text-xs text-muted-foreground">
                         Нажмите на аватар или перетащите изображение
                     </p>
+                    
+                    {/* Редактор аватара */}
+                    <AvatarEditor
+                        open={isAvatarEditorOpen}
+                        onClose={() => setIsAvatarEditorOpen(false)}
+                        onSave={handleAvatarSave}
+                        aspectRatio={1}
+                    />
                 </div>
 
                 <div className="space-y-4">

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useState } from "react";
 import {
     Card,
     CardHeader,
@@ -11,6 +11,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { UserData } from "@/app/service/user";
 import { AVATAR_URL } from "@/app/service/config";
+import { AvatarEditor } from "@/components/ui/avatar-editor";
 
 interface ProfileInfoProps {
     userData: UserData | null;
@@ -19,24 +20,16 @@ interface ProfileInfoProps {
 }
 
 export function ProfileInfo({ userData, onAvatarUpload, uploadingAvatar = false }: ProfileInfoProps) {
-    const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isAvatarEditorOpen, setIsAvatarEditorOpen] = useState(false);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file || !onAvatarUpload) return;
-
-        // Проверка типа файла
-        if (!file.type.startsWith('image/')) {
-            alert('Пожалуйста, выберите изображение');
-            return;
-        }
-
-        // Вызываем обработчик
-        onAvatarUpload(file);
-    };
-
-    const triggerFileInput = () => {
-        fileInputRef.current?.click();
+    const handleAvatarSave = async (blob: Blob) => {
+        if (!onAvatarUpload) return;
+        
+        // Преобразуем Blob в File
+        const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
+        
+        // Вызываем обработчик загрузки
+        await onAvatarUpload(file);
     };
     return (
         <Card>
@@ -57,21 +50,22 @@ export function ProfileInfo({ userData, onAvatarUpload, uploadingAvatar = false 
 
                     {onAvatarUpload && (
                         <>
-                            <input
-                                type="file"
-                                ref={fileInputRef}
-                                onChange={handleFileChange}
-                                accept="image/*"
-                                className="hidden"
-                            />
                             <button
                                 type="button"
-                                onClick={triggerFileInput}
+                                onClick={() => setIsAvatarEditorOpen(true)}
                                 disabled={uploadingAvatar}
                                 className="text-xs text-blue-600 hover:text-blue-800 mt-1"
                             >
                                 {uploadingAvatar ? "Загрузка..." : "Изменить аватар"}
                             </button>
+                            
+                            {/* Редактор аватара */}
+                            <AvatarEditor
+                                open={isAvatarEditorOpen}
+                                onClose={() => setIsAvatarEditorOpen(false)}
+                                onSave={handleAvatarSave}
+                                aspectRatio={1}
+                            />
                         </>
                     )}
                 </div>
