@@ -17,12 +17,13 @@ import { authService, AuthType } from "@/app/service/auth"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/hooks/use-auth"
 import { useProfile } from "@/hooks/use-profile"
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const pathname = usePathname();
   const router = useRouter();
   const { isAuthenticated, authType, isUser } = useAuth();
-  const { profileData, displayName, initials } = useProfile();
+  const { profileData, displayName, initials, avatarUrl } = useProfile();
 
   const handleLogout = () => {
     authService.logout();
@@ -34,15 +35,20 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent className="px-4 py-6 space-y-6">
         {isAuthenticated ? (
           <div className="flex flex-col items-center text-center px-4 py-6">
-            <div className="h-20 w-20 rounded-full bg-gradient-to-r from-primary/20 to-primary/30 flex items-center justify-center text-primary text-xl font-bold mb-4 ring-4 ring-background shadow-sm">
-              {initials}
-            </div>
+            <Avatar className="h-20 w-20 mb-4 ring-4 ring-background shadow-sm">
+              {avatarUrl ? (
+                <AvatarImage src={avatarUrl} alt={displayName} />
+              ) : null}
+              <AvatarFallback className="bg-gradient-to-r from-primary/20 to-primary/30 text-primary text-xl font-bold">
+                {initials}
+              </AvatarFallback>
+            </Avatar>
             <h3 className="text-lg font-bold text-foreground mb-1">{displayName}</h3>
             <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold text-primary bg-primary/10 border-primary/20">
               {isUser ? 'Пользователь' : 'Ментор'}
             </span>
-            {profileData?.email && (
-              <span className="text-xs text-muted-foreground mt-1">{profileData.email}</span>
+            {profileData?.login && (
+              <span className="text-xs text-muted-foreground mt-1">{profileData.login}</span>
             )}
           </div>
         ) : (
@@ -139,9 +145,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/profile" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <Link href="/app/profile" className="flex gap-3">
-                    <User className={`h-4 w-4 ${pathname === "/app/profile" ? "" : "text-muted-foreground"}`} />
+                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/mentor/profile" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <Link href="/app/mentor/profile" className="flex gap-3">
+                    <User className={`h-4 w-4 ${pathname === "/app/mentor/profile" ? "" : "text-muted-foreground"}`} />
                     <span>Профиль</span>
                   </Link>
                 </SidebarMenuButton>

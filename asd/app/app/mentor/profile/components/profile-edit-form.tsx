@@ -13,14 +13,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { TiptapEditor } from "@/components/ui/tiptap-editor";
-import { UserData, UserUpdateData } from "@/app/service/user";
+import { MentorData, MentorUpdateData } from "@/app/service/mentor";
 import { FormField } from "./form-field";
 import { Notification } from "./notification";
 
 interface ProfileEditFormProps {
-    userData: UserData | null;
-    formData: UserUpdateData;
-    setFormData: React.Dispatch<React.SetStateAction<UserUpdateData>>;
+    mentorData: MentorData | null;
+    formData: MentorUpdateData;
+    setFormData: React.Dispatch<React.SetStateAction<MentorUpdateData>>;
     error: string | null;
     success: string | null;
     saving: boolean;
@@ -29,7 +29,7 @@ interface ProfileEditFormProps {
 }
 
 export function ProfileEditForm({
-    userData,
+    mentorData,
     formData,
     setFormData,
     error,
@@ -55,14 +55,6 @@ export function ProfileEditForm({
                 [name]: value || null
             }));
         }
-    };
-
-    const handleTargetUniversitiesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const universities = e.target.value.split(',').map(uni => uni.trim()).filter(Boolean);
-        setFormData(prev => ({
-            ...prev,
-            target_universities: universities.length > 0 ? universities : null
-        }));
     };
 
     const handleDescriptionChange = (value: string) => {
@@ -149,40 +141,8 @@ export function ProfileEditForm({
                                 <TiptapEditor
                                     value={formData.description || ''}
                                     onChange={handleDescriptionChange}
-                                    placeholder="Расскажите о себе"
+                                    placeholder="Расскажите о себе, вашем опыте и специализации"
                                 />
-                            </FormField>
-                        </div>
-
-                        <FormField
-                            id="target_universities"
-                            label="Целевые университеты"
-                            value={formData.target_universities?.join(", ") || ""}
-                            onChange={handleTargetUniversitiesChange}
-                            placeholder="МГУ, МФТИ, ВШЭ (через запятую)"
-                            helpText="Укажите через запятую"
-                            error={fieldErrors.target_universities}
-                        />
-
-                        <div className="space-y-2">
-                            <FormField
-                                id="admission_type"
-                                label="Тип поступления"
-                                value={formData.admission_type || ""}
-                                onChange={handleChange}
-                                error={fieldErrors.admission_type}
-                            >
-                                <select
-                                    id="admission_type"
-                                    name="admission_type"
-                                    value={formData.admission_type || ""}
-                                    onChange={handleChange}
-                                    className="w-full p-2 border rounded-md"
-                                >
-                                    <option value="">Не выбрано</option>
-                                    <option value="ЕГЭ">ЕГЭ</option>
-                                    <option value="олимпиады">Олимпиады</option>
-                                </select>
                             </FormField>
                         </div>
                     </div>

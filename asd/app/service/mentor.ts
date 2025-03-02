@@ -1,14 +1,32 @@
 import { authService } from "./auth";
-import { API_URL } from "./config";
+import { API_URL, AVATAR_URL } from "./config";
+import { uploadAvatar as apiUploadAvatar } from "@/app/api/profile";
 
 export interface MentorData {
     email: string;
     name: string;
     id: number;
     is_active: boolean;
-    avatar_url: string | null;
-    created_at: string;
-    updated_at: string;
+    login?: string;
+    avatar_uuid?: string;
+    avatar_url?: string;
+    telegram_link?: string;
+    age?: number;
+    created_at?: string;
+    updated_at?: string;
+    description?: string;
+    university?: string;
+    title?: string;
+    free_days?: string[];
+}
+
+export interface MentorUpdateData {
+    name?: string | null;
+    telegram_link?: string | null;
+    age?: number | null;
+    email?: string | null;
+    password?: string | null;
+    description?: string | null;
 }
 
 export class MentorService {
@@ -27,10 +45,88 @@ export class MentorService {
                 throw new Error('Failed to fetch mentor data');
             }
 
-            return await response.json();
+            const mentorData = await response.json();
+            
+            // Если у ментора есть avatar_uuid, но нет avatar_url, добавляем его
+            if (mentorData.avatar_uuid && !mentorData.avatar_url) {
+                mentorData.avatar_url = `${AVATAR_URL}/${mentorData.avatar_uuid}`;
+            }
+
+            return mentorData;
         } catch (error) {
             console.error('Error fetching mentor data:', error);
             return null;
+        }
+    }
+
+    async uploadAvatar(file: File): Promise<MentorData> {
+        try {
+            // Используем функцию из API для загрузки аватара
+            await apiUploadAvatar(file);
+            
+            // Получаем обновленные данные ментора
+            const mentorData = await this.getCurrentMentor() as MentorData;
+            
+            return mentorData;
+        } catch (error) {
+            console.error('Error uploading avatar:', error);
+            throw error;
+        }
+    }
+
+    async updateMentorProfile(data: MentorUpdateData): Promise<MentorData> {
+        try {
+            const token = authService.getToken();
+            if (!token) {
+                throw new Error('Не авторизован');
+            }
+
+            // Преобразуем данные в формат application/x-www-form-urlencoded
+            const formData = new URLSearchParams();
+            Object.entries(data).forEach(([key, value]) => {
+                if (value !== undefined && value !== null) {
+                    formData.append(key, String(value));
+                }
+            });
+
+            const response = await fetch(`${API_URL}/auth/mentors/me`, {
+                method: 'PATCH',
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                
+                // Handle complex error structure
+                if (errorData.detail && Array.isArray(errorData.detail)) {
+                    // Extract field-specific errors
+                    const fieldErrors: Record<string, string> = {};
+                    const errorMessages = errorData.detail.map((error: any) => {
+                        // Get the field name from the location path
+                        if (error.loc && error.loc.length > 1) {
+                            const fieldName = error.loc[1];
+                            fieldErrors[fieldName] = error.msg;
+                        }
+                        return error.msg;
+                    });
+                    
+                    // Create a structured error object with both message and field errors
+                    const structuredError: any = new Error(errorMessages.join(', '));
+                    structuredError.fieldErrors = fieldErrors;
+                    throw structuredError;
+                }
+                
+                throw new Error(typeof errorData.detail === 'string' ? errorData.detail : 'Ошибка при обновлении профиля');
+            }
+
+            return await response.json();
+        } catch (error) {
+            console.error('Error updating mentor profile:', error);
+            throw error;
         }
     }
 }

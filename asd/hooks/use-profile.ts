@@ -9,6 +9,9 @@ export type ProfileData = {
   name: string;
   id: number;
   is_active: boolean;
+  login?: string;
+  avatar_uuid?: string;
+  avatar_url?: string | null;
 };
 
 export function useProfile() {
@@ -61,12 +64,14 @@ export function useProfile() {
   // Получаем имя и инициалы для отображения
   const displayName = profileData?.name || "Пользователь";
   const initials = profileData ? getInitials(profileData.name) : "ПП";
+  const avatarUrl = profileData?.avatar_url;
 
   return {
     profileData,
     loading,
     error,
     displayName,
-    initials
+    initials,
+    avatarUrl
   };
 }

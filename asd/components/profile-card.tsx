@@ -2,9 +2,10 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { useProfile } from "@/hooks/use-profile";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
 export function ProfileCard() {
-  const { profileData, loading, error } = useProfile();
+  const { profileData, loading, error, initials, avatarUrl } = useProfile();
 
   if (loading) {
     return (
@@ -52,6 +53,16 @@ export function ProfileCard() {
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
+        <div className="flex flex-col items-center mb-4">
+          <Avatar className="w-24 h-24 mb-2">
+            {avatarUrl ? (
+              <AvatarImage src={avatarUrl} alt={profileData.name || "Аватар пользователя"} />
+            ) : null}
+            <AvatarFallback className="bg-gradient-to-r from-primary/20 to-primary/30 text-primary text-xl font-bold">
+              {initials}
+            </AvatarFallback>
+          </Avatar>
+        </div>
         <CardTitle className="text-center">Профиль пользователя</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
