@@ -11,6 +11,7 @@ from sqlalchemy import (
     Integer,
     MetaData,
     String,
+    ForeignKey,
 )
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.ext.asyncio import AsyncAttrs
@@ -94,3 +95,37 @@ class Mentor(AsyncAttrs, Base):
 
     def __repr__(self):
         return f"<Mentor(id={self.id}, email={self.email})>"
+
+class RequestStatus(str, PyEnum):
+    """Enum for request status."""
+    PENDING = "pending"
+    ACCEPTED = "accepted"
+    REJECTED = "rejected"
+
+# class Request(Base):
+#     """Request model for request management."""
+
+#     __tablename__ = "requests"
+
+#     id = cast(int, Column(Integer, primary_key=True, index=True))
+#     sender_id = cast(str, Column(
+#         String,
+#         ForeignKey("prod.users.id", ondelete="CASCADE"),
+#         ForeignKey("prod.mentors.id", ondelete="CASCADE"),
+#         nullable=False
+#     ))
+#     sender_type = cast(str, Column(Enum(User, Mentor), nullable=False))
+#     receiver_id = cast(str, Column(
+#         String,
+#         ForeignKey("prod.users.id", ondelete="CASCADE"),
+#         ForeignKey("prod.mentors.id", ondelete="CASCADE"),
+#         nullable=False
+#     ))
+#     message = cast(str, Column(String(500), nullable=True))
+#     receiver_type = cast(str, Column(Enum(User, Mentor), nullable=False))
+#     status = cast(str, Column(Enum(RequestStatus), nullable=False))
+    
+#     created_at = cast(datetime, Column(DateTime, default=datetime.now))
+#     updated_at = cast(
+#         datetime, Column(DateTime, default=datetime.now, onupdate=datetime.now)
+#     )
