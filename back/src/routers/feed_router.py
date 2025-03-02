@@ -81,7 +81,7 @@ async def get_mentors_feed(
         )
     
     # Корректно вычисляем общее количество страниц
-    total_pages = max(ceil(total / size) if total > 0 else 1, 1)
+    total_pages = ceil(total / size) if total > 0 else 1
     
     return FeedResponse(
         items=items, total=total, page=page, size=size, pages=total_pages
@@ -158,7 +158,7 @@ async def get_users_feed(
         )
 
     # Корректно вычисляем общее количество страниц
-    total_pages = max(ceil(total / size) if total > 0 else 1, 1)
+    total_pages = ceil(total / size) if total > 0 else 1
 
     return FeedResponse(
         items=items, total=total, page=page, size=size, pages=total_pages

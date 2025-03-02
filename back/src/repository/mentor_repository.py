@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 from sqlalchemy.orm import selectinload
 from src.data.base import session_scope
 from src.data.models import Mentor
@@ -96,11 +96,12 @@ async def get_mentor_by_id(mentor_id: int) -> Mentor:
 async def get_mentors(page: int = 1, size: int = 10) -> tuple[list[Mentor], int]:
     """Получить список менторов с пагинацией."""
     async with session_scope() as session:
+        # Базовый запрос
         query = select(Mentor)
         
         # Считаем общее количество
-        count_result = await session.execute(select(Mentor.id).select_from(query.subquery()))
-        total = len(count_result.all())
+        count_result = await session.execute(select(func.count(Mentor.id)))
+        total = count_result.scalar() or 0
         
         # Применяем пагинацию
         skip = (page - 1) * size
@@ -155,23 +156,21 @@ async def get_filtered_mentors(
         Кортеж из списка менторов и общего количества менторов
     """
     async with session_scope() as session:
-        # Базовый запрос
-        query = select(Mentor)
-        count_query = select(Mentor)
-        
-        # Фильтрация по университетам
+        # Базовый запрос и условия фильтрации
+        conditions = []
         if target_universities and len(target_universities) > 0:
-            query = query.where(Mentor.university.in_(target_universities))
-            count_query = count_query.where(Mentor.university.in_(target_universities))
-        
-        # Фильтрация по типу поступления
+            conditions.append(Mentor.university.in_(target_universities))
         if admission_type:
-            query = query.where(Mentor.admission_type == admission_type)
-            count_query = count_query.where(Mentor.admission_type == admission_type)
-        
-        # Считаем общее количество
-        count_result = await session.execute(select(Mentor.id).select_from(count_query.subquery()))
-        total = len(count_result.all())
+            conditions.append(Mentor.admission_type == admission_type)
+            
+        # Создаем запрос с фильтрами
+        query = select(Mentor)
+        if conditions:
+            query = query.where(*conditions)
+            
+        # Считаем общее количество с учетом фильтров
+        count_result = await session.execute(select(func.count(Mentor.id)).where(*conditions) if conditions else select(func.count(Mentor.id)))
+        total = count_result.scalar() or 0
         
         # Применяем пагинацию
         skip = (page - 1) * size

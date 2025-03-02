@@ -1,4 +1,4 @@
-from sqlalchemy import select, update
+from sqlalchemy import select, update, func
 from src.data.base import session_scope
 from src.data.models import User
 from sqlalchemy import insert
@@ -84,11 +84,12 @@ async def update_user_profile(user_id: int, update_data: Dict[str, Any]) -> User
 async def get_users(page: int = 1, size: int = 10) -> Tuple[List[User], int]:
     """Получить список пользователей с пагинацией."""
     async with session_scope() as session:
+        # Базовый запрос
         query = select(User)
         
         # Считаем общее количество
-        count_result = await session.execute(select(User.id).select_from(query.subquery()))
-        total = len(count_result.all())
+        count_result = await session.execute(select(func.count(User.id)))
+        total = count_result.scalar() or 0
         
         # Применяем пагинацию
         skip = (page - 1) * size
@@ -120,23 +121,21 @@ async def get_filtered_users(
         Кортеж из списка пользователей и общего количества пользователей
     """
     async with session_scope() as session:
-        # Базовый запрос
-        query = select(User)
-        count_query = select(User)
-        
-        # Фильтрация по университету (ищем в target_universities)
+        # Базовый запрос и условия фильтрации
+        conditions = []
         if university:
-            query = query.where(User.target_universities.any(university))  # type: ignore
-            count_query = count_query.where(User.target_universities.any(university))  # type: ignore
-        
-        # Фильтрация по типу поступления
+            conditions.append(User.target_universities.any(university))  # type: ignore
         if admission_type:
-            query = query.where(User.admission_type == admission_type)  # type: ignore
-            count_query = count_query.where(User.admission_type == admission_type)  # type: ignore
-        
-        # Считаем общее количество
-        count_result = await session.execute(select(User.id).select_from(count_query.subquery()))
-        total = len(count_result.all())
+            conditions.append(User.admission_type == admission_type)  # type: ignore
+            
+        # Создаем запрос с фильтрами
+        query = select(User)
+        if conditions:
+            query = query.where(*conditions)
+            
+        # Считаем общее количество с учетом фильтров
+        count_result = await session.execute(select(func.count(User.id)).where(*conditions) if conditions else select(func.count(User.id)))
+        total = count_result.scalar() or 0
         
         # Применяем пагинацию
         skip = (page - 1) * size
