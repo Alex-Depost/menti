@@ -1,6 +1,5 @@
+import { API_URL } from '../service/config';
 import { getAuthToken } from './auth';
-
-const API_URL = 'http://localhost:8000'; // Базовый URL API - замените на свой
 
 export interface MentorResumeData {
   university: string;
