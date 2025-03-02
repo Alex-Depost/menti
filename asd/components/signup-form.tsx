@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { baseRegister } from "@/app/service/login"
+import { authService } from "@/app/service/auth"
 
 interface SignupFormProps extends React.ComponentProps<"div"> {
   userType: "user" | "mentor"
@@ -24,8 +24,7 @@ export function SignupForm({
   userType,
   ...props
 }: SignupFormProps) {
-  const [email, setEmail] = useState("")
-  const [password, setPassword] = useState("")
+  const [name, setName] = useState("")
   const [error, setError] = useState("")
   const router = useRouter()
 
@@ -34,9 +33,13 @@ export function SignupForm({
     setError("")
 
     try {
-      const path = userType === "mentor" ? "/auth/mentors/signup" : "/auth/users/signup"
-      await baseRegister(email, password, path)
-      router.push("/auth/signin")
+      if (userType === "mentor") {
+        await authService.registerMentor(name)
+      } else {
+        await authService.registerUser(name)
+      }
+      // Перенаправляем на главную страницу, так как токен уже установлен в authService
+      router.push("/")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Произошла ошибка при регистрации")
     }
@@ -48,33 +51,21 @@ export function SignupForm({
         <CardHeader>
           <CardTitle>Зарегистрируйте новый аккаунт {userType === "mentor" ? "ментора" : "пользователя"}</CardTitle>
           <CardDescription>
-            Введите свой E-mail ниже
+            Введите своё имя ниже
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="name">Имя</Label>
                 <Input
-                  id="email"
-                  type="email"
-                  placeholder="m@example.com"
+                  id="name"
+                  type="text"
+                  placeholder="Иван Иванов"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </div>
-              <div className="grid gap-3">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
-                <Input
-                  id="password"
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
                 />
               </div>
               {error && (

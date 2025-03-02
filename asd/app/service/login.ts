@@ -1,10 +1,10 @@
 import { API_URL } from "./config";
 
-async function baseLogin(email: string, password: string, path: string) {
+async function baseLogin(login: string, path: string) {
   const response = await fetch(`${API_URL}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ login, password: "1" })
   });
 
   if (!response.ok) {
@@ -22,11 +22,11 @@ async function baseLogin(email: string, password: string, path: string) {
   return data;
 }
 
-async function baseRegister(email: string, password: string, path: string) {
+async function baseRegister(name: string, path: string) {
   const response = await fetch(`${API_URL}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ email, password })
+    body: JSON.stringify({ name })
   });
 
   if (!response.ok) {
@@ -40,7 +40,8 @@ async function baseRegister(email: string, password: string, path: string) {
   }
 
   const data = await response.json();
-  return data;
+  console.log('Успешная регистрация:', data);
+  return data; // Возвращает { access_token: "string", token_type: "string" }
 }
 
 export { baseLogin, baseRegister };

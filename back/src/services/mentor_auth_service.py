@@ -22,28 +22,28 @@ async def generate_unique_login(name: str) -> str:
     Генерирует уникальный логин на основе имени.
     Если имя на русском, транслитерирует его.
     Если логин не уникален, добавляет число в конец.
-    
+
     Args:
         name: Имя пользователя
-        
+
     Returns:
         Уникальный логин
     """
     # Проверка на русские символы
-    if re.search('[а-яА-Я]', name):
-        login = translit(name, 'ru', reversed=True)
+    if re.search("[а-яА-Я]", name):
+        login = translit(name, "ru", reversed=True)
     else:
         login = name
-        
+
     # Делаем логин в нижнем регистре и заменяем пробелы на подчеркивания
-    login = login.lower().replace(' ', '_')
-    
+    login = login.lower().replace(" ", "_")
+
     # Проверяем, существует ли такой логин
     existing_mentor = await mentor_repo.get_mentor_by_login(login)
-    
+
     if not existing_mentor:
         return login
-    
+
     # Если логин существует, добавляем число
     counter = 1
     while True:
@@ -57,20 +57,19 @@ async def generate_unique_login(name: str) -> str:
 async def register_mentor(user_data: MentorCreationSchema):
     # Генерируем уникальный логин
     login = await generate_unique_login(user_data.name)
-    
+
     # Создаем хеш пароля
     hashed_password = get_password_hash(user_data.password)
-    
+
     # Создаем нового ментора
     new_mentor = Mentor(
-        name=user_data.name,
-        login=login,
-        password_hash=hashed_password
+        name=user_data.name,  # type: ignore
+        login=login,  # type: ignore
+        password_hash=hashed_password,  # type: ignore
     )
 
     try:
         await mentor_repo.create_mentor(new_mentor)
-        created_mentor = await mentor_repo.get_mentor_by_login(login)
         
         # Генерируем JWT токен
         access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -98,41 +97,42 @@ async def authenticate_mentor(login: str, password: str) -> tuple[Mentor, str]:
     # Create access token
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        Roles.MENTOR,
-        data={"sub": entity.login}, expires_delta=access_token_expires
+        Roles.MENTOR, data={"sub": entity.login}, expires_delta=access_token_expires
     )
 
     return entity, access_token
 
 
-async def update_mentor_profile_service(mentor_id: int, update_data: MentorUpdateSchema) -> Mentor:
+async def update_mentor_profile_service(
+    mentor_id: int, update_data: MentorUpdateSchema
+) -> Mentor:
     """
     Обновляет профиль ментора
-    
+
     Args:
         mentor_id: ID ментора
         update_data: Данные для обновления
-        
+
     Returns:
         Обновленный объект ментора
-    
+
     Raises:
         HTTPException: Если ментор не найден
     """
     # Преобразуем данные в словарь и удаляем None значения
     update_dict = update_data.dict(exclude_unset=True)
-    
+
     # Если передан пароль, хэшируем его
     if "password" in update_dict:
         update_dict["password_hash"] = get_password_hash(update_dict.pop("password"))
-    
+
     # Обновляем профиль
     updated_mentor = await mentor_repo.update_mentor_profile(mentor_id, update_dict)
-    
+
     if not updated_mentor:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Ментор не найден",
         )
-    
+
     return updated_mentor

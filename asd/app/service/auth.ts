@@ -1,4 +1,4 @@
-import { baseLogin } from "./login"
+import { baseLogin, baseRegister } from "./login"
 
 enum AuthType {
     user = "user",
@@ -6,9 +6,9 @@ enum AuthType {
     mentor = "mentor"
 }
 class AuthService {
-    async loginAsUser(username: string, password: string) {
+    async loginAsUser(login: string) {
         try {
-            const userData = await baseLogin(username, password, "/auth/users/signin");
+            const userData = await baseLogin(login, "/auth/users/signin");
             if (userData) {
                 this.setToken(userData.access_token);
                 this.setAuthType(AuthType.user);
@@ -18,15 +18,42 @@ class AuthService {
             throw error;
         }
     }
-    async loginAsMentor(username: string, password: string) {
+    
+    async loginAsMentor(login: string) {
         try {
-            const userData = await baseLogin(username, password, "/auth/mentors/signin");
+            const userData = await baseLogin(login, "/auth/mentors/signin");
             if (userData) {
                 this.setToken(userData.access_token);
                 this.setAuthType(AuthType.mentor);
             }
         } catch (error) {
             await this.logout();
+            throw error;
+        }
+    }
+    
+    async registerUser(name: string) {
+        try {
+            const userData = await baseRegister(name, "/auth/users/signup");
+            if (userData && userData.access_token) {
+                this.setToken(userData.access_token);
+                this.setAuthType(AuthType.user);
+            }
+            return userData;
+        } catch (error) {
+            throw error;
+        }
+    }
+    
+    async registerMentor(name: string) {
+        try {
+            const userData = await baseRegister(name, "/auth/mentors/signup");
+            if (userData && userData.access_token) {
+                this.setToken(userData.access_token);
+                this.setAuthType(AuthType.mentor);
+            }
+            return userData;
+        } catch (error) {
             throw error;
         }
     }

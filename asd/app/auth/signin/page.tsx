@@ -12,9 +12,9 @@ export default function SignInPage() {
 
     // State for user authentication
     const [userError, setUserError] = useState<string | null>(null);
-    const handleUserFormSubmit = async ({ email, password }: { email: string; password: string; }) => {
+    const handleUserFormSubmit = async ({ login }: { login: string }) => {
         try {
-            await authService.loginAsUser(email, password);
+            await authService.loginAsUser(login);
             router.push("/")
         } catch (error) {
             setUserError(error instanceof Error ? error.message : "Ошибка авторизации");
@@ -23,9 +23,9 @@ export default function SignInPage() {
 
     // State for mentor authentication
     const [mentorError, setMentorError] = useState<string | null>(null);
-    const handleMentorFormSubmit = async ({ email, password }: { email: string; password: string; }) => {
+    const handleMentorFormSubmit = async ({ login }: { login: string }) => {
         try {
-            await authService.loginAsMentor(email, password);
+            await authService.loginAsMentor(login);
             router.push("/")
         } catch (error) {
             setMentorError(error instanceof Error ? error.message : "Ошибка авторизации");
