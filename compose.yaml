@@ -7,7 +7,7 @@ services:
     ports:
       - "80:80"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     networks:
       - app-network
     depends_on:
@@ -32,7 +32,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST=postgres
-      - POSTGRES_PORT=5432
+      - POSTGRES_PORT=7777
       - POSTGRES_DB=app
       - JWT_SECRET_KEY=your_super_secret_key_for_jwt_tokens
       - DATABASE_URL=postgresql://postgres:postgres@postgres:5432/app
@@ -44,10 +44,6 @@ services:
       dockerfile: Dockerfile
     container_name: frontend
     restart: unless-stopped
-    volumes:
-      - ./asd:/app
-      - /app/node_modules
-      - /app/.next
     networks:
       - app-network
     environment:
@@ -58,7 +54,7 @@ services:
   # Database service
   postgres:
     image: postgres:16-alpine
-    container_name: postgres
+    container_name: postgres-prod
     hostname: postgres
     restart: unless-stopped
     environment:
@@ -69,7 +65,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     ports:
-      - "5432:5432"
+      - "7777:5432"
     networks:
       - app-network
 
