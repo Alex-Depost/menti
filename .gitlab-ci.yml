@@ -32,8 +32,8 @@ deploy_to_production:
     - scp -r ./* $SSH_ADDRESS:$REMOTE_DIR/
     
     # Run the containers
-    - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker-compose down || true"
-    - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker-compose up -d --build"
+    - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker compose down || true"
+    - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker compose up -d --build"
     
     # Clean up unused images
     - ssh $SSH_ADDRESS "docker system prune -f"
