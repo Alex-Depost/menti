@@ -1,13 +1,9 @@
-from typing import Optional
 from math import ceil
-import os
 from urllib.parse import urljoin
 
 from fastapi import APIRouter, HTTPException, Query, Request, Depends
-from sqlalchemy import func, select
 
-from src.data.base import session_scope
-from src.data.models import Mentor, User
+from src.data.models import User
 from src.repository.mentor_repository import get_mentors, get_filtered_mentors
 from src.schemas.schemas import FeedResponse, MentorFeedResponse
 from src.security.auth import get_current_user
@@ -28,9 +24,9 @@ async def get_all_mentors(
     Fetch all available mentors with pagination.
     """
     mentors, total = await get_mentors(page=page, size=size)
-    
+
     total_pages = ceil(total / size) if total > 0 else 1
-    
+
     items = []
     for mentor in mentors:
         # Формируем URL для аватара
@@ -52,11 +48,7 @@ async def get_all_mentors(
         )
 
     return FeedResponse(
-        items=items, 
-        total=total, 
-        page=page, 
-        size=size, 
-        pages=total_pages
+        items=items, total=total, page=page, size=size, pages=total_pages
     )
 
 
@@ -74,19 +66,18 @@ async def get_filtered_mentors_endpoint(
     """
     if not current_user:
         raise HTTPException(
-            status_code=401, 
-            detail="Authentication required to access filtered feed"
+            status_code=401, detail="Authentication required to access filtered feed"
         )
-    
+
     mentors, total = await get_filtered_mentors(
         target_universities=current_user.target_universities,
         admission_type=current_user.admission_type,
         page=page,
         size=size,
     )
-    
+
     total_pages = ceil(total / size) if total > 0 else 1
-    
+
     items = []
     for mentor in mentors:
         # Формируем URL для аватара
@@ -108,9 +99,5 @@ async def get_filtered_mentors_endpoint(
         )
 
     return FeedResponse(
-        items=items,
-        total=total,
-        page=page,
-        size=size,
-        pages=total_pages
+        items=items, total=total, page=page, size=size, pages=total_pages
     )
