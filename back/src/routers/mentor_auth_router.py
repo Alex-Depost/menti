@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, status, Request, HTTPException, Form, UploadFile, File
 from urllib.parse import urljoin
 from typing import Optional
+from datetime import timedelta
 
 import logging
 from src.data.models import Mentor
@@ -12,7 +13,7 @@ from src.schemas.schemas import (
     MentorUpdateSchema,
     MentorDisplay,
 )
-from src.security.auth import get_current_mentor
+from src.security.auth import get_current_mentor, create_access_token
 from src.services.mentor_auth_service import authenticate_mentor, register_mentor, update_mentor_profile_service
 
 router = APIRouter(tags=["authentication"])
@@ -21,10 +22,21 @@ logger = logging.getLogger(__name__)
 
 
 @router.post(
-    "/signup", response_model=MentorResponse, status_code=status.HTTP_201_CREATED
+    "/signup", response_model=Token, status_code=status.HTTP_201_CREATED
 )
 async def signup(user_data: MentorCreationSchema):
-    return await register_mentor(user_data)
+    result = await register_mentor(user_data)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Registration failed",
+        )
+    # Форматируем результат как токен
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        role=Roles.MENTOR, data={"sub": result.login}, expires_delta=access_token_expires
+    )
+    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @router.post("/signin", response_model=Token)

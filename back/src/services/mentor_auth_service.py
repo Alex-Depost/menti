@@ -54,7 +54,7 @@ async def generate_unique_login(name: str) -> str:
         counter += 1
 
 
-async def register_mentor(user_data: MentorCreationSchema) -> Mentor:
+async def register_mentor(user_data: MentorCreationSchema):
     # Генерируем уникальный логин
     login = await generate_unique_login(user_data.name)
     
@@ -71,7 +71,14 @@ async def register_mentor(user_data: MentorCreationSchema) -> Mentor:
     try:
         await mentor_repo.create_mentor(new_mentor)
         created_mentor = await mentor_repo.get_mentor_by_login(login)
-        return created_mentor
+        
+        # Генерируем JWT токен
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            role=Roles.MENTOR, data={"sub": login}, expires_delta=access_token_expires
+        )
+        
+        return {"access_token": access_token, "token_type": "bearer"}
     except IntegrityError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Registration failed"

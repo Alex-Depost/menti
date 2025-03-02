@@ -18,10 +18,16 @@ router = APIRouter(tags=["authentication"])
 
 
 @router.post(
-    "/signup", response_model=UserResponse, status_code=status.HTTP_201_CREATED
+    "/signup", response_model=Token, status_code=status.HTTP_201_CREATED
 )
 async def signup(user_data: UserCreationSchema):
-    return await register_user(user_data)
+    result = await register_user(user_data)
+    if not result:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Registration failed",
+        )
+    return result
 
 
 @router.post("/signin", response_model=Token)
