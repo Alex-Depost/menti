@@ -24,11 +24,11 @@ export function SidebarFloatingButton() {
     <Button
       variant="default"
       size="icon"
-      className="fixed bottom-6 left-6 z-50 rounded-full shadow-lg"
+      className="fixed bottom-6 right-6 z-50 rounded-full shadow-lg bg-primary hover:bg-primary/90 p-4 h-14 w-14 flex items-center justify-center"
       onClick={toggleSidebar}
       aria-label="Open Sidebar"
     >
-      <Menu className="h-5 w-5" />
+      <Menu className="h-6 w-6 text-white" />
     </Button>
   );
 }

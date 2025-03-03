@@ -1,7 +1,7 @@
 import os
 import json
 import httpx
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 
 class InterestRatingService:
     """Сервис для ранжирования менторов и пользователей по интересности на основе их описаний."""

@@ -25,7 +25,7 @@ export default function MentorOutgoingPage() {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<MentorshipRequestDisplay[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [contactInfo, setContactInfo] = useState<Record<number, { email: string; telegram_link?: string }>>({});
+  const [contactInfo, setContactInfo] = useState<Record<number, { email?: string; telegram_link?: string }>>({});
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -40,38 +40,39 @@ export default function MentorOutgoingPage() {
       setIsRefreshing(true);
       const data = await getOutgoingMentorshipRequestsForUI();
       setRequests(data);
-      
+
       // Reset notification state for outgoing requests
       notificationService.resetNotificationState();
-      
+
       // Extract contact info from accepted requests
-      const contactInfoMap: Record<number, { email: string; telegram_link?: string }> = {};
-      
+      const contactInfoMap: Record<number, { email?: string; telegram_link?: string }> = {};
+
       data.filter(req => req.status === 'accepted').forEach(request => {
         try {
           // Only add contact info if email exists
-          if (request.receiver && request.receiver.email) {
-            const contactInfo: { email: string; telegram_link?: string } = {
-              email: request.receiver.email
-            };
-            
+          if (request.receiver) {
+            const contactInfo: { email?: string; telegram_link?: string } = {};
+            if (request.receiver.email) {
+              contactInfo.email = request.receiver.email;
+            }
+
             if (request.receiver.telegram_link) {
               contactInfo.telegram_link = request.receiver.telegram_link;
             }
-            
+
             contactInfoMap[request.id] = contactInfo;
           } else if (request.receiver_email) {
             const contactInfo: { email: string; telegram_link?: string } = {
               email: request.receiver_email
             };
-            
+
             contactInfoMap[request.id] = contactInfo;
           }
         } catch (error) {
           console.error(`Failed to get contact info for request ${request.id}:`, error);
         }
       });
-      
+
       setContactInfo(contactInfoMap);
     } catch (err) {
       toast.error("Не удалось загрузить исходящие заявки");

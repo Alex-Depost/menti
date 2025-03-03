@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useRef, KeyboardEvent, useEffect } from 'react';
+import React, { useState, useRef, KeyboardEvent, useEffect, FormEvent } from 'react';
 import { Badge } from "@/components/ui/badge";
-import { X, ChevronDown } from "lucide-react";
+import { X, ChevronDown, Plus } from "lucide-react";
 
 interface TagInputProps {
   value: string[];
@@ -82,18 +82,32 @@ export function TagInput({
     onChange(newTags);
   };
 
+  // Handle form submission (for mobile Enter key)
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    if (inputValue.trim() !== "") {
+      addCurrentTag();
+    }
+  };
+
+  // Add current input as tag
+  const addCurrentTag = () => {
+    if (inputValue.trim() === "") return;
+    
+    if (showSuggestions && filteredSuggestions.length > 0 && activeSuggestion >= 0) {
+      // Add the selected suggestion
+      addTag(filteredSuggestions[activeSuggestion]);
+    } else {
+      // Add the current input value as a tag
+      addTag(inputValue.trim());
+    }
+  };
+
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     // Add tag only on Enter, not on Space (to allow multi-word tags)
     if (e.key === "Enter" && inputValue.trim() !== "") {
       e.preventDefault();
-      
-      if (showSuggestions && filteredSuggestions.length > 0) {
-        // Add the selected suggestion
-        addTag(filteredSuggestions[activeSuggestion]);
-      } else {
-        // Add the current input value as a tag
-        addTag(inputValue.trim());
-      }
+      addCurrentTag();
     }
     
     // Add tag on comma (for comma-separated input)
@@ -173,34 +187,57 @@ export function TagInput({
           </Badge>
         ))}
         
-        <div className="flex flex-grow items-center">
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={(e) => {
-              setInputValue(e.target.value);
-              setShowSuggestions(true);
-              setIsDropdownOpen(false);
-            }}
-            onFocus={() => {
-              setShowSuggestions(true);
-              setIsDropdownOpen(true);
-            }}
-            onKeyDown={handleKeyDown}
-            placeholder={value.length === 0 ? placeholder : ""}
-            className="flex-grow min-w-[120px] outline-none bg-transparent"
-            onClick={(e) => e.stopPropagation()}
-            // Disable input if we've reached the maximum number of tags
-            disabled={maxTags !== undefined && value.length >= maxTags}
-          />
+        <div className="flex flex-grow items-center relative">
+          <div className="flex-grow overflow-hidden pr-20" onKeyDown={(e) => {
+            if (e.key === "Enter" && inputValue.trim() !== "") {
+              e.preventDefault();
+              addCurrentTag();
+            }
+          }}>
+            <input
+              ref={inputRef}
+              type="text"
+              value={inputValue}
+              onChange={(e) => {
+                setInputValue(e.target.value);
+                setShowSuggestions(true);
+                setIsDropdownOpen(false);
+              }}
+              onFocus={() => {
+                setShowSuggestions(true);
+                setIsDropdownOpen(true);
+              }}
+              onKeyDown={handleKeyDown}
+              placeholder={value.length === 0 ? placeholder : ""}
+              className="w-full outline-none bg-transparent text-ellipsis overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+              // Disable input if we've reached the maximum number of tags
+              disabled={maxTags !== undefined && value.length >= maxTags}
+            />
+          </div>
+          
+          {/* Add button for mobile users */}
+          {inputValue.trim() !== "" && (
+            <button
+              type="button"
+              className="absolute right-8 p-1 rounded-md hover:bg-gray-100 focus:outline-none"
+              aria-label="Add tag"
+              onClick={(e) => {
+                e.preventDefault();
+                addCurrentTag();
+              }}
+            >
+              <Plus size={18} />
+            </button>
+          )}
+          
           <button
             type="button"
             onClick={(e) => {
               e.stopPropagation();
               toggleDropdown();
             }}
-            className="ml-2 p-1 rounded-md hover:bg-gray-100 focus:outline-none"
+            className="absolute right-0 p-1 rounded-md hover:bg-gray-100 focus:outline-none"
             aria-label="Show options"
           >
             <ChevronDown size={18} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />

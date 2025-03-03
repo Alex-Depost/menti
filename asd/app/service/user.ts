@@ -1,7 +1,6 @@
+import { uploadAvatar as apiUploadAvatar } from "@/app/api/profile";
 import { authService } from "./auth";
 import { API_URL, AVATAR_URL } from "./config";
-import { uploadAvatar as apiUploadAvatar } from "@/app/api/profile";
-import { removeNullFields } from "@/lib/utils";
 
 export interface UserData {
     email: string;
@@ -117,7 +116,12 @@ export class UserService {
             }
 
             return await response.json();
-        } catch (error) {
+        } catch (error: any) {
+            // If the error already has fieldErrors (from our structured error), preserve it
+            if (error.fieldErrors) {
+                throw error;
+            }
+            // Otherwise throw a generic error
             throw new Error('Ошибка при обновлении профиля');
         }
     }
