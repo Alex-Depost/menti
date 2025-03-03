@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AVATAR_URL } from "@/app/service/config";
@@ -16,7 +16,7 @@ import {
 import { toast } from "sonner";
 import { Check, X, Loader2 } from "lucide-react";
 
-export default function UserInboxPage() {
+export default function MentorInboxPage() {
   const router = useRouter();
   const { isAuthenticated, isUser } = useAuth();
   const [loading, setLoading] = useState(true);
@@ -25,7 +25,7 @@ export default function UserInboxPage() {
 
   useEffect(() => {
     async function loadRequests() {
-      if (!isAuthenticated || !isUser) {
+      if (!isAuthenticated || isUser) {
         return;
       }
 
@@ -130,7 +130,7 @@ export default function UserInboxPage() {
         <Card>
           <CardContent className="py-10">
             <div className="text-center text-muted-foreground">
-              У вас пока нет входящих заявок от менторов
+              У вас пока нет входящих заявок от пользователей
             </div>
           </CardContent>
         </Card>
