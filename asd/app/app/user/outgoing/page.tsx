@@ -1,67 +1,58 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/use-auth";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AVATAR_URL } from "@/app/service/config";
 import {
   getOutgoingMentorshipRequestsForUI,
   MentorshipRequestDisplay,
   cancelMentorshipRequest
 } from "@/app/service/mentorship";
+import { ReceiverCard } from "@/components/receiver-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useAuth } from "@/hooks/use-auth";
+import { Filter, Loader2, RefreshCw, Search } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { X, Loader2, RefreshCw } from "lucide-react";
 
 export default function UserOutgoingPage() {
   const router = useRouter();
   const { isAuthenticated, isUser } = useAuth();
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<MentorshipRequestDisplay[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [cancellingRequestId, setCancellingRequestId] = useState<number | null>(null);
 
-  useEffect(() => {
-    async function loadRequests() {
-      if (!isAuthenticated || !isUser) {
-        return;
-      }
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
 
-      try {
-        const data = await getOutgoingMentorshipRequestsForUI();
-        setRequests(data);
-      } catch (err) {
-        toast.error("Не удалось загрузить исходящие заявки");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  const loadRequests = async () => {
+    if (!isAuthenticated || !isUser) {
+      return;
     }
 
+    try {
+      setIsRefreshing(true);
+      const data = await getOutgoingMentorshipRequestsForUI();
+      setRequests(data);
+    } catch (err) {
+      toast.error("Не удалось загрузить исходящие заявки");
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     loadRequests();
   }, [isAuthenticated, isUser, router]);
 
-  // Get initials for avatar
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
-  };
-
-  // Generate a consistent pastel color based on the name
-  const generatePastelColor = (name: string) => {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    // Generate pastel color (higher lightness, lower saturation)
-    const h = hash % 360;
-    return `hsl(${h}, 70%, 85%)`;
+  const handleRefresh = () => {
+    loadRequests();
   };
 
   const handleCancel = async (requestId: number) => {
@@ -87,9 +78,40 @@ export default function UserOutgoingPage() {
     }
   };
 
+  // Filter and search functionality
+  const filteredRequests = useMemo(() => {
+    return requests.filter(request => {
+      // Status filter
+      if (statusFilter !== "all" && request.status !== statusFilter) {
+        return false;
+      }
+
+      // Search filter (case insensitive)
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          (request.receiver_name?.toLowerCase().includes(query) || false) ||
+          (request.message.toLowerCase().includes(query))
+        );
+      }
+
+      return true;
+    });
+  }, [requests, statusFilter, searchQuery]);
+
+  // Count requests by status
+  const requestCounts = useMemo(() => {
+    return {
+      all: requests.length,
+      pending: requests.filter(r => r.status === 'pending').length,
+      accepted: requests.filter(r => r.status === 'accepted').length,
+      rejected: requests.filter(r => r.status === 'rejected').length
+    };
+  }, [requests]);
+
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4 md:px-6 max-w-4xl">
+      <div className="container mx-auto py-8 px-4 md:px-8">
         <h1 className="text-2xl font-bold mb-6">Исходящие заявки</h1>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -99,95 +121,140 @@ export default function UserOutgoingPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6 max-w-4xl">
-      <h1 className="text-2xl font-bold mb-6">Исходящие заявки</h1>
+    <div className="container mx-auto py-8 px-4 md:px-8">
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <h1 className="text-2xl font-bold">Исходящие заявки</h1>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="self-start md:self-auto"
+        >
+          {isRefreshing ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Обновить
+        </Button>
+      </div>
 
-      {requests.length === 0 ? (
+      {/* Filter section */}
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-medium flex items-center">
+            <Filter className="h-4 w-4 mr-2" />
+            Фильтры
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Поиск по имени или сообщению..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="w-full md:w-48">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Статус" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    Все заявки <Badge variant="outline" className="ml-2">{requestCounts.all}</Badge>
+                  </SelectItem>
+                  <SelectItem value="pending">
+                    Ожидающие <Badge variant="outline" className="ml-2">{requestCounts.pending}</Badge>
+                  </SelectItem>
+                  <SelectItem value="accepted">
+                    Принятые <Badge variant="outline" className="ml-2">{requestCounts.accepted}</Badge>
+                  </SelectItem>
+                  <SelectItem value="rejected">
+                    Отклоненные <Badge variant="outline" className="ml-2">{requestCounts.rejected}</Badge>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {filteredRequests.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-12 flex flex-col items-center justify-center">
-            <div className="rounded-full bg-muted p-3 mb-4">
-              <RefreshCw className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium mb-2">Нет исходящих заявок</h3>
-            <p className="text-muted-foreground text-center max-w-md mb-4">
-              У вас пока нет исходящих заявок к менторам. Найдите интересующих вас менторов и отправьте им заявку на сотрудничество.
-            </p>
-            <Button
-              variant="outline"
-              onClick={() => router.push('/')}
-              className="mt-2"
-            >
-              Перейти к поиску менторов
-            </Button>
+            {requests.length === 0 ? (
+              <>
+                <div className="rounded-full bg-muted p-3 mb-4">
+                  <RefreshCw className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Нет исходящих заявок</h3>
+                <p className="text-muted-foreground text-center max-w-md mb-4">
+                  У вас пока нет исходящих заявок к менторам. Найдите интересующих вас менторов и отправьте им заявку на сотрудничество.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/')}
+                  className="mt-2"
+                >
+                  Перейти к поиску менторов
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="rounded-full bg-muted p-3 mb-4">
+                  <Filter className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Нет совпадений</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  Нет заявок, соответствующих выбранным фильтрам. Попробуйте изменить параметры поиска или фильтрации.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("all");
+                  }}
+                  className="mt-4"
+                >
+                  Сбросить фильтры
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {requests.map((request) => {
-            const avatarColor = generatePastelColor(request.receiver_name || '');
-
+          {filteredRequests.map((request) => {
             return (
-              <Card key={request.id} className="overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-12 w-12 border border-border/50">
-                      {request.receiver_avatar && (
-                        <AvatarImage
-                          src={`${AVATAR_URL}/${request.receiver_avatar}`}
-                          alt={request.receiver_name || ''}
-                        />
-                      )}
-                      <AvatarFallback
-                        className="text-primary-foreground text-sm font-medium"
-                        style={{ backgroundColor: avatarColor }}
-                      >
-                        {getInitials(request.receiver_name || '')}
-                      </AvatarFallback>
-                    </Avatar>
+              <div key={request.id} className="space-y-2">
+                <ReceiverCard request={request} showActions={false} />
 
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium">{request.receiver_name}</h3>
-                          {request.receiver_description && (
-                            <p className="text-sm font-medium text-primary mt-1">{request.receiver_description}</p>
-                          )}
-                          {/* Skip university display to avoid type errors */}
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(request.created_at).toLocaleDateString('ru-RU')}
-                        </div>
-                      </div>
-
-                      <div className="mt-4 p-4 bg-muted/30 rounded-md">
-                        <p className="text-sm whitespace-pre-wrap">{request.message}</p>
-                      </div>
-
-                      <div className="mt-4 flex justify-between items-center">
-                        <div>
-                          {request.status === 'pending' && (
-                            <div className="text-sm text-amber-600 font-medium">
-                              Ожидает ответа
-                            </div>
-                          )}
-
-                          {request.status === 'accepted' && (
-                            <div className="text-sm text-green-600 font-medium">
-                              Заявка принята
-                            </div>
-                          )}
-
-                          {request.status === 'rejected' && (
-                            <div className="text-sm text-muted-foreground">
-                              Заявка отклонена
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                {request.status === 'pending' && (
+                  <div className="mt-2 text-sm text-amber-600 font-medium text-right">
+                    Ожидает ответа
                   </div>
-                </CardContent>
-              </Card>
+                )}
+
+                {request.status === 'accepted' && (
+                  <div className="mt-2 text-sm text-green-600 font-medium text-right">
+                    Заявка принята
+                  </div>
+                )}
+
+                {request.status === 'rejected' && (
+                  <div className="mt-2 text-sm text-muted-foreground text-right">
+                    Заявка отклонена
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>

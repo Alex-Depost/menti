@@ -275,7 +275,11 @@ export default function MentorInboxPage() {
 
             return (
               <div key={request.id} className="space-y-2">
-                <SenderCard request={request} showActions={false} />
+                <SenderCard
+                  request={request}
+                  showActions={false}
+                  contactInfo={request.status === 'accepted' ? contactInfo[request.id] : undefined}
+                />
 
                 {request.status === 'pending' && (
                   <div className="flex justify-end gap-2 mt-2">
@@ -297,40 +301,6 @@ export default function MentorInboxPage() {
                       {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
                       Принять
                     </Button>
-                  </div>
-                )}
-
-                {request.status === 'accepted' && (
-                  <div className="mt-2 flex flex-col gap-2">
-                    <div className="text-sm text-green-600 font-medium">
-                      Заявка принята
-                    </div>
-                    {contactInfo[request.id] && (
-                      <div className="flex flex-col sm:flex-row gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => window.location.href = `mailto:${contactInfo[request.id].email}?subject=Менторство&body=Здравствуйте! Я принял(а) вашу заявку на менторство. Давайте обсудим детали сотрудничества.`}
-                          className="flex items-center"
-                        >
-                          <Mail className="h-4 w-4 mr-2" />
-                          Связаться по email
-                        </Button>
-                        {contactInfo[request.id].telegram_link && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => window.open(`${contactInfo[request.id].telegram_link}?text=Здравствуйте! Я принял(а) вашу заявку на менторство. Давайте обсудим детали сотрудничества.`, '_blank')}
-                            className="flex items-center"
-                          >
-                            <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
-                              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm3.93 5.84l-1.68 8.275a.75.75 0 01-1.188.386l-2.079-1.629-1.192 1.19a.75.75 0 01-1.276-.544l.001-.033V12.4l4.844-4.305a.75.75 0 00-.915-1.177l-5.947 3.968-2.242-.899a.75.75 0 01-.094-1.32l11.75-6.05a.75.75 0 011.02 1.024z" />
-                            </svg>
-                            Связаться в Telegram
-                          </Button>
-                        )}
-                      </div>
-                    )}
                   </div>
                 )}
 
