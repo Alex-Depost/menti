@@ -52,7 +52,7 @@ class InterestRatingService:
                         "Authorization": f"Bearer {self.api_key}"
                     },
                     json={
-                        "model": "gpt-3.5-turbo",
+                        "model": "gemini-1.5-pro",
                         "messages": [
                             {"role": "system", "content": "Ты помогаешь сортировать менторов по их интересности для пользователя на основе описаний."},
                             {"role": "user", "content": prompt}
