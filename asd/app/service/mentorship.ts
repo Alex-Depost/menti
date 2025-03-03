@@ -29,6 +29,16 @@ export interface MentorshipRequestResponse {
     email: string;
     avatar_url?: string;
   };
+  receiver?: {
+    id: number;
+    login: string;
+    name: string;
+    description: string;
+    target_universities?: string[];
+    admission_type?: string | null;
+    email: string | null;
+    avatar_url?: string | null;
+  };
 }
 
 // Interface for displaying mentorship requests in the UI
@@ -42,16 +52,20 @@ export interface MentorshipRequestDisplay {
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
   updated_at: string;
-  // Sender properties (now populated directly from API response)
+  // Sender properties (populated directly from API response)
   sender_name?: string;  // From sender.name
   sender_email?: string; // From sender.email
   sender_avatar?: string; // From sender.avatar_url
-  // Receiver properties (still populated from context or other API calls)
-  receiver_name?: string;
-  receiver_email?: string;
-  receiver_avatar?: string;
-  // Original sender object from API (for advanced usage if needed)
+  // Receiver properties (now populated directly from API response)
+  receiver_name?: string; // From receiver.name
+  receiver_email?: string | null; // From receiver.email
+  receiver_avatar?: string | null; // From receiver.avatar_url
+  receiver_university?: string; // For backward compatibility
+  receiver_title?: string | null; // For backward compatibility
+  receiver_description?: string; // From receiver.description
+  // Original objects from API (for advanced usage if needed)
   sender?: MentorshipRequestResponse['sender'];
+  receiver?: MentorshipRequestResponse['receiver'];
 }
 
 /**
@@ -60,6 +74,17 @@ export interface MentorshipRequestDisplay {
  * @param message Сообщение для получателя
  * @param receiverType Тип получателя (user или mentor)
  */
+// Custom error type for mentorship request errors
+export class MentorshipRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string
+  ) {
+    super(message);
+    this.name = 'MentorshipRequestError';
+  }
+}
+
 export async function sendMentorshipRequest(
   receiverId: number,
   message: string,
@@ -88,11 +113,26 @@ export async function sendMentorshipRequest(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to send mentorship request');
+      const errorDetail = errorData.detail || 'Failed to send mentorship request';
+      
+      // Check for the specific error about existing active request
+      if (errorDetail === 'У вас уже есть активная заявка к этому получателю') {
+        throw new MentorshipRequestError(
+          'У вас уже есть активная заявка к этому получателю',
+          'EXISTING_REQUEST'
+        );
+      }
+      
+      throw new Error(errorDetail);
     }
 
     return await response.json();
   } catch (error) {
+    // Re-throw MentorshipRequestError so it can be handled by the components
+    if (error instanceof MentorshipRequestError) {
+      throw error;
+    }
+    
     console.error('Failed to send mentorship request:', error);
     return null;
   }
@@ -164,15 +204,22 @@ export async function getOutgoingMentorshipRequestsForUI(): Promise<MentorshipRe
     // Map API responses to display format
     return apiResponses.map(response => ({
       ...response,
-      // Use sender information from the API response if available (for consistency with incoming requests)
-      // Note: Outgoing requests API might not include sender information
+      // Use sender information from the API response if available
       sender_name: response.sender?.name || `Sender ${response.sender_id}`,
       sender_email: response.sender?.email,
       sender_avatar: response.sender?.avatar_url,
-      // Add placeholder for receiver
-      receiver_name: `Receiver ${response.receiver_id}`,
-      // Pass the original sender object for advanced usage if needed
-      sender: response.sender
+      // Use receiver information from the API response if available
+      receiver_name: response.receiver?.name || `Receiver ${response.receiver_id}`,
+      receiver_email: response.receiver?.email,
+      receiver_avatar: response.receiver?.avatar_url,
+      // For backward compatibility, set these to null/undefined
+      receiver_university: undefined,
+      receiver_title: response.receiver?.description || null,
+      // Add the description from the receiver
+      receiver_description: response.receiver?.description,
+      // Pass the original objects for advanced usage if needed
+      sender: response.sender,
+      receiver: response.receiver
     }));
   } catch (error) {
     console.error('Failed to fetch outgoing mentorship requests for UI:', error);

@@ -48,7 +48,7 @@ export class UserService {
             }
 
             const userData = await response.json();
-            
+
             // Если у пользователя есть avatar_uuid, но нет avatar_url, добавляем его
             if (userData.avatar_uuid && !userData.avatar_url) {
                 userData.avatar_url = `${AVATAR_URL}/${userData.avatar_uuid}`;
@@ -65,10 +65,10 @@ export class UserService {
         try {
             // Используем функцию из API для загрузки аватара
             await apiUploadAvatar(file);
-            
+
             // Получаем обновленные данные пользователя
             const userData = await this.getCurrentUser() as UserData;
-            
+
             return userData;
         } catch (error) {
             console.error('Error uploading avatar:', error);
@@ -95,7 +95,7 @@ export class UserService {
 
             if (!response.ok) {
                 const errorData = await response.json();
-                
+
                 // Handle complex error structure
                 if (errorData.detail && Array.isArray(errorData.detail)) {
                     // Extract field-specific errors
@@ -108,13 +108,13 @@ export class UserService {
                         }
                         return error.msg;
                     });
-                    
+
                     // Create a structured error object with both message and field errors
                     const structuredError: any = new Error(errorMessages.join(', '));
                     structuredError.fieldErrors = fieldErrors;
                     throw structuredError;
                 }
-                
+
                 throw new Error(typeof errorData.detail === 'string' ? errorData.detail : 'Ошибка при обновлении профиля');
             }
 

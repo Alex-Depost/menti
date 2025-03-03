@@ -50,7 +50,7 @@ export default function UserInboxPage() {
 
   useEffect(() => {
     loadRequests();
-  }, [isAuthenticated, isUser, router, loadRequests]);
+  }, [isAuthenticated, isUser, router]);
 
   const handleRefresh = () => {
     loadRequests();

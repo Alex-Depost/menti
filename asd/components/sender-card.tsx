@@ -54,7 +54,6 @@ export function SenderCard({
         login: '',
         name: '',
         description: '',
-        email: '',
         avatar_url: '',
         target_universities: [] as string[]
     };
@@ -104,10 +103,6 @@ export function SenderCard({
                                 <div className="flex items-center gap-2">
                                     <h3 className="font-medium text-lg">{request.sender_name}</h3>
                                     {getStatusBadge()}
-                                </div>
-                                <div className="flex items-center text-sm text-muted-foreground mt-1">
-                                    <Mail className="h-3.5 w-3.5 mr-1.5" />
-                                    {request.sender_email}
                                 </div>
                             </div>
                             <div className="flex items-center text-sm text-muted-foreground">
