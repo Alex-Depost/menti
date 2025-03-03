@@ -137,13 +137,13 @@ export function SenderCard({
                                 className="text-sm"
                             />
                         </div>
-                        
+
                         {/* Contact buttons for accepted requests */}
                         {request.status === 'accepted' && contactInfo && (
                             <div className="mt-4 flex flex-col sm:flex-row gap-2">
                                 {contactInfo.email && (
                                     <button
-                                        onClick={() => window.open(`mailto:${contactInfo.email}?subject=Менторство&body=Здравствуйте! Я принял(а) вашу заявку на менторство. Давайте обсудим детали сотрудничества.`, '_self')}
+                                        onClick={() => window.open(`mailto:${contactInfo.email}?subject=Менторство&body=Здравствуйте! Я принял(а) вашу заявку на менторство. Давайте обсудим детали сотрудничества.`, '_blank')}
                                         className="flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-md border border-border/50 bg-background hover:bg-muted transition-colors"
                                     >
                                         <Mail className="h-4 w-4 mr-2" />
