@@ -38,9 +38,8 @@ export default function UserOutgoingPage() {
       setIsRefreshing(true);
       const data = await getOutgoingMentorshipRequestsForUI();
       setRequests(data);
-    } catch (err) {
-      toast.error("Не удалось загрузить исходящие заявки");
-      console.error(err);
+    } catch (error) {
+      setError('Ошибка при загрузке данных');
     } finally {
       setLoading(false);
       setIsRefreshing(false);
@@ -72,7 +71,6 @@ export default function UserOutgoingPage() {
       }
     } catch (error) {
       toast.error("Произошла ошибка при отмене заявки");
-      console.error(error);
     } finally {
       setCancellingRequestId(null);
     }

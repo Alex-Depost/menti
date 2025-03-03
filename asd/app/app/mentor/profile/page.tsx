@@ -44,9 +44,8 @@ export default function MentorProfilePage() {
                         admission_type: data.admission_type || null
                     });
                 }
-            } catch (err) {
-                setError("Не удалось загрузить данные профиля");
-                console.error(err);
+            } catch (error) {
+                setError('Ошибка при загрузке данных профиля');
             } finally {
                 setLoading(false);
             }

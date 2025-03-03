@@ -18,7 +18,6 @@ async function baseLogin(login: string, path: string) {
   }
 
   const data = await response.json();
-  console.log('Успешный вход:', data);
   return data;
 }
 
@@ -40,7 +39,6 @@ async function baseRegister(name: string, path: string) {
   }
 
   const data = await response.json();
-  console.log('Успешная регистрация:', data);
   return data; // Возвращает { access_token: "string", token_type: "string" }
 }
 

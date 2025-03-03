@@ -6,6 +6,7 @@ import { Slider } from '@/components/ui/slider';
 import React, { useCallback, useRef, useState } from 'react';
 import ReactCrop, { Crop, PixelCrop, centerCrop, makeAspectCrop } from 'react-image-crop';
 import 'react-image-crop/dist/ReactCrop.css';
+import { toast } from 'react-hot-toast';
 
 interface AvatarEditorProps {
   open: boolean;
@@ -128,7 +129,7 @@ export function AvatarEditor({ open, onClose, onSave, aspectRatio = 1 }: AvatarE
       canvas.toBlob(
         async (blob) => {
           if (!blob) {
-            console.error('Canvas is empty');
+            toast.error('Ошибка при загрузке аватара');
             setLoading(false);
             return;
           }
@@ -141,8 +142,8 @@ export function AvatarEditor({ open, onClose, onSave, aspectRatio = 1 }: AvatarE
         'image/jpeg',
         0.95
       );
-    } catch (e) {
-      console.error('Error saving cropped image:', e);
+    } catch (error) {
+      toast.error('Ошибка при загрузке аватара');
       setLoading(false);
     }
   }, [completedCrop, imgRef, onSave, onClose, rotate, scale]);

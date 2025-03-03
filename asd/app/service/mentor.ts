@@ -59,8 +59,7 @@ export class MentorService {
 
             return mentorData;
         } catch (error) {
-            console.error('Error fetching mentor data:', error);
-            return null;
+            throw new Error('Ошибка при получении данных ментора');
         }
     }
 
@@ -74,8 +73,7 @@ export class MentorService {
             
             return mentorData;
         } catch (error) {
-            console.error('Error uploading avatar:', error);
-            throw error;
+            throw new Error('Ошибка при загрузке аватара');
         }
     }
 
@@ -124,8 +122,7 @@ export class MentorService {
 
             return await response.json();
         } catch (error) {
-            console.error('Error updating mentor profile:', error);
-            throw error;
+            throw new Error('Ошибка при обновлении профиля');
         }
     }
 }

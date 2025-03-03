@@ -23,6 +23,7 @@ export default function FeedPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
   const [isAuthLoading, setIsAuthLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     if (auth.isAuthenticated !== undefined) {
@@ -42,7 +43,7 @@ export default function FeedPage() {
       setFeedData(data);
       setCurrentPage(data.page);
     } catch (error) {
-      console.error("Error fetching feed:", error);
+      setError('Ошибка при загрузке данных');
     } finally {
       setIsLoading(false);
     }

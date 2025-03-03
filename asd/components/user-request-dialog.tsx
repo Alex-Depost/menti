@@ -68,14 +68,7 @@ export function UserRequestDialog({
         toast.error("Не удалось отправить запрос");
       }
     } catch (error) {
-      console.error("Error sending user request:", error);
-      
-      // Handle specific error for existing request
-      if (error instanceof MentorshipRequestError && error.code === 'EXISTING_REQUEST') {
-        toast.error("У вас уже есть активная заявка к этому пользователю");
-      } else {
-        toast.error("Произошла ошибка при отправке запроса");
-      }
+      toast.error(error instanceof Error ? error.message : "Ошибка при отправке запроса");
     } finally {
       setIsSubmitting(false);
     }

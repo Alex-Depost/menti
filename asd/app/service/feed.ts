@@ -49,7 +49,6 @@ const getMentorsFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
 
         return await response.json();
     } catch (error) {
-        console.error('Failed to fetch mentors feed:', error);
         return {
             items: [],
             total: 0,
@@ -68,7 +67,6 @@ const getUsersFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
         params.append('size', size.toString());
 
         const url = `${API_URL}/feed/users/?${params.toString()}`;
-        console.log(API_URL);
         // Get auth token
         const token = authService.getToken();
 
@@ -88,7 +86,6 @@ const getUsersFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
 
         return await response.json();
     } catch (error) {
-        console.error('Failed to fetch users feed:', error);
         return {
             items: [],
             total: 0,

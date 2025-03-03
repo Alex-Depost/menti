@@ -36,9 +36,8 @@ export default function MentorOutgoingPage() {
       setIsRefreshing(true);
       const data = await getOutgoingMentorshipRequestsForUI();
       setRequests(data);
-    } catch (err) {
-      toast.error("Не удалось загрузить исходящие заявки");
-      console.error(err);
+    } catch (error) {
+      setError('Ошибка при загрузке данных');
     } finally {
       setLoading(false);
       setIsRefreshing(false);
