@@ -33,6 +33,7 @@
     "next": "15.2.1-canary.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
+    "react-hot-toast": "^2.5.2",
     "react-image-crop": "^11.0.7",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
