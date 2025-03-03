@@ -39,8 +39,7 @@ export function useProfile() {
         
         setProfileData(data);
       } catch (error) {
-        console.error("Ошибка при загрузке данных профиля:", error);
-        setError("Не удалось загрузить данные профиля");
+        setError(error instanceof Error ? error.message : "Ошибка при загрузке данных профиля");
       } finally {
         setLoading(false);
       }

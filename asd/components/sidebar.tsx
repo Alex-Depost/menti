@@ -25,6 +25,7 @@ import { useEffect, useState } from "react";
 // Navigation link that closes sidebar on mobile when clicked
 function NavLink({ href, children, className }: { href: string, children: React.ReactNode, className?: string }) {
   const { setOpenMobile, isMobile } = useSidebar();
+  const pathname = usePathname();
   
   const handleClick = () => {
     if (isMobile) {
@@ -32,8 +33,14 @@ function NavLink({ href, children, className }: { href: string, children: React.
     }
   };
 
+  const isActive = pathname === href;
+
   return (
-    <Link href={href} className={className} onClick={handleClick}>
+    <Link 
+      href={href} 
+      className={`nav-button ${isActive ? 'nav-button-active' : ''} ${className}`} 
+      onClick={handleClick}
+    >
       {children}
     </Link>
   );
@@ -145,16 +152,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ) : isUser ? (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <NavLink href="/app" className="flex gap-3">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app" ? "bg-primary/10 text-primary" : ""}`}>
+                  <NavLink href="/app" className="flex gap-3 w-full">
                     <Home className={`h-4 w-4 ${pathname === "/app" ? "" : "text-muted-foreground"}`} />
                     <span>Все менторы</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/user/inbox" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <NavLink href="/app/user/inbox" className="flex gap-3 w-full relative">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app/user/inbox" ? "bg-primary/10 text-primary" : ""}`}>
+                  <NavLink href="/app/user/inbox" className="flex gap-3 w-full">
                     <MessageSquare className={`h-4 w-4 ${pathname === "/app/user/inbox" ? "" : "text-muted-foreground"}`} />
                     <span>Входящие заявки</span>
                     {newMessagesCount > 0 && (
@@ -166,16 +173,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/user/outgoing" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <NavLink href="/app/user/outgoing" className="flex gap-3">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app/user/outgoing" ? "bg-primary/10 text-primary" : ""}`}>
+                  <NavLink href="/app/user/outgoing" className="flex gap-3 w-full">
                     <BookOpen className={`h-4 w-4 ${pathname === "/app/user/outgoing" ? "" : "text-muted-foreground"}`} />
                     <span>Исходящие заявки</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/user/profile" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <NavLink href="/app/user/profile" className="flex gap-3">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app/user/profile" ? "bg-primary/10 text-primary" : ""}`}>
+                  <NavLink href="/app/user/profile" className="flex gap-3 w-full">
                     <User className={`h-4 w-4 ${pathname === "/app/user/profile" ? "" : "text-muted-foreground"}`} />
                     <span>Профиль</span>
                   </NavLink>
@@ -185,16 +192,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           ) : (
             <>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/search" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <NavLink href="/app" className="flex gap-3">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app/search" ? "bg-primary/10 text-primary" : ""}`}>
+                  <NavLink href="/app" className="flex gap-3 w-full">
                     <Search className={`h-4 w-4 ${pathname === "/app/search" ? "" : "text-muted-foreground"}`} />
                     <span>Поиск менти</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/mentor/inbox" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <NavLink href="/app/mentor/inbox" className="flex gap-3 w-full relative">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app/mentor/inbox" ? "bg-primary/10 text-primary" : ""}`}>
+                  <NavLink href="/app/mentor/inbox" className="flex gap-3 w-full">
                     <MessageSquare className={`h-4 w-4 ${pathname === "/app/mentor/inbox" ? "" : "text-muted-foreground"}`} />
                     <span>Входящие заявки</span>
                     {newMessagesCount > 0 && (
@@ -206,16 +213,16 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/mentor/outgoing" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <NavLink href="/app/mentor/outgoing" className="flex gap-3">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app/mentor/outgoing" ? "bg-primary/10 text-primary" : ""}`}>
+                  <NavLink href="/app/mentor/outgoing" className="flex gap-3 w-full">
                     <BookOpen className={`h-4 w-4 ${pathname === "/app/mentor/outgoing" ? "" : "text-muted-foreground"}`} />
                     <span>Исходящие заявки</span>
                   </NavLink>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
-                <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/mentor/profile" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
-                  <NavLink href="/app/mentor/profile" className="flex gap-3">
+                <SidebarMenuButton asChild className={`w-full flex items-center gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app/mentor/profile" ? "bg-primary/10 text-primary" : ""}`}>
+                  <NavLink href="/app/mentor/profile" className="flex gap-3 w-full">
                     <User className={`h-4 w-4 ${pathname === "/app/mentor/profile" ? "" : "text-muted-foreground"}`} />
                     <span>Профиль</span>
                   </NavLink>
@@ -231,7 +238,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             {isAuthenticated && (
               <>
                 <SidebarMenuItem>
-                  <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg transition-all ${pathname === "/app/settings" ? "bg-primary/10 text-primary" : "hover:text-primary"}`}>
+                  <SidebarMenuButton asChild className={`w-full flex gap-3 text-sm font-medium px-3 py-2.5 rounded-lg ${pathname === "/app/settings" ? "bg-primary/10 text-primary" : ""}`}>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
                 <SidebarMenuItem>

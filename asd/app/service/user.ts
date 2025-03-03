@@ -56,8 +56,7 @@ export class UserService {
 
             return userData;
         } catch (error) {
-            console.error('Error fetching user data:', error);
-            return null;
+            throw new Error('Ошибка при получении данных пользователя');
         }
     }
 
@@ -71,8 +70,7 @@ export class UserService {
 
             return userData;
         } catch (error) {
-            console.error('Error uploading avatar:', error);
-            throw error;
+            throw new Error('Ошибка при загрузке аватара');
         }
     }
 
@@ -120,8 +118,7 @@ export class UserService {
 
             return await response.json();
         } catch (error) {
-            console.error('Error updating user profile:', error);
-            throw error;
+            throw new Error('Ошибка при обновлении профиля');
         }
     }
 }

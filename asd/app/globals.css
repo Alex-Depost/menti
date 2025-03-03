@@ -152,6 +152,63 @@
   }
 }
 
+@keyframes scaleButton {
+  from {
+    transform: scale(0.95);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+
+@keyframes subtleHover {
+  from {
+    background-position: 0% 0%;
+  }
+  to {
+    background-position: 100% 0%;
+  }
+}
+
+@keyframes iconFloat {
+  0% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-2px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@keyframes glowPulse {
+  0% {
+    box-shadow: 0 0 0 0 var(--primary);
+  }
+  70% {
+    box-shadow: 0 0 0 4px transparent;
+  }
+  100% {
+    box-shadow: 0 0 0 0 transparent;
+  }
+}
+
+@keyframes borderFlow {
+  0% {
+    border-color: var(--primary);
+    border-width: 1px;
+  }
+  50% {
+    border-color: var(--accent);
+    border-width: 2px;
+  }
+  100% {
+    border-color: var(--primary);
+    border-width: 1px;
+  }
+}
+
 @layer utilities {
   .animate-fadeIn {
     animation: fadeIn 0.6s ease-out;
@@ -159,5 +216,40 @@
   
   .animate-slideUp {
     animation: slideUp 0.5s ease-out;
+  }
+
+  .nav-button {
+    @apply relative transition-all duration-200 ease-out rounded-lg border border-transparent;
+    background-size: 200% auto;
+    background-image: linear-gradient(to right, transparent 0%, var(--accent) 50%, transparent 100%);
+  }
+
+  .nav-button:hover {
+    @apply transform;
+    animation: subtleHover 0.6s ease-in-out forwards;
+  }
+
+  .nav-button:hover svg {
+    animation: iconFloat 0.6s ease-in-out;
+  }
+
+  .nav-button:active {
+    animation: scaleButton 0.2s ease-out forwards;
+  }
+
+  .nav-button-active {
+    @apply bg-primary/10;
+    animation: borderFlow 2s ease-in-out infinite;
+  }
+
+  .nav-button-active::before {
+    content: '';
+    @apply absolute inset-0 rounded-lg;
+    animation: glowPulse 2s ease-in-out infinite;
+  }
+
+  .nav-button-active svg {
+    @apply text-primary;
+    filter: drop-shadow(0 0 2px var(--primary));
   }
 }

@@ -128,13 +128,7 @@ export async function sendMentorshipRequest(
 
     return await response.json();
   } catch (error) {
-
-    if (error instanceof MentorshipRequestError) {
-      throw error;
-    }
-
-    console.error('Failed to send mentorship request:', error);
-    return null;
+    throw new Error('Ошибка при отправке запроса на менторство');
   }
 }
 
@@ -160,8 +154,7 @@ export async function getOutgoingMentorshipRequests(): Promise<MentorshipRequest
 
     return await response.json();
   } catch (error) {
-    console.error('Failed to fetch outgoing mentorship requests:', error);
-    return [];
+    throw new Error('Ошибка при получении исходящих запросов');
   }
 }
 
@@ -187,8 +180,7 @@ export async function getIncomingMentorshipRequests(): Promise<MentorshipRequest
 
     return await response.json();
   } catch (error) {
-    console.error('Failed to fetch incoming mentorship requests:', error);
-    return [];
+    throw new Error('Ошибка при получении входящих запросов');
   }
 }
 
@@ -222,8 +214,7 @@ export async function getOutgoingMentorshipRequestsForUI(): Promise<MentorshipRe
       receiver: response.receiver
     }));
   } catch (error) {
-    console.error('Failed to fetch outgoing mentorship requests for UI:', error);
-    return [];
+    throw new Error('Ошибка при получении исходящих запросов');
   }
 }
 
@@ -248,8 +239,7 @@ export async function getIncomingMentorshipRequestsForUI(): Promise<MentorshipRe
       receiver: response.receiver
     }));
   } catch (error) {
-    console.error('Failed to fetch incoming mentorship requests for UI:', error);
-    return [];
+    throw new Error('Ошибка при получении входящих запросов');
   }
 }
 
@@ -271,8 +261,7 @@ export async function getAcceptedRequests(): Promise<MentorshipRequestResponse[]
 
     return acceptedRequests;
   } catch (error) {
-    console.error('Failed to fetch accepted requests:', error);
-    return [];
+    throw new Error('Ошибка при получении принятых запросов');
   }
 }
 
@@ -303,8 +292,7 @@ export async function cancelMentorshipRequest(requestId: number): Promise<boolea
 
     return true;
   } catch (error) {
-    console.error('Failed to cancel mentorship request:', error);
-    return false;
+    throw new Error('Ошибка при отмене запроса');
   }
 }
 
@@ -343,8 +331,7 @@ export async function acceptMentorshipRequest(requestId: number): Promise<Reques
     const data: RequestApproveResponse = await response.json();
     return data;
   } catch (error) {
-    console.error('Failed to accept mentorship request:', error);
-    return false;
+    throw new Error('Ошибка при принятии запроса');
   }
 }
 
@@ -374,8 +361,7 @@ export async function rejectMentorshipRequest(requestId: number): Promise<boolea
 
     return true;
   } catch (error) {
-    console.error('Failed to reject mentorship request:', error);
-    return false;
+    throw new Error('Ошибка при отклонении запроса');
   }
 }
 

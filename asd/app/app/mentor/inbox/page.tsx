@@ -102,8 +102,7 @@ export default function MentorInboxPage() {
         toast.error("Не удалось принять заявку");
       }
     } catch (error) {
-      toast.error("Произошла ошибка при обработке заявки");
-      console.error(error);
+      toast.error("Произошла ошибка при принятии заявки");
     } finally {
       setProcessingRequestId(null);
     }
@@ -121,8 +120,7 @@ export default function MentorInboxPage() {
         toast.error("Не удалось отклонить заявку");
       }
     } catch (error) {
-      toast.error("Произошла ошибка при обработке заявки");
-      console.error(error);
+      toast.error("Произошла ошибка при отклонении заявки");
     } finally {
       setProcessingRequestId(null);
     }

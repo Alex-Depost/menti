@@ -108,7 +108,6 @@ export default function UserOutgoingPage() {
       }
     } catch (error) {
       toast.error("Произошла ошибка при отмене заявки");
-      console.error(error);
     } finally {
       setCancellingRequestId(null);
     }
