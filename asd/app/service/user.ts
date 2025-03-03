@@ -83,16 +83,14 @@ export class UserService {
                 throw new Error('Не авторизован');
             }
 
-            // Remove null fields from the data before sending
-            const cleanData = removeNullFields(data);
-
+            // Send data as is, including null values for cleared fields
             const response = await fetch(`${API_URL}/auth/users/me`, {
                 method: 'PATCH',
                 headers: {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(cleanData)
+                body: JSON.stringify(data)
             });
 
             if (!response.ok) {

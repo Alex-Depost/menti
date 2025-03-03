@@ -62,12 +62,17 @@ export default function UserProfilePage() {
         setSaving(true);
 
         try {
-            // Удаляем пустые поля перед отправкой
+            // Подготавливаем данные для отправки
             const dataToSend: UserUpdateData = {};
             Object.entries(formData).forEach(([key, value]) => {
-                // Проверяем, что значение не undefined, не null и не пустая строка
-                if (value !== undefined && value !== null && value !== "") {
-                    dataToSend[key as keyof UserUpdateData] = value;
+                // Проверяем, что значение не undefined
+                if (value !== undefined) {
+                    // Если значение - пустая строка, отправляем null
+                    if (value === "") {
+                        dataToSend[key as keyof UserUpdateData] = null;
+                    } else {
+                        dataToSend[key as keyof UserUpdateData] = value;
+                    }
                 }
             });
 

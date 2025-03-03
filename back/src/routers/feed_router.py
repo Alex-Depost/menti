@@ -1,14 +1,17 @@
 from math import ceil
+from typing import Optional, cast
 from urllib.parse import urljoin
-from typing import List, Optional, cast, Union
 
-from fastapi import APIRouter, HTTPException, Query, Request, Depends
+from fastapi import APIRouter, Depends, Query, Request
 
-from src.data.models import User, Mentor, AdmissionType
-from src.repository.mentor_repository import get_mentors, get_filtered_mentors
-from src.repository.user_repository import get_users, get_filtered_users
+from src.data.models import AdmissionType, Mentor, User
+from src.repository.mentor_repository import get_filtered_mentors, get_mentors
+from src.repository.user_repository import get_filtered_users, get_users
 from src.schemas.schemas import FeedResponse, MentorFeedResponse, UserFeedResponse
-from src.security.auth import get_current_user, get_current_mentor, get_optional_current_user, get_optional_current_mentor
+from src.security.auth import (
+    get_optional_current_mentor,
+    get_optional_current_user,
+)
 from src.services.interest_rating import InterestRatingService
 
 router = APIRouter(
@@ -40,19 +43,19 @@ async def get_mentors_feed(
         size = 10
     elif size > 100:
         size = 100
-    
+
     items = []
     total = 0
-    
+
     # Если filtered=true и есть авторизованный пользователь, применяем фильтры
     if filtered and current_user:
         # Фильтрация по параметрам профиля
         target_universities = current_user.target_universities if current_user else []
         admission_type_value = ""
-        
+
         if current_user and current_user.admission_type:
             admission_type_value = str(current_user.admission_type)
-        
+
         mentors, total = await get_filtered_mentors(
             target_universities=target_universities,
             admission_type=admission_type_value,
@@ -62,7 +65,7 @@ async def get_mentors_feed(
     else:
         # Возвращаем всех менторов без фильтрации
         mentors, total = await get_mentors(page=1, size=1000)
-    
+
     # Подготавливаем список менторов для сортировки
     mentor_list = []
     for mentor in mentors:
@@ -71,7 +74,7 @@ async def get_mentors_feed(
         if mentor.avatar_uuid is not None:
             base_url = str(request.base_url)
             avatar_url = urljoin(base_url, f"img/{mentor.avatar_uuid}")
-            
+
         mentor_data = MentorFeedResponse(
             id=mentor.id,
             name=mentor.name,
@@ -83,34 +86,32 @@ async def get_mentors_feed(
             avatar_url=avatar_url,
         )
         mentor_list.append(mentor_data)
-    
+
     # Если есть авторизованный пользователь, сортируем менторов по интересности
     if current_user and current_user.description:
         # Подготавливаем данные для сервиса интересности
         mentors_for_ranking = [
-            {"id": m.id, "description": m.description or ""} 
-            for m in mentor_list
+            {"id": m.id, "description": m.description or ""} for m in mentor_list
         ]
-        
+
         # Получаем отсортированный список ID менторов
         ranked_mentor_ids = await interest_service.get_ranked_mentors(
-            mentors=mentors_for_ranking,
-            user_description=current_user.description
+            mentors=mentors_for_ranking, user_description=current_user.description
         )
-        
+
         # Создаем словарь для быстрого поиска менторов по ID
         mentor_dict = {m.id: m for m in mentor_list}
-        
+
         # Сортируем список менторов согласно рейтингу
         sorted_mentors = []
         for mentor_id in ranked_mentor_ids:
             if mentor_id in mentor_dict:
                 sorted_mentors.append(mentor_dict[mentor_id])
-        
+
         # Добавляем оставшихся менторов (если такие есть)
         remaining_mentors = [m for m in mentor_list if m.id not in ranked_mentor_ids]
         sorted_mentors.extend(remaining_mentors)
-        
+
         # Применяем пагинацию к отсортированному списку
         start_idx = (page - 1) * size
         end_idx = start_idx + size
@@ -120,10 +121,10 @@ async def get_mentors_feed(
         start_idx = (page - 1) * size
         end_idx = start_idx + size
         items = mentor_list[start_idx:end_idx]
-    
+
     # Корректно вычисляем общее количество страниц
     total_pages = ceil(total / size) if total > 0 else 1
-    
+
     return FeedResponse(
         items=items, total=total, page=page, size=size, pages=total_pages
     )
@@ -152,16 +153,16 @@ async def get_users_feed(
 
     items = []
     total = 0
-    
+
     # Если filtered=true и есть авторизованный ментор, применяем фильтры
     if filtered and current_mentor:
         # Фильтрация по параметрам профиля
         university = current_mentor.university
         admission_type_value = ""
-        
+
         if current_mentor and current_mentor.admission_type:
             admission_type_value = str(current_mentor.admission_type)
-        
+
         users, total = await get_filtered_users(
             university=university,
             admission_type=admission_type_value,
@@ -171,7 +172,7 @@ async def get_users_feed(
     else:
         # Возвращаем всех пользователей без фильтрации
         users, total = await get_users(page=1, size=1000)
-    
+
     # Формируем список пользователей
     user_list = []
     for user in users:
@@ -180,12 +181,12 @@ async def get_users_feed(
         if user.avatar_uuid is not None:
             base_url = str(request.base_url)
             avatar_url = urljoin(base_url, f"img/{user.avatar_uuid}")
-            
+
         # Применяем type cast к enum
         admission_type: Optional[AdmissionType] = None
         if user.admission_type:
             admission_type = cast(AdmissionType, user.admission_type)
-            
+
         user_data = UserFeedResponse(
             id=user.id,
             name=user.name,
@@ -197,34 +198,32 @@ async def get_users_feed(
             avatar_url=avatar_url,
         )
         user_list.append(user_data)
-    
+
     # Если есть авторизованный ментор, сортируем пользователей по интересности
     if current_mentor and current_mentor.description:
         # Подготавливаем данные для сервиса интересности
         users_for_ranking = [
-            {"id": u.id, "description": u.description or ""} 
-            for u in user_list
+            {"id": u.id, "description": u.description or ""} for u in user_list
         ]
-        
+
         # Получаем отсортированный список ID пользователей
         ranked_user_ids = await interest_service.get_ranked_users(
-            users=users_for_ranking,
-            mentor_description=current_mentor.description
+            users=users_for_ranking, mentor_description=current_mentor.description
         )
-        
+
         # Создаем словарь для быстрого поиска пользователей по ID
         user_dict = {u.id: u for u in user_list}
-        
+
         # Сортируем список пользователей согласно рейтингу
         sorted_users = []
         for user_id in ranked_user_ids:
             if user_id in user_dict:
                 sorted_users.append(user_dict[user_id])
-        
+
         # Добавляем оставшихся пользователей (если такие есть)
         remaining_users = [u for u in user_list if u.id not in ranked_user_ids]
         sorted_users.extend(remaining_users)
-        
+
         # Применяем пагинацию к отсортированному списку
         start_idx = (page - 1) * size
         end_idx = start_idx + size
@@ -234,7 +233,7 @@ async def get_users_feed(
         start_idx = (page - 1) * size
         end_idx = start_idx + size
         items = user_list[start_idx:end_idx]
-    
+
     # Корректно вычисляем общее количество страниц
     total_pages = ceil(total / size) if total > 0 else 1
 

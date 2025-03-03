@@ -15,6 +15,7 @@ import { TiptapEditor } from "@/components/ui/tiptap-editor";
 import { useRouter } from "next/navigation";
 import { FormField } from "./form-field";
 import { Notification } from "./notification";
+import { TagInput } from "@/app/app/mentor/profile/components/tag-input";
 
 interface ProfileEditFormProps {
     formData: UserUpdateData;
@@ -54,8 +55,7 @@ export function ProfileEditForm({
         }
     };
 
-    const handleTargetUniversitiesChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const universities = e.target.value.split(',').map(uni => uni.trim()).filter(Boolean);
+    const handleTargetUniversitiesChange = (universities: string[]) => {
         setFormData(prev => ({
             ...prev,
             target_universities: universities.length > 0 ? universities : null
@@ -150,15 +150,35 @@ export function ProfileEditForm({
                             </FormField>
                         </div>
 
-                        <FormField
-                            id="target_universities"
-                            label="Целевые университеты"
-                            value={formData.target_universities?.join(", ") || ""}
-                            onChange={handleTargetUniversitiesChange}
-                            placeholder="МГУ, МФТИ, ВШЭ (через запятую)"
-                            helpText="Укажите через запятую"
-                            error={fieldErrors.target_universities}
-                        />
+                        <div className="space-y-2">
+                            <label htmlFor="target_universities" className="block text-sm font-medium">
+                                Целевые университеты
+                                {fieldErrors.target_universities && (
+                                    <span className="text-red-500 ml-1">*</span>
+                                )}
+                            </label>
+                            <TagInput
+                                value={formData.target_universities || []}
+                                onChange={handleTargetUniversitiesChange}
+                                suggestions={[
+                                    "МГУ",
+                                    "МФТИ",
+                                    "ВШЭ",
+                                    "МГТУ им. Баумана",
+                                    "Санкт-Петербургский государственный университет",
+                                    "ИТМО",
+                                    "Новосибирский государственный университет",
+                                    "Томский государственный университет",
+                                    "РАНХиГС",
+                                    "МГИМО"
+                                ]}
+                                placeholder="Добавьте университет и нажмите Enter"
+                                error={fieldErrors.target_universities}
+                            />
+                            <p className="text-sm text-gray-500">
+                                Введите название университета и нажмите Enter. Для университетов с несколькими словами просто продолжайте печатать.
+                            </p>
+                        </div>
 
                         <div className="space-y-2">
                             <FormField

@@ -11,7 +11,8 @@ import { useCallback, useEffect, useState } from "react";
 import feedService, { FeedResponse } from "../service/feed";
 
 export default function FeedPage() {
-  const { isMentor } = useAuth();
+  const auth = useAuth();
+  const { isMentor } = auth;
   
   // Feed state
   const [feedData, setFeedData] = useState<FeedResponse>({
@@ -25,14 +26,27 @@ export default function FeedPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
+  const [isAuthLoading, setIsAuthLoading] = useState(true);
+  
+  // Check if auth is initialized
+  useEffect(() => {
+    // We consider auth loaded once we have a definitive value for isAuthenticated
+    // This prevents the initial default state from triggering API calls
+    if (auth.isAuthenticated !== undefined) {
+      setIsAuthLoading(false);
+    }
+  }, [auth.isAuthenticated]);
   
   // Fetch feed based on user type
   const fetchFeed = useCallback(async (page: number = currentPage) => {
+    // Don't fetch if auth is still loading
+    if (isAuthLoading) return;
+    
     setIsLoading(true);
     try {
       // If user is a mentor, show users feed
       // If user is a regular user, show mentors feed
-      const data = isMentor 
+      const data = isMentor
         ? await feedService.getUsersFeed(page, 10)
         : await feedService.getMentorsFeed(page, 10);
       
@@ -43,14 +57,16 @@ export default function FeedPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, isMentor]);
+  }, [currentPage, isMentor, isAuthLoading]);
 
   // Load initial data and refetch when auth state changes
   useEffect(() => {
-    fetchFeed();
-    // Adding isMentor to the dependency array ensures the feed is refetched
-    // when the user's role changes
-  }, [fetchFeed, isMentor]);
+    if (!isAuthLoading) {
+      fetchFeed();
+    }
+    // Adding isAuthLoading to the dependency array ensures we only fetch
+    // after auth state is determined
+  }, [fetchFeed, isMentor, isAuthLoading]);
 
   // Handle page change
   const handlePageChange = (page: number) => {

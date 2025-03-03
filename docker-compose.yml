@@ -109,6 +109,7 @@ services:
       - ./infrastructure/grafana/prometheus_ds.yml:/etc/grafana/provisioning/datasources/prometheus_ds.yml
       - ./infrastructure/grafana/dashboard.yaml:/etc/grafana/provisioning/dashboards/main.yaml
       - ./infrastructure/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./infrastructure/grafana/grafana.ini:/etc/grafana/grafana.ini
 
     depends_on:
       - prometheus

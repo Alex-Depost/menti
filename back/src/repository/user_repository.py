@@ -46,7 +46,7 @@ async def update_user_avatar(db: AsyncSession, user_id: int, avatar_uuid: Option
         user_id: ID пользователя
         avatar_uuid: UUID аватарки или None для удаления
     """
-    stmt = update(User).where(User.id == user_id).values(avatar_uuid=avatar_uuid)
+    stmt = update(User).where(User.id == user_id).values(avatar_uuid=avatar_uuid) # type: ignore
     await db.execute(stmt)
     await db.commit()
 
@@ -64,15 +64,15 @@ async def update_user_profile(user_id: int, update_data: Dict[str, Any]) -> User
     """
     async with session_scope() as session:
         # Сначала получаем пользователя, чтобы убедиться, что он существует
-        user_query = select(User).where(User.id == user_id)
+        user_query = select(User).where(User.id == user_id) # type: ignore
         result = await session.execute(user_query)
         user = result.scalars().first()
         
         if not user:
-            return None
+            return None # type: ignore
         
         # Обновляем профиль
-        stmt = update(User).where(User.id == user_id).values(**update_data)
+        stmt = update(User).where(User.id == user_id).values(**update_data) # type: ignore
         await session.execute(stmt)
         await session.commit()
         
@@ -88,7 +88,7 @@ async def get_users(page: int = 1, size: int = 10) -> Tuple[List[User], int]:
         query = select(User)
         
         # Считаем общее количество
-        count_result = await session.execute(select(func.count(User.id)))
+        count_result = await session.execute(select(func.count(User.id))) # type: ignore
         total = count_result.scalar() or 0
         
         # Применяем пагинацию
@@ -134,7 +134,7 @@ async def get_filtered_users(
             query = query.where(*conditions)
             
         # Считаем общее количество с учетом фильтров
-        count_result = await session.execute(select(func.count(User.id)).where(*conditions) if conditions else select(func.count(User.id)))
+        count_result = await session.execute(select(func.count(User.id)).where(*conditions) if conditions else select(func.count(User.id))) # type: ignore
         total = count_result.scalar() or 0
         
         # Применяем пагинацию
