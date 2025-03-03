@@ -13,7 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useAuth } from "@/hooks/use-auth";
-import { Check, Filter, Loader2, RefreshCw, Search, X } from "lucide-react";
+import { Check, Filter, Loader2, Mail, RefreshCw, Search, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -57,18 +57,25 @@ export default function UserInboxPage() {
   };
 
 
+  const [contactInfo, setContactInfo] = useState<Record<number, { email: string; telegram_link?: string }>>({});
+
   const handleAccept = async (requestId: number) => {
     setProcessingRequestId(requestId);
     try {
-      const success = await acceptMentorshipRequest(requestId);
-      if (success) {
+      const result = await acceptMentorshipRequest(requestId);
+      if (result && typeof result !== 'boolean') {
         toast.success("Заявка принята");
         // Update the request status in the UI
-        setRequests(prevRequests => 
-          prevRequests.map(req => 
+        setRequests(prevRequests =>
+          prevRequests.map(req =>
             req.id === requestId ? { ...req, status: 'accepted' } : req
           )
         );
+        // Store contact info
+        setContactInfo(prev => ({
+          ...prev,
+          [requestId]: result.contact_info
+        }));
       } else {
         toast.error("Не удалось принять заявку");
       }
@@ -295,8 +302,36 @@ export default function UserInboxPage() {
                 )}
                 
                 {request.status === 'accepted' && (
-                  <div className="mt-2 text-sm text-green-600 font-medium text-right">
-                    Заявка принята
+                  <div className="mt-2 flex flex-col gap-2">
+                    <div className="text-sm text-green-600 font-medium">
+                      Заявка принята
+                    </div>
+                    {contactInfo[request.id] && (
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => window.location.href = `mailto:${contactInfo[request.id].email}?subject=Менторство&body=Здравствуйте! Я принял(а) вашу заявку на менторство. Давайте обсудим детали сотрудничества.`}
+                          className="flex items-center"
+                        >
+                          <Mail className="h-4 w-4 mr-2" />
+                          Связаться по email
+                        </Button>
+                        {contactInfo[request.id].telegram_link && (
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => window.open(`${contactInfo[request.id].telegram_link}?text=Здравствуйте! Я принял(а) вашу заявку на менторство. Давайте обсудим детали сотрудничества.`, '_blank')}
+                            className="flex items-center"
+                          >
+                            <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                              <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm3.93 5.84l-1.68 8.275a.75.75 0 01-1.188.386l-2.079-1.629-1.192 1.19a.75.75 0 01-1.276-.544l.001-.033V12.4l4.844-4.305a.75.75 0 00-.915-1.177l-5.947 3.968-2.242-.899a.75.75 0 01-.094-1.32l11.75-6.05a.75.75 0 011.02 1.024z" />
+                            </svg>
+                            Связаться в Telegram
+                          </Button>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
                 

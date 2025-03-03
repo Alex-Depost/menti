@@ -306,10 +306,19 @@ export async function cancelMentorshipRequest(requestId: number): Promise<boolea
   }
 }
 
+export interface RequestApproveResponse {
+  message: string;
+  contact_info: {
+    email: string;
+    telegram_link?: string;
+  };
+}
+
 /**
  * Принятие входящего запроса на менторство
+ * @returns Объект с сообщением об успешном подтверждении и контактной информацией отправителя
  */
-export async function acceptMentorshipRequest(requestId: number): Promise<boolean> {
+export async function acceptMentorshipRequest(requestId: number): Promise<RequestApproveResponse | false> {
   try {
     const token = authService.getToken();
     if (!token) {
@@ -329,7 +338,8 @@ export async function acceptMentorshipRequest(requestId: number): Promise<boolea
       throw new Error(errorData.detail || 'Failed to approve mentorship request');
     }
 
-    return true;
+    const data: RequestApproveResponse = await response.json();
+    return data;
   } catch (error) {
     console.error('Failed to accept mentorship request:', error);
     return false;
