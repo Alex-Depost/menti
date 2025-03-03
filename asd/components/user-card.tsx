@@ -1,17 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { FeedItem } from "@/app/service/feed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { AVATAR_URL } from "@/app/service/config";
+import { UserRequestDialog } from "./user-request-dialog";
 
 interface UserCardProps {
     item: FeedItem;
 }
 
 export function UserCard({ item }: UserCardProps) {
+    const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+
     // Get user initials for avatar
     const getInitials = (name: string) => {
         return name
@@ -63,6 +67,7 @@ export function UserCard({ item }: UserCardProps) {
                         variant="default"
                         size="sm"
                         className="gap-2 text-sm whitespace-nowrap"
+                        onClick={() => setIsRequestDialogOpen(true)}
                     >
                         <MessageSquare className="h-4 w-4" />
                         Связаться
@@ -83,6 +88,14 @@ export function UserCard({ item }: UserCardProps) {
                     )}
                 </div>
             </div>
+            
+            {/* User Request Dialog */}
+            <UserRequestDialog
+                isOpen={isRequestDialogOpen}
+                onClose={() => setIsRequestDialogOpen(false)}
+                userId={item.id || 0}
+                userName={item.name || ''}
+            />
         </Card>
     );
 }

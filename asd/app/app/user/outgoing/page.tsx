@@ -1,185 +1,179 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { Loader2 } from "lucide-react";
-import { MentorshipRequest, getOutgoingMentorshipRequestsForUI } from "@/app/service/mentorship";
-import { MentorshipRequestCard } from "@/components/mentorship-request-card";
-import { MentorshipFilter } from "@/components/mentorship-filter";
-import { EmptyState } from "@/components/empty-state";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/use-auth";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { AVATAR_URL } from "@/app/service/config";
+import { 
+  getOutgoingMentorshipRequestsForUI, 
+  MentorshipRequestDisplay, 
+  cancelMentorshipRequest 
+} from "@/app/service/mentorship";
+import { toast } from "sonner";
+import { X, Loader2 } from "lucide-react";
 
-export default function OutgoingMentorshipPage() {
-  const [requests, setRequests] = useState<MentorshipRequest[]>([]);
+export default function UserOutgoingPage() {
+  const router = useRouter();
+  const { isAuthenticated, isUser } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [searchQuery, setSearchQuery] = useState("");
+  const [requests, setRequests] = useState<MentorshipRequestDisplay[]>([]);
+  const [cancellingRequestId, setCancellingRequestId] = useState<number | null>(null);
 
-  const fetchRequests = async () => {
-    setLoading(true);
+  useEffect(() => {
+    async function loadRequests() {
+      if (!isAuthenticated || !isUser) {
+        return;
+      }
+
+      try {
+        const data = await getOutgoingMentorshipRequestsForUI();
+        setRequests(data);
+      } catch (err) {
+        toast.error("Не удалось загрузить исходящие заявки");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadRequests();
+  }, [isAuthenticated, isUser, router]);
+
+  // Get initials for avatar
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  // Generate a consistent pastel color based on the name
+  const generatePastelColor = (name: string) => {
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+
+    // Generate pastel color (higher lightness, lower saturation)
+    const h = hash % 360;
+    return `hsl(${h}, 70%, 85%)`;
+  };
+
+  const handleCancel = async (requestId: number) => {
+    setCancellingRequestId(requestId);
     try {
-      const data = await getOutgoingMentorshipRequestsForUI();
-      setRequests(data);
+      const success = await cancelMentorshipRequest(requestId);
+      if (success) {
+        toast.success("Заявка отменена");
+        // Update the request status in the UI
+        setRequests(prevRequests => 
+          prevRequests.map(req => 
+            req.id === requestId ? { ...req, status: 'rejected' } : req
+          )
+        );
+      } else {
+        toast.error("Не удалось отменить заявку");
+      }
     } catch (error) {
-      console.error("Ошибка при загрузке запросов на менторство:", error);
+      toast.error("Произошла ошибка при отмене заявки");
+      console.error(error);
     } finally {
-      setLoading(false);
+      setCancellingRequestId(null);
     }
   };
 
-  useEffect(() => {
-    fetchRequests();
-  }, []);
-
-  const filteredRequests = useMemo(() => {
-    return requests.filter((request) => {
-      // Фильтрация по статусу
-      if (statusFilter !== "all" && request.status !== statusFilter) {
-        return false;
-      }
-      
-      // Фильтрация по поисковому запросу
-      if (
-        searchQuery &&
-        !request.mentor_name.toLowerCase().includes(searchQuery.toLowerCase())
-      ) {
-        return false;
-      }
-      
-      return true;
-    });
-  }, [requests, statusFilter, searchQuery]);
-
-  // Группировка запросов по статусу для вкладок
-  const pendingRequests = requests.filter((req) => req.status === "pending");
-  const acceptedRequests = requests.filter((req) => req.status === "accepted");
-  const rejectedRequests = requests.filter((req) => req.status === "rejected");
-
   if (loading) {
     return (
-      <div className="container mx-auto py-6 px-3 sm:py-8 sm:px-6 lg:px-8 flex items-center justify-center h-64">
-        <Loader2 className="w-6 h-6 sm:w-8 sm:h-8 animate-spin text-primary" />
+      <div className="container mx-auto py-8 px-4 md:px-8">
+        <h1 className="text-2xl font-bold mb-6">Исходящие заявки</h1>
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto py-4 sm:py-8 px-3 sm:px-6 lg:px-8">
-      <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-6">Исходящие запросы на менторство</h1>
-      
+    <div className="container mx-auto py-8 px-4 md:px-8">
+      <h1 className="text-2xl font-bold mb-6">Исходящие заявки</h1>
+
       {requests.length === 0 ? (
-        <EmptyState
-          title="Запросов пока нет"
-          description="Вы еще не отправили ни одного запроса на менторство."
-          actionLabel="Найти менторов"
-          actionHref="/app"
-        />
+        <Card>
+          <CardContent className="py-10">
+            <div className="text-center text-muted-foreground">
+              У вас пока нет исходящих заявок к менторам
+            </div>
+          </CardContent>
+        </Card>
       ) : (
-        <>
-          <MentorshipFilter
-            statusFilter={statusFilter}
-            setStatusFilter={setStatusFilter}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-          />
-          
-          <Tabs defaultValue="all" className="w-full">
-            <TabsList className="mb-4 w-full overflow-x-auto flex-nowrap justify-start sm:justify-center p-0.5 sm:p-1">
-              <TabsTrigger value="all" className="text-xs sm:text-sm">
-                Все ({requests.length})
-              </TabsTrigger>
-              <TabsTrigger value="pending" className="text-xs sm:text-sm">
-                В ожидании ({pendingRequests.length})
-              </TabsTrigger>
-              <TabsTrigger value="accepted" className="text-xs sm:text-sm">
-                Принятые ({acceptedRequests.length})
-              </TabsTrigger>
-              <TabsTrigger value="rejected" className="text-xs sm:text-sm">
-                Отклоненные ({rejectedRequests.length})
-              </TabsTrigger>
-            </TabsList>
+        <div className="space-y-4">
+          {requests.map((request) => {
+            const avatarColor = generatePastelColor(request.receiver_name || '');
+            const isCancelling = cancellingRequestId === request.id;
             
-            <TabsContent value="all">
-              {filteredRequests.length === 0 ? (
-                <EmptyState
-                  title="Ничего не найдено"
-                  description="Попробуйте изменить параметры фильтрации"
-                  actionLabel="Сбросить фильтры"
-                  onAction={() => {
-                    setStatusFilter("all");
-                    setSearchQuery("");
-                  }}
-                />
-              ) : (
-                <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                  {filteredRequests.map((request) => (
-                    <MentorshipRequestCard
-                      key={request.id}
-                      request={request}
-                      onStatusChange={fetchRequests}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="pending">
-              {pendingRequests.length === 0 ? (
-                <EmptyState
-                  title="Нет запросов в ожидании"
-                  description="У вас нет запросов на менторство в статусе ожидания"
-                />
-              ) : (
-                <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                  {pendingRequests.map((request) => (
-                    <MentorshipRequestCard
-                      key={request.id}
-                      request={request}
-                      onStatusChange={fetchRequests}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="accepted">
-              {acceptedRequests.length === 0 ? (
-                <EmptyState
-                  title="Нет принятых запросов"
-                  description="У вас еще нет принятых запросов на менторство"
-                />
-              ) : (
-                <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                  {acceptedRequests.map((request) => (
-                    <MentorshipRequestCard
-                      key={request.id}
-                      request={request}
-                      onStatusChange={fetchRequests}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-            
-            <TabsContent value="rejected">
-              {rejectedRequests.length === 0 ? (
-                <EmptyState
-                  title="Нет отклоненных запросов"
-                  description="У вас нет отклоненных запросов на менторство"
-                />
-              ) : (
-                <div className="grid grid-cols-1 gap-3 sm:gap-4">
-                  {rejectedRequests.map((request) => (
-                    <MentorshipRequestCard
-                      key={request.id}
-                      request={request}
-                      onStatusChange={fetchRequests}
-                    />
-                  ))}
-                </div>
-              )}
-            </TabsContent>
-          </Tabs>
-        </>
+            return (
+              <Card key={request.id} className="overflow-hidden">
+                <CardContent className="p-6">
+                  <div className="flex items-start gap-4">
+                    <Avatar className="h-12 w-12 border border-border/50">
+                      {request.receiver_avatar && (
+                        <AvatarImage
+                          src={`${AVATAR_URL}/${request.receiver_avatar}`}
+                          alt={request.receiver_name || ''}
+                        />
+                      )}
+                      <AvatarFallback
+                        className="text-primary-foreground text-sm font-medium"
+                        style={{ backgroundColor: avatarColor }}
+                      >
+                        {getInitials(request.receiver_name || '')}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    <div className="flex-1">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h3 className="font-medium">{request.receiver_name}</h3>
+                          <p className="text-sm text-muted-foreground">{request.receiver_email}</p>
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          {new Date(request.created_at).toLocaleDateString('ru-RU')}
+                        </div>
+                      </div>
+                      
+                      <div className="mt-4 p-4 bg-muted/50 rounded-md">
+                        <p className="text-sm whitespace-pre-wrap">{request.message}</p>
+                      </div>
+                      
+                      {request.status === 'pending' && (
+                        <div className="mt-4 text-sm text-amber-600 font-medium">
+                          Ожидает ответа
+                        </div>
+                      )}
+                      
+                      {request.status === 'accepted' && (
+                        <div className="mt-4 text-sm text-green-600 font-medium">
+                          Заявка принята
+                        </div>
+                      )}
+                      
+                      {request.status === 'rejected' && (
+                        <div className="mt-4 text-sm text-muted-foreground">
+                          Заявка отклонена
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
       )}
     </div>
   );

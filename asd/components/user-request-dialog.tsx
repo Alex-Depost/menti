@@ -30,19 +30,19 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
 );
 Textarea.displayName = "Textarea";
 
-interface MentorshipRequestDialogProps {
+interface UserRequestDialogProps {
   isOpen: boolean;
   onClose: () => void;
-  mentorId: number;
-  mentorName: string;
+  userId: number;
+  userName: string;
 }
 
-export function MentorshipRequestDialog({
+export function UserRequestDialog({
   isOpen,
   onClose,
-  mentorId,
-  mentorName,
-}: MentorshipRequestDialogProps) {
+  userId,
+  userName,
+}: UserRequestDialogProps) {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -50,25 +50,25 @@ export function MentorshipRequestDialog({
     e.preventDefault();
     
     if (!message.trim()) {
-      toast.error("Пожалуйста, введите сообщение для ментора");
+      toast.error("Пожалуйста, введите сообщение для пользователя");
       return;
     }
     
     setIsSubmitting(true);
     
     try {
-      // When a user sends a request to a mentor, the receiver type should be 'mentor'
-      const response = await sendMentorshipRequest(mentorId, message, 'mentor');
+      // When a mentor sends a request to a user, the receiver type should be 'user'
+      const response = await sendMentorshipRequest(userId, message, 'user');
       
       if (response) {
-        toast.success("Запрос на менторство успешно отправлен");
+        toast.success("Запрос успешно отправлен");
         onClose();
         setMessage("");
       } else {
-        toast.error("Не удалось отправить запрос на менторство");
+        toast.error("Не удалось отправить запрос");
       }
     } catch (error) {
-      console.error("Error sending mentorship request:", error);
+      console.error("Error sending user request:", error);
       toast.error("Произошла ошибка при отправке запроса");
     } finally {
       setIsSubmitting(false);
@@ -81,16 +81,16 @@ export function MentorshipRequestDialog({
         <DialogHeader>
           <DialogTitle>Запрос на менторство</DialogTitle>
           <DialogDescription>
-            Отправьте запрос ментору {mentorName} с кратким описанием ваших целей и ожиданий.
+            Отправьте запрос пользователю {userName} с предложением менторства и описанием того, чем вы можете помочь.
           </DialogDescription>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-2">
-            <Label htmlFor="message">Сообщение для ментора</Label>
+            <Label htmlFor="message">Сообщение для пользователя</Label>
             <Textarea
               id="message"
-              placeholder="Расскажите о своих целях, опыте и чему хотите научиться..."
+              placeholder="Расскажите, чем вы можете помочь пользователю, ваш опыт и подход к менторству..."
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               className="min-h-[120px]"
