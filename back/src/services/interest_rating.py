@@ -52,7 +52,7 @@ class InterestRatingService:
                         "Authorization": f"Bearer {self.api_key}"
                     },
                     json={
-                        "model": "gemini-1.5-pro",
+                        "model": "qodo/gemini-2.0-flash",
                         "messages": [
                             {"role": "system", "content": "Ты помогаешь сортировать менторов по их интересности для пользователя на основе описаний."},
                             {"role": "user", "content": prompt}
@@ -69,6 +69,7 @@ class InterestRatingService:
                 result_text = data["choices"][0]["message"]["content"]
                 
                 # Пытаемся распарсить JSON
+                result_text = result_text.replace("```json", "").replace("```", "")
                 try:
                     ranked_ids = json.loads(result_text)
                     # Проверяем, что результат - список
