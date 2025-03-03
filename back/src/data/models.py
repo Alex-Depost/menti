@@ -115,8 +115,6 @@ class Request(Base):
     id = cast(int, Column(Integer, primary_key=True, index=True))
     sender_id = cast(int, Column(
         Integer,
-        ForeignKey("prod.users.id", ondelete="CASCADE"),
-        ForeignKey("prod.mentors.id", ondelete="CASCADE"),
         nullable=False
     ))
     sender_type = cast(str, Column(Enum(EntityType), nullable=False))
