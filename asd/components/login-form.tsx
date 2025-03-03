@@ -37,7 +37,7 @@ export function LoginForm({
         <CardHeader>
           <CardTitle>Войдите в свой аккаунт</CardTitle>
           <CardDescription>
-            Введите своё имя для входа в аккаунт {userType === "mentor" ? "ментора" : "пользователя"}
+            Введите своё имя для входа в аккаунт
           </CardDescription>
         </CardHeader>
         <CardContent>
