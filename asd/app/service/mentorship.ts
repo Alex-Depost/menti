@@ -19,6 +19,16 @@ export interface MentorshipRequestResponse {
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
   updated_at: string;
+  sender?: {
+    id: number;
+    login: string;
+    name: string;
+    description: string;
+    target_universities?: string[];
+    admission_type?: string;
+    email: string;
+    avatar_url?: string;
+  };
 }
 
 // Interface for displaying mentorship requests in the UI
@@ -32,13 +42,16 @@ export interface MentorshipRequestDisplay {
   status: 'pending' | 'accepted' | 'rejected';
   created_at: string;
   updated_at: string;
-  // UI display properties (populated from other API calls or context)
-  sender_name?: string;
-  sender_email?: string;
-  sender_avatar?: string;
+  // Sender properties (now populated directly from API response)
+  sender_name?: string;  // From sender.name
+  sender_email?: string; // From sender.email
+  sender_avatar?: string; // From sender.avatar_url
+  // Receiver properties (still populated from context or other API calls)
   receiver_name?: string;
   receiver_email?: string;
   receiver_avatar?: string;
+  // Original sender object from API (for advanced usage if needed)
+  sender?: MentorshipRequestResponse['sender'];
 }
 
 /**
@@ -148,12 +161,18 @@ export async function getOutgoingMentorshipRequestsForUI(): Promise<MentorshipRe
   try {
     const apiResponses = await getOutgoingMentorshipRequests();
     
-    // Return the API responses directly, UI can handle display
+    // Map API responses to display format
     return apiResponses.map(response => ({
       ...response,
-      // Add placeholder display properties that UI can override
-      sender_name: `Sender ${response.sender_id}`,
-      receiver_name: `Receiver ${response.receiver_id}`
+      // Use sender information from the API response if available (for consistency with incoming requests)
+      // Note: Outgoing requests API might not include sender information
+      sender_name: response.sender?.name || `Sender ${response.sender_id}`,
+      sender_email: response.sender?.email,
+      sender_avatar: response.sender?.avatar_url,
+      // Add placeholder for receiver
+      receiver_name: `Receiver ${response.receiver_id}`,
+      // Pass the original sender object for advanced usage if needed
+      sender: response.sender
     }));
   } catch (error) {
     console.error('Failed to fetch outgoing mentorship requests for UI:', error);
@@ -166,13 +185,18 @@ export async function getIncomingMentorshipRequestsForUI(): Promise<MentorshipRe
   try {
     const apiResponses = await getIncomingMentorshipRequests();
     
-    // Return the API responses directly, UI can handle display
-    return apiResponses.map(response => ({
-      ...response,
-      // Add placeholder display properties that UI can override
-      sender_name: `Sender ${response.sender_id}`,
-      receiver_name: `Receiver ${response.receiver_id}`
-    }));
+    // Map API responses to display format, using sender information from the API
+        return apiResponses.map(response => ({
+          ...response,
+          // Use sender information from the API response if available
+          sender_name: response.sender?.name || `Sender ${response.sender_id}`,
+          sender_email: response.sender?.email,
+          sender_avatar: response.sender?.avatar_url,
+          // Still use placeholder for receiver as it's not included in the API response
+          receiver_name: `Receiver ${response.receiver_id}`,
+          // Pass the original sender object for advanced usage if needed
+          sender: response.sender
+        }));
   } catch (error) {
     console.error('Failed to fetch incoming mentorship requests for UI:', error);
     return [];
