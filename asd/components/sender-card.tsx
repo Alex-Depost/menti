@@ -1,14 +1,13 @@
 "use client";
 
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AVATAR_URL } from "@/app/service/config";
 import { MentorshipRequestDisplay } from "@/app/service/mentorship";
-import { HtmlContent } from "@/components/ui/html-content";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, Mail, User } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
+import { CalendarDays, Mail } from "lucide-react";
 
 interface SenderCardProps {
     request: MentorshipRequestDisplay;
