@@ -120,12 +120,7 @@ class Request(Base):
         nullable=False
     ))
     sender_type = cast(str, Column(Enum(EntityType), nullable=False))
-    receiver_id = cast(int, Column(
-        Integer,
-        ForeignKey("prod.users.id", ondelete="CASCADE"),
-        ForeignKey("prod.mentors.id", ondelete="CASCADE"),
-        nullable=False
-    ))
+    receiver_id = cast(int, Column(Integer, nullable=False))
     message = cast(str, Column(String(500), nullable=True))
     receiver_type = cast(str, Column(Enum(EntityType), nullable=False))
     status = cast(str, Column(Enum(RequestStatus), nullable=False))
