@@ -81,10 +81,12 @@ export function RequestList({ requests, onStatusChange, className }: RequestList
 
   const RequestItem = ({ request }: { request: IncomingMentorshipRequest }) => {
     const userInitials = request.user_name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase();
+      ? request.user_name
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
+      : "U"; // Default initial if user_name is undefined
 
     const formattedTime = formatDistanceToNow(new Date(request.created_at), {
       addSuffix: true,

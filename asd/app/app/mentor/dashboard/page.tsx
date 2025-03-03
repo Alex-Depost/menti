@@ -2,7 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { Loader2, Users, BarChart3, Mail, CheckCircle, XCircle, BookOpenCheck } from "lucide-react";
-import { getMentorDashboardStats, getIncomingMentorshipRequests, IncomingMentorshipRequest } from "@/app/service/mentorship";
+import {
+  getMentorDashboardStats,
+  getIncomingMentorshipRequests,
+  getIncomingMentorshipRequestsForUI,
+  IncomingMentorshipRequest
+} from "@/app/service/mentorship";
 import { StatCard } from "@/components/stat-card";
 import { ActivityFeed } from "@/components/activity-feed";
 import { RequestList } from "@/components/request-list";
@@ -18,7 +23,7 @@ export default function MentorDashboardPage() {
     try {
       const [dashboardStats, incomingRequests] = await Promise.all([
         getMentorDashboardStats(),
-        getIncomingMentorshipRequests()
+        getIncomingMentorshipRequestsForUI()
       ]);
       
       setStats(dashboardStats);
@@ -58,32 +63,28 @@ export default function MentorDashboardPage() {
 
       {/* Карточки статистики */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-1.5 sm:gap-2 md:gap-4 mb-2 sm:mb-3 md:mb-6">
-        <StatCard 
+        <StatCard
           title="Всего студентов"
           value={stats?.totalStudents ?? 0}
           icon={<Users className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-primary" />}
-          trend={{ value: 12, isPositive: true }}
           className="col-span-1"
         />
-        <StatCard 
+        <StatCard
           title="Активных студентов"
           value={stats?.activeStudents ?? 0}
           icon={<CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-green-500" />}
-          trend={{ value: 8, isPositive: true }}
           className="col-span-1"
         />
-        <StatCard 
+        <StatCard
           title="Всего заявок"
           value={stats?.totalRequests ?? 0}
           icon={<Mail className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-blue-500" />}
-          trend={{ value: 5, isPositive: true }}
           className="col-span-1"
         />
-        <StatCard 
+        <StatCard
           title="Ожидающих заявок"
           value={stats?.pendingRequests ?? 0}
           icon={<XCircle className="w-3 h-3 sm:w-4 sm:h-4 md:w-5 md:h-5 text-yellow-500" />}
-          trend={{ value: 3, isPositive: false }}
           className="col-span-1"
         />
       </div>

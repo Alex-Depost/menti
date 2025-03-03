@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { Loader2 } from "lucide-react";
-import { IncomingMentorshipRequest, getIncomingMentorshipRequests } from "@/app/service/mentorship";
+import { IncomingMentorshipRequest, getIncomingMentorshipRequestsForUI } from "@/app/service/mentorship";
 import { IncomingRequestCard } from "@/components/incoming-request-card";
 import { MentorshipFilter } from "@/components/mentorship-filter"; 
 import { EmptyState } from "@/components/empty-state";
@@ -17,7 +17,7 @@ export default function IncomingMentorshipPage() {
   const fetchRequests = async () => {
     setLoading(true);
     try {
-      const data = await getIncomingMentorshipRequests();
+      const data = await getIncomingMentorshipRequestsForUI();
       setRequests(data);
     } catch (error) {
       console.error("Ошибка при загрузке входящих запросов на менторство:", error);

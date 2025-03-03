@@ -1,17 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { FeedItem } from "@/app/service/feed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { AVATAR_URL } from "@/app/service/config";
+import { MentorshipRequestDialog } from "./mentorship-request-dialog";
 
 interface MentorCardProps {
     item: FeedItem;
 }
 
 export function MentorCard({ item }: MentorCardProps) {
+    const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+
     // Get mentor initials for avatar
     const getInitials = (name: string) => {
         return name
@@ -63,6 +67,7 @@ export function MentorCard({ item }: MentorCardProps) {
                         variant="default"
                         size="sm"
                         className="gap-2 text-sm whitespace-nowrap"
+                        onClick={() => setIsRequestDialogOpen(true)}
                     >
                         <MessageSquare className="h-4 w-4" />
                         Связаться
@@ -78,6 +83,14 @@ export function MentorCard({ item }: MentorCardProps) {
                     </div>
                 </div>
             </div>
+            
+            {/* Mentorship Request Dialog */}
+            <MentorshipRequestDialog
+                isOpen={isRequestDialogOpen}
+                onClose={() => setIsRequestDialogOpen(false)}
+                mentorId={item.id || 0}
+                mentorName={item.name || ''}
+            />
         </Card>
     );
 }

@@ -89,10 +89,12 @@ export function StudentCard({ student, onStatusChange }: StudentCardProps) {
     : "Нет данных";
 
   const userInitials = student.user_name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .toUpperCase();
+    ? student.user_name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+    : "U"; // Default initial if user_name is undefined
 
   const progressPercentage = student.progress 
     ? Math.round((student.progress.completed_sessions / student.progress.total_sessions) * 100)
