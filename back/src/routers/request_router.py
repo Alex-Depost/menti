@@ -95,7 +95,7 @@ async def send_request(
                     Request.sender_type == sender_type, # type: ignore
                     Request.receiver_id == request_data.receiver_id, # type: ignore
                     Request.receiver_type == request_data.receiver_type, # type: ignore
-                    Request.status == RequestStatus.PENDING # type: ignore
+                    # Request.status == RequestStatus.PENDING # type: ignore
                 )
             )
         ) # type: ignore
