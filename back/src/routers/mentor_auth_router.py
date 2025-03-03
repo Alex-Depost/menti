@@ -117,6 +117,7 @@ async def update_mentor_profile(
         avatar_uuid=updated_mentor.avatar_uuid,  # type: ignore
         telegram_link=updated_mentor.telegram_link,
         age=updated_mentor.age,
+        title=updated_mentor.title,
         is_active=updated_mentor.is_active,
         created_at=updated_mentor.created_at,
         updated_at=updated_mentor.updated_at,

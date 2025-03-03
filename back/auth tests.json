@@ -1,0 +1,981 @@
+{
+  "info": {
+    "name": "Auth API Tests",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "User Auth Tests",
+      "item": [
+        {
+          "name": "User Registration - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Успешная регистрация пользователя\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.access_token).to.be.a('string');",
+                  "    pm.expect(jsonData.token_type).to.eql('bearer');",
+                  "    pm.collectionVariables.set('user_token', jsonData.access_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Иван Петров\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "User Registration - Name Too Short",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при коротком имени\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.detail[0].msg).to.include('должно содержать от 3 до 20 символов');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Ив\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "User Registration - Name Too Long",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при длинном имени\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.detail[0].msg).to.include('должно содержать от 3 до 20 символов');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Очень длинное имя пользователя которое точно превышает лимит в 20 символов\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "User Registration - Empty Name",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при пустом имени\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "User Login - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Успешная авторизация пользователя\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.access_token).to.be.a('string');",
+                  "    pm.expect(jsonData.token_type).to.eql('bearer');",
+                  "    pm.collectionVariables.set('user_token', jsonData.access_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"login\": \"ivan_petrov\",\n    \"password\": \"1\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signin",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signin"]
+            }
+          }
+        },
+        {
+          "name": "User Login - Invalid Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при неверном логине\", function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"login\": \"non_existent_user\",\n    \"password\": \"1\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signin",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signin"]
+            }
+          }
+        },
+        {
+          "name": "Get Current User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Успешное получение профиля пользователя\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.name).to.be.a('string');",
+                  "    pm.expect(jsonData.login).to.be.a('string');",
+                  "    pm.expect(jsonData.id).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get User Profile - No Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при отсутствии токена\", function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get User Profile - Invalid Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при неверном токене\", function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer invalid_token_value"
+              }
+            ],
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Успешное обновление профиля пользователя\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.name).to.eql('Новое Имя');",
+                  "    pm.expect(jsonData.telegram_link).to.eql('https://t.me/newuser');",
+                  "    pm.expect(jsonData.age).to.eql(25);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Новое Имя\",\n    \"telegram_link\": \"t.me/newuser\",\n    \"age\": 25,\n    \"description\": \"Новое описание профиля пользователя\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile - Invalid Telegram Link",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при неверном формате ссылки телеграм\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"telegram_link\": \"неверный формат\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile - Invalid Age",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при неверном возрасте\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"age\": 5\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Mentor Auth Tests",
+      "item": [
+        {
+          "name": "Mentor Registration - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Успешная регистрация ментора\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.access_token).to.be.a('string');",
+                  "    pm.expect(jsonData.token_type).to.eql('bearer');",
+                  "    pm.collectionVariables.set('mentor_token', jsonData.access_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Профессор Иванов\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/mentors/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Mentor Registration - Name Too Short",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при коротком имени\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.detail[0].msg).to.include('должно содержать от 3 до 20 символов');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Пр\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/mentors/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Mentor Registration - Name Too Long",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при длинном имени\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.detail[0].msg).to.include('должно содержать от 3 до 20 символов');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Очень длинное имя ментора которое точно превышает лимит в 20 символов\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/mentors/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Mentor Login - Success",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Успешная авторизация ментора\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.access_token).to.be.a('string');",
+                  "    pm.expect(jsonData.token_type).to.eql('bearer');",
+                  "    pm.collectionVariables.set('mentor_token', jsonData.access_token);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"login\": \"professor_ivanov\",\n    \"password\": \"1\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/mentors/signin",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "signin"]
+            }
+          }
+        },
+        {
+          "name": "Mentor Login - Invalid Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при неверном логине\", function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"login\": \"non_existent_mentor\",\n    \"password\": \"1\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/mentors/signin",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "signin"]
+            }
+          }
+        },
+        {
+          "name": "Get Current Mentor Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Успешное получение профиля ментора\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.name).to.be.a('string');",
+                  "    pm.expect(jsonData.login).to.be.a('string');",
+                  "    pm.expect(jsonData.id).to.be.a('number');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "localhost/api/auth/mentors/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "me"]
+            }
+          }
+        },
+        {
+          "name": "Get Mentor Profile - No Token",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при отсутствии токена\", function() {",
+                  "    pm.response.to.have.status(401);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "localhost/api/auth/mentors/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update Mentor Profile",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Успешное обновление профиля ментора\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.name).to.eql('Новое Имя Ментора');",
+                  "    pm.expect(jsonData.university).to.eql('МГУ');",
+                  "    pm.expect(jsonData.title).to.eql('Профессор');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentor_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Новое Имя Ментора\",\n    \"university\": \"МГУ\",\n    \"title\": \"Профессор\",\n    \"description\": \"Новое описание профиля ментора\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/mentors/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "me"]
+            }
+          }
+        },
+        {
+          "name": "Cross-Check: User Token on Mentor Endpoint",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при использовании токена пользователя на эндпоинте ментора\", function() {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "url": {
+              "raw": "localhost/api/auth/mentors/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "mentors", "me"]
+            }
+          }
+        },
+        {
+          "name": "Cross-Check: Mentor Token on User Endpoint",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при использовании токена ментора на эндпоинте пользователя\", function() {",
+                  "    pm.response.to.have.status(403);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{mentor_token}}"
+              }
+            ],
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Edge Cases",
+      "item": [
+        {
+          "name": "User Registration - Missing Name Field",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при отсутствии поля name\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "User Login - Missing Fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при отсутствии обязательных полей\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signin",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signin"]
+            }
+          }
+        },
+        {
+          "name": "User Registration - Special Characters",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Регистрация с спецсимволами в имени\", function() {",
+                  "    pm.response.to.have.status(201);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.access_token).to.be.a('string');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Иван-Петр Сидоров\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/signup",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "signup"]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile - Extra Fields",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Проверка обработки лишних полей\", function() {",
+                  "    pm.response.to.have.status(200);",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.expect(jsonData.name).to.eql('Петр Иванов');",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"name\": \"Петр Иванов\",\n    \"non_existent_field\": \"Это поле не должно обрабатываться\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        },
+        {
+          "name": "Update User Profile - Invalid Email",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Ошибка при неверном формате email\", function() {",
+                  "    pm.response.to.have.status(422);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{user_token}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"это.неверный.email\"\n}"
+            },
+            "url": {
+              "raw": "localhost/api/auth/users/me",
+              "host": ["localhost"],
+              "path": ["api", "auth", "users", "me"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "user_token",
+      "value": ""
+    },
+    {
+      "key": "mentor_token",
+      "value": ""
+    }
+  ]
+}
