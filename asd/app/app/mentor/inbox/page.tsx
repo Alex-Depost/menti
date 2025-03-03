@@ -39,6 +39,26 @@ export default function MentorInboxPage() {
       setIsRefreshing(true);
       const data = await getIncomingMentorshipRequestsForUI();
       setRequests(data);
+      
+      // Extract contact info from accepted requests
+      const contactInfoMap: Record<number, { email: string; telegram_link?: string }> = {};
+      
+      data.filter(req => req.status === 'accepted').forEach(request => {
+        if (request.sender && request.sender.email) {
+          const contactInfo: { email: string; telegram_link?: string } = {
+            email: request.sender.email
+          };
+          
+          // Check if telegram_link exists in the sender object
+          if (request.sender && 'telegram_link' in request.sender) {
+            contactInfo.telegram_link = (request.sender as any).telegram_link;
+          }
+          
+          contactInfoMap[request.id] = contactInfo;
+        }
+      });
+      
+      setContactInfo(contactInfoMap);
     } catch (err) {
       toast.error("Не удалось загрузить входящие заявки");
       console.error(err);

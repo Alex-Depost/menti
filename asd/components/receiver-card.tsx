@@ -8,16 +8,18 @@ import { Card, CardContent } from "@/components/ui/card";
 import { HtmlContent } from "@/components/ui/html-content";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
-import { CalendarDays } from "lucide-react";
+import { CalendarDays, Mail } from "lucide-react";
 
 interface ReceiverCardProps {
     request: MentorshipRequestDisplay;
     showActions?: boolean;
+    contactInfo?: { email: string; telegram_link?: string };
 }
 
 export function ReceiverCard({
     request,
-    showActions = true
+    showActions = true,
+    contactInfo
 }: ReceiverCardProps) {
     // Get receiver initials for avatar
     const getInitials = (name: string) => {
@@ -126,6 +128,30 @@ export function ReceiverCard({
                                 className="text-sm"
                             />
                         </div>
+                        
+                        {/* Contact buttons for accepted requests */}
+                        {request.status === 'accepted' && contactInfo && (
+                            <div className="mt-4 flex flex-col sm:flex-row gap-2">
+                                <button
+                                    onClick={() => window.location.href = `mailto:${contactInfo.email}?subject=Менторство&body=Здравствуйте! Я принял(а) вашу заявку на менторство. Давайте обсудим детали сотрудничества.`}
+                                    className="flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-md border border-border/50 bg-background hover:bg-muted transition-colors"
+                                >
+                                    <Mail className="h-4 w-4 mr-2" />
+                                    Связаться по email
+                                </button>
+                                {contactInfo.telegram_link && (
+                                    <button
+                                        onClick={() => window.open(`${contactInfo.telegram_link}?text=Здравствуйте! Я принял(а) вашу заявку на менторство. Давайте обсудим детали сотрудничества.`, '_blank')}
+                                        className="flex items-center justify-center px-3 py-1.5 text-sm font-medium rounded-md border border-border/50 bg-background hover:bg-muted transition-colors"
+                                    >
+                                        <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm0 2c5.523 0 10 4.477 10 10s-4.477 10-10 10S2 17.523 2 12 6.477 2 12 2zm3.93 5.84l-1.68 8.275a.75.75 0 01-1.188.386l-2.079-1.629-1.192 1.19a.75.75 0 01-1.276-.544l.001-.033V12.4l4.844-4.305a.75.75 0 00-.915-1.177l-5.947 3.968-2.242-.899a.75.75 0 01-.094-1.32l11.75-6.05a.75.75 0 011.02 1.024z" />
+                                        </svg>
+                                        Связаться в Telegram
+                                    </button>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
             </CardContent>

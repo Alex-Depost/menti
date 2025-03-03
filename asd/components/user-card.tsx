@@ -5,10 +5,11 @@ import { Card } from "@/components/ui/card";
 import { FeedItem } from "@/app/service/feed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, School } from "lucide-react";
 import { AVATAR_URL } from "@/app/service/config";
 import { UserRequestDialog } from "./user-request-dialog";
 import { HtmlContent } from "@/components/ui/html-content";
+import { Badge } from "@/components/ui/badge";
 
 interface UserCardProps {
     item: FeedItem;
@@ -89,10 +90,29 @@ export function UserCard({ item }: UserCardProps) {
                             <p className="text-sm text-muted-foreground">Нет описания</p>
                         )}
                     </div>
-                    {item.university && (
-                        <p className="text-sm">
-                            <span className="font-medium">Университет:</span> {item.university}
-                        </p>
+                    {/* University tags */}
+                    {((item.target_universities && item.target_universities.length > 0) || item.university) && (
+                        <div className="flex flex-wrap gap-2 mt-3">
+                            {item.target_universities?.map((university, index) => (
+                                <Badge
+                                    key={index}
+                                    variant="secondary"
+                                    className="flex items-center gap-1.5 px-3 py-1 text-xs"
+                                >
+                                    <School className="h-3 w-3" />
+                                    {university}
+                                </Badge>
+                            ))}
+                            {!item.target_universities?.length && item.university && (
+                                <Badge
+                                    variant="secondary"
+                                    className="flex items-center gap-1.5 px-3 py-1 text-xs"
+                                >
+                                    <School className="h-3 w-3" />
+                                    {item.university}
+                                </Badge>
+                            )}
+                        </div>
                     )}
                 </div>
             </div>

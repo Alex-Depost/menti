@@ -2,7 +2,9 @@
 
 import {
   getOutgoingMentorshipRequestsForUI,
-  MentorshipRequestDisplay
+  MentorshipRequestDisplay,
+  acceptMentorshipRequest,
+  RequestApproveResponse
 } from "@/app/service/mentorship";
 import { ReceiverCard } from "@/components/receiver-card";
 import { Badge } from "@/components/ui/badge";
@@ -22,6 +24,7 @@ export default function MentorOutgoingPage() {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<MentorshipRequestDisplay[]>([]);
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [contactInfo, setContactInfo] = useState<Record<number, { email: string; telegram_link?: string }>>({});
 
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
@@ -36,6 +39,35 @@ export default function MentorOutgoingPage() {
       setIsRefreshing(true);
       const data = await getOutgoingMentorshipRequestsForUI();
       setRequests(data);
+      
+      // Extract contact info from accepted requests
+      const contactInfoMap: Record<number, { email: string; telegram_link?: string }> = {};
+      
+      data.filter(req => req.status === 'accepted').forEach(request => {
+        try {
+          if (request.receiver && request.receiver.email) {
+            const contactInfo: { email: string; telegram_link?: string } = {
+              email: request.receiver.email
+            };
+            
+            if (request.receiver.telegram_link) {
+              contactInfo.telegram_link = request.receiver.telegram_link;
+            }
+            
+            contactInfoMap[request.id] = contactInfo;
+          } else if (request.receiver_email) {
+            const contactInfo: { email: string; telegram_link?: string } = {
+              email: request.receiver_email
+            };
+            
+            contactInfoMap[request.id] = contactInfo;
+          }
+        } catch (error) {
+          console.error(`Failed to get contact info for request ${request.id}:`, error);
+        }
+      });
+      
+      setContactInfo(contactInfoMap);
     } catch (err) {
       toast.error("Не удалось загрузить исходящие заявки");
       console.error(err);
@@ -210,7 +242,11 @@ export default function MentorOutgoingPage() {
           {filteredRequests.map((request) => {
             return (
               <div key={request.id} className="space-y-2">
-                <ReceiverCard request={request} showActions={false} />
+                <ReceiverCard
+                  request={request}
+                  showActions={false}
+                  contactInfo={request.status === 'accepted' ? contactInfo[request.id] : undefined}
+                />
 
                 {request.status === 'pending' && (
                   <div className="mt-2 text-sm text-amber-600 font-medium text-right">

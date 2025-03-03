@@ -1,16 +1,22 @@
-from typing import List, Union, Optional
+from typing import List, Optional, Union
+
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy import select, and_
+from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.base import session_scope
-from src.data.models import Request, RequestStatus, EntityType, User, Mentor
+from src.data.models import EntityType, Mentor, Request, RequestStatus, User
 from src.schemas.request_schemas import (
-    RequestCreate, RequestResponse, RequestResponseWithSender, RequestResponseWithReceiver,
-    RequestApproveResponse, RequestRejectResponse, ContactInfo
+    ContactInfo,
+    RequestApproveResponse,
+    RequestCreate,
+    RequestRejectResponse,
+    RequestResponse,
+    RequestResponseWithReceiver,
+    RequestResponseWithSender,
 )
-from src.security.auth import get_optional_current_user, get_optional_current_mentor
-from src.schemas.schemas import UserFeedResponse, MentorFeedResponse
+from src.schemas.schemas import MentorFeedResponse, UserFeedResponse
+from src.security.auth import get_optional_current_mentor, get_optional_current_user
 from src.utils.constants import AVATAR_URL
 
 
@@ -68,9 +74,9 @@ async def send_request(
     # Проверяем существование получателя
     async with session_scope() as session:
         if request_data.receiver_type == EntityType.USER:
-            query = select(User).where(User.id == request_data.receiver_id)
+            query = select(User).where(User.id == request_data.receiver_id) # type: ignore
         else:
-            query = select(Mentor).where(Mentor.id == request_data.receiver_id)
+            query = select(Mentor).where(Mentor.id == request_data.receiver_id) # type: ignore
         
         result = await session.execute(query)
         receiver = result.scalar_one_or_none()
@@ -85,14 +91,14 @@ async def send_request(
         existing_request = await session.execute(
             select(Request).where(
                 and_(
-                    Request.sender_id == current_user.id,
-                    Request.sender_type == sender_type,
-                    Request.receiver_id == request_data.receiver_id,
-                    Request.receiver_type == request_data.receiver_type,
-                    Request.status == RequestStatus.PENDING
+                    Request.sender_id == current_user.id, # type: ignore
+                    Request.sender_type == sender_type, # type: ignore
+                    Request.receiver_id == request_data.receiver_id, # type: ignore
+                    Request.receiver_type == request_data.receiver_type, # type: ignore
+                    Request.status == RequestStatus.PENDING # type: ignore
                 )
             )
-        )
+        ) # type: ignore
         if existing_request.scalar_one_or_none():
             raise HTTPException(
                 status_code=400,
@@ -131,8 +137,8 @@ async def get_sent_requests(
     async with session_scope() as session:
         query = select(Request).where(
             and_(
-                Request.sender_id == current_user.id,
-                Request.sender_type == sender_type
+                Request.sender_id == current_user.id, # type: ignore
+                Request.sender_type == sender_type # type: ignore
             )
         )
         result = await session.execute(query)
@@ -145,17 +151,17 @@ async def get_sent_requests(
             receiver = None
             if request.receiver_type == EntityType.USER:
                 # Если получатель - пользователь, получаем информацию о нем
-                user_query = select(User).where(User.id == request.receiver_id)
+                user_query = select(User).where(User.id == request.receiver_id) # type: ignore
                 user_result = await session.execute(user_query)
                 user = user_result.scalars().first()
                 if user:
                     receiver = UserFeedResponse.model_validate(user)
                     # Добавляем URL аватара, если есть UUID
-                    if user.avatar_uuid and not receiver.avatar_url:
+                    if user.avatar_uuid and not receiver.avatar_url: # type: ignore
                         receiver.avatar_url = f"{AVATAR_URL}/{user.avatar_uuid}"
             else:
                 # Если получатель - ментор, получаем информацию о нем
-                mentor_query = select(Mentor).where(Mentor.id == request.receiver_id)
+                mentor_query = select(Mentor).where(Mentor.id == request.receiver_id) # type: ignore
                 mentor_result = await session.execute(mentor_query)
                 mentor = mentor_result.scalars().first()
                 if mentor:
@@ -188,8 +194,8 @@ async def get_received_requests(
     async with session_scope() as session:
         query = select(Request).where(
             and_(
-                Request.receiver_id == current_user.id,
-                Request.receiver_type == receiver_type
+                Request.receiver_id == current_user.id, # type: ignore
+                Request.receiver_type == receiver_type # type: ignore
             )
         )
         result = await session.execute(query)
@@ -203,17 +209,17 @@ async def get_received_requests(
             sender = None
             if request.sender_type == EntityType.USER:
                 # Если отправитель - пользователь, получаем информацию о нем
-                user_query = select(User).where(User.id == request.sender_id)
+                user_query = select(User).where(User.id == request.sender_id) # type: ignore
                 user_result = await session.execute(user_query)
                 user = user_result.scalars().first()
                 if user:
                     sender = UserFeedResponse.model_validate(user)
                     # Добавляем URL аватара, если есть UUID
-                    if user.avatar_uuid and not sender.avatar_url:
+                    if user.avatar_uuid and not sender.avatar_url: # type: ignore
                         sender.avatar_url = f"{AVATAR_URL}/{user.avatar_uuid}"
             else:
                 # Если отправитель - ментор, получаем информацию о нем
-                mentor_query = select(Mentor).where(Mentor.id == request.sender_id)
+                mentor_query = select(Mentor).where(Mentor.id == request.sender_id) # type: ignore
                 mentor_result = await session.execute(mentor_query)
                 mentor = mentor_result.scalars().first()
                 if mentor:
@@ -224,7 +230,27 @@ async def get_received_requests(
             
             # Создаем объект ответа с информацией об отправителе
             request_response = RequestResponseWithSender.model_validate(request)
+            
+            # Добавляем telegram_link к sender, если статус ACCEPTED
+            if request.status == RequestStatus.ACCEPTED:
+                # Получаем отправителя с полной информацией
+                if request.sender_type == EntityType.USER:
+                    # Если отправитель - пользователь
+                    user_query = select(User).where(User.id == request.sender_id) # type: ignore
+                    user_result = await session.execute(user_query)
+                    user = user_result.scalar_one_or_none()
+                    if user and user.telegram_link and sender:
+                        sender.telegram_link = user.telegram_link
+                else:
+                    # Если отправитель - ментор
+                    mentor_query = select(Mentor).where(Mentor.id == request.sender_id) # type: ignore
+                    mentor_result = await session.execute(mentor_query)
+                    mentor = mentor_result.scalar_one_or_none()
+                    if mentor and mentor.telegram_link and sender:
+                        sender.telegram_link = mentor.telegram_link
+            
             request_response.sender = sender
+                
             requests_with_senders.append(request_response)
         
         return requests_with_senders
@@ -252,10 +278,10 @@ async def approve_request(
         # Получаем заявку
         query = select(Request).where(
             and_(
-                Request.id == request_id,
-                Request.receiver_id == current_user.id,
-                Request.receiver_type == receiver_type,
-                Request.status == RequestStatus.PENDING
+                Request.id == request_id, # type: ignore
+                Request.receiver_id == current_user.id, # type: ignore
+                Request.receiver_type == receiver_type, # type: ignore
+                Request.status == RequestStatus.PENDING # type: ignore
             )
         )
         result = await session.execute(query)
@@ -269,9 +295,9 @@ async def approve_request(
 
         # Получаем данные отправителя
         if request.sender_type == EntityType.USER:
-            sender_query = select(User).where(User.id == request.sender_id)
+            sender_query = select(User).where(User.id == request.sender_id) # type: ignore
         else:
-            sender_query = select(Mentor).where(Mentor.id == request.sender_id)
+            sender_query = select(Mentor).where(Mentor.id == request.sender_id) # type: ignore
         
         sender_result = await session.execute(sender_query)
         sender = sender_result.scalar_one_or_none()
@@ -324,10 +350,10 @@ async def reject_request(
         # Получаем заявку
         query = select(Request).where(
             and_(
-                Request.id == request_id,
-                Request.receiver_id == current_user.id,
-                Request.receiver_type == receiver_type,
-                Request.status == RequestStatus.PENDING
+                Request.id == request_id, # type: ignore
+                Request.receiver_id == current_user.id, # type: ignore
+                Request.receiver_type == receiver_type, # type: ignore
+                Request.status == RequestStatus.PENDING # type: ignore
             )
         )
         result = await session.execute(query)

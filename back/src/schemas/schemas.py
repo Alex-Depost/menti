@@ -311,6 +311,7 @@ class MentorFeedResponse(BaseModel):
     university: Optional[str] = Field(None, min_length=2, max_length=50)
     email: Optional[EmailStr] = None
     avatar_url: Optional[str] = None
+    telegram_link: Optional[str] = None
 
     class Config:
         """Pydantic config."""
@@ -329,6 +330,7 @@ class UserFeedResponse(BaseModel):
     admission_type: Optional[AdmissionType] = None
     email: Optional[EmailStr] = None
     avatar_url: Optional[str] = None
+    telegram_link: Optional[str] = None
 
     class Config:
         """Pydantic config."""

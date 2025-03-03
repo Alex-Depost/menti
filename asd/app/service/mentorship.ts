@@ -28,6 +28,7 @@ export interface MentorshipRequestResponse {
     admission_type?: string;
     email: string;
     avatar_url?: string;
+    telegram_link?: string;
   };
   receiver?: {
     id: number;
@@ -38,6 +39,7 @@ export interface MentorshipRequestResponse {
     admission_type?: string | null;
     email: string | null;
     avatar_url?: string | null;
+    telegram_link?: string;
   };
 }
 
@@ -345,6 +347,7 @@ export async function acceptMentorshipRequest(requestId: number): Promise<Reques
     return false;
   }
 }
+
 
 /**
  * Отклонение входящего запроса на менторство

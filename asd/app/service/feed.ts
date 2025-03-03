@@ -7,7 +7,9 @@ export interface FeedItem {
     name: string;
     title: string | null;
     description: string | null;
-    university: string | null;
+    university?: string | null;
+    target_universities?: string[];
+    admission_type?: string | null;
     email: string | null;
     avatar_url: string | null;
     avatar_uuid?: string;
