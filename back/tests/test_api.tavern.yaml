@@ -1,0 +1,130 @@
+---
+# Тесты API с использованием Tavern для проекта GOYDA
+test_name: Проверка базовых API эндпоинтов
+
+stages:
+  # Проверка корневого эндпоинта
+  - name: Проверка корневого эндпоинта
+    request:
+      url: "{tavern.env_vars.API_URL}/"
+      method: GET
+    response:
+      status_code: 200
+      json:
+        message: "GOYDA API"
+
+  # Регистрация пользователя
+  - name: Регистрация нового пользователя
+    request:
+      url: "{tavern.env_vars.API_URL}/auth/users/signup"
+      method: POST
+      json:
+        login: "test_user"
+        name: "Тестовый Пользователь"
+        password: "Password123!"
+        age: 18
+        description: "Тестовый пользователь для Tavern тестов"
+        target_universities: ["МГУ", "МГТУ"]
+        admission_type: "ЕГЭ"
+        email: "test@example.com"
+        telegram_link: "https://t.me/testuser"
+    response:
+      status_code: 201
+      save:
+        json:
+          user_access_token: access_token
+
+  # Аутентификация пользователя
+  - name: Аутентификация пользователя
+    request:
+      url: "{tavern.env_vars.API_URL}/auth/users/signin"
+      method: POST
+      json:
+        login: "test_user"
+        password: "Password123!"
+    response:
+      status_code: 200
+      json:
+        access_token: !anything
+      save:
+        json:
+          user_access_token: access_token
+
+  # Получение профиля текущего пользователя
+  - name: Получение профиля пользователя
+    request:
+      url: "{tavern.env_vars.API_URL}/auth/users/me"
+      method: GET
+      headers:
+        Authorization: "Bearer {user_access_token}"
+    response:
+      status_code: 200
+      json:
+        login: "test_user"
+        name: "Тестовый Пользователь"
+        description: !anything
+
+---
+# Тесты для API ленты менторов
+test_name: Проверка API ленты менторов
+
+stages:
+  # Получение списка менторов (публичный эндпоинт)
+  - name: Получение списка менторов
+    request:
+      url: "{tavern.env_vars.API_URL}/feed/mentors"
+      method: GET
+      params:
+        page: 1
+        size: 10
+    response:
+      status_code: 200
+      json:
+        total: !anything
+        items: !anything
+      verify_response_with:
+        function: back.tests.utils:verify_mentor_feed
+
+---
+# Тесты для API ленты пользователей
+test_name: Проверка API ленты пользователей
+
+stages:
+  # Тест регистрации ментора 
+  - name: Регистрация нового ментора
+    request:
+      url: "{tavern.env_vars.API_URL}/auth/mentors/signup"
+      method: POST
+      json:
+        login: "test_mentor"
+        name: "Тестовый Ментор"
+        password: "Password123!"
+        description: "Тестовый ментор для Tavern тестов" 
+        universities: ["МГУ"]
+        faculty: "Факультет ВМК"
+        admission_type: "ЕГЭ"
+        email: "mentor@example.com"
+        telegram_link: "https://t.me/testmentor"
+    response:
+      status_code: 201
+      save:
+        json:
+          mentor_access_token: access_token
+
+  # Получение списка пользователей (требует авторизации ментора)
+  - name: Получение списка пользователей
+    request:
+      url: "{tavern.env_vars.API_URL}/feed/users"
+      method: GET
+      headers:
+        Authorization: "Bearer {mentor_access_token}"
+      params:
+        page: 1
+        size: 10
+    response:
+      status_code: 200
+      json:
+        total: !anything
+        items: !anything
+      verify_response_with:
+        function: back.tests.utils:verify_user_feed 

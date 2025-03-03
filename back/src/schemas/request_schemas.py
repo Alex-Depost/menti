@@ -37,3 +37,11 @@ class RequestResponseWithSender(RequestResponse):
     class Config:
         """Pydantic config."""
         from_attributes = True 
+
+class RequestResponseWithReceiver(RequestResponse):
+    """Схема для ответа с заявкой, включающая информацию о получателе."""
+    receiver: Optional[Union[UserFeedResponse, MentorFeedResponse]] = None
+
+    class Config:
+        """Pydantic config."""
+        from_attributes = True 
