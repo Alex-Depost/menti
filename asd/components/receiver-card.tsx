@@ -42,7 +42,8 @@ export function ReceiverCard({
         return `hsl(${h}, 70%, 85%)`;
     };
 
-    const avatarColor = generatePastelColor(request.receiver_name || '');
+    const receiverName = request.receiver?.name || request.receiver_name || '';
+    const avatarColor = generatePastelColor(receiverName);
 
     // Format date for better readability
     const formattedDate = formatDistanceToNow(new Date(request.created_at), {
@@ -70,24 +71,24 @@ export function ReceiverCard({
                 {/* Header section with receiver info */}
                 <div className="flex items-start gap-4">
                     <Avatar className="h-16 w-16 border border-border/50 ring-2 ring-background shadow-sm">
-                        {request.receiver_avatar && (
+                        {(request.receiver?.avatar_url || request.receiver_avatar) && (
                             <AvatarImage
-                                src={`${AVATAR_URL}/${request.receiver_avatar}`}
-                                alt={request.receiver_name || ''}
+                                src={`${AVATAR_URL}/${request.receiver?.avatar_url || request.receiver_avatar}`}
+                                alt={receiverName}
                             />
                         )}
                         <AvatarFallback
                             className="text-primary-foreground text-base font-medium"
                             style={{ backgroundColor: avatarColor }}
                         >
-                            {getInitials(request.receiver_name || '')}
+                            {getInitials(receiverName)}
                         </AvatarFallback>
                     </Avatar>
                     <div className="flex-1">
                         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2">
                             <div>
                                 <div className="flex items-center gap-2">
-                                    <h3 className="font-medium text-lg">{request.receiver_name}</h3>
+                                    <h3 className="font-medium text-lg">{receiverName}</h3>
                                     {getStatusBadge()}
                                 </div>
                             </div>
@@ -98,21 +99,23 @@ export function ReceiverCard({
                         </div>
 
                         {/* Receiver description with formatted content */}
-                        {request.receiver_description && (
+                        {(request.receiver?.description || request.receiver_description) && (
                             <div className="mt-3">
                                 <HtmlContent
-                                    html={request.receiver_description}
+                                    html={request.receiver?.description || request.receiver_description || ''}
                                     className="text-sm text-muted-foreground"
                                 />
                             </div>
                         )}
 
-                        {/* Receiver university */}
-                        {request.receiver_university && (
-                            <div className="mt-2">
-                                <Badge variant="secondary" className="text-xs">
-                                    {request.receiver_university}
-                                </Badge>
+                        {/* Receiver universities */}
+                        {request.receiver?.target_universities && request.receiver.target_universities.length > 0 && (
+                            <div className="mt-2 flex flex-wrap gap-1">
+                                {request.receiver.target_universities.map((university, index) => (
+                                    <Badge key={index} variant="secondary" className="text-xs">
+                                        {university}
+                                    </Badge>
+                                ))}
                             </div>
                         )}
 
