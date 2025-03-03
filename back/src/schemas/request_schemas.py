@@ -44,4 +44,51 @@ class RequestResponseWithReceiver(RequestResponse):
 
     class Config:
         """Pydantic config."""
-        from_attributes = True 
+        from_attributes = True
+
+# Новые схемы для ответов на запросы подтверждения/отклонения заявок
+
+class ContactInfo(BaseModel):
+    """Схема для контактной информации отправителя заявки."""
+    email: str
+    telegram_link: Optional[str] = None
+    
+    class Config:
+        """Pydantic config."""
+        json_schema_extra = {
+            "example": {
+                "email": "user@example.com",
+                "telegram_link": "https://t.me/username"
+            }
+        }
+
+
+class RequestApproveResponse(BaseModel):
+    """Схема для ответа при подтверждении заявки."""
+    message: str
+    contact_info: ContactInfo
+    
+    class Config:
+        """Pydantic config."""
+        json_schema_extra = {
+            "example": {
+                "message": "Заявка успешно подтверждена",
+                "contact_info": {
+                    "email": "user@example.com",
+                    "telegram_link": "https://t.me/username"
+                }
+            }
+        }
+
+
+class RequestRejectResponse(BaseModel):
+    """Схема для ответа при отклонении заявки."""
+    message: str
+    
+    class Config:
+        """Pydantic config."""
+        json_schema_extra = {
+            "example": {
+                "message": "Заявка успешно отклонена"
+            }
+        }
