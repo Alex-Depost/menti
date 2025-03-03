@@ -170,6 +170,26 @@ export default function MentorInboxPage() {
                         </div>
                       </div>
                       
+                      {request.sender?.description && (
+                        <div className="mt-2">
+                          <p className="text-sm text-muted-foreground">
+                            {request.sender.description.length > 100
+                              ? `${request.sender.description.substring(0, 100)}...`
+                              : request.sender.description}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {request.sender?.target_universities && request.sender.target_universities.length > 0 && (
+                        <div className="mt-1 flex flex-wrap gap-1">
+                          {request.sender.target_universities.map((uni, index) => (
+                            <span key={index} className="text-xs bg-muted px-2 py-1 rounded-full">
+                              {uni}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                      
                       <div className="mt-4 p-4 bg-muted/50 rounded-md">
                         <p className="text-sm whitespace-pre-wrap">{request.message}</p>
                       </div>

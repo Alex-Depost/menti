@@ -170,6 +170,16 @@ export default function UserInboxPage() {
                         </div>
                       </div>
                       
+                      {request.sender?.description && (
+                        <div className="mt-2">
+                          <p className="text-sm text-muted-foreground">
+                            {request.sender.description.length > 100
+                              ? `${request.sender.description.substring(0, 100)}...`
+                              : request.sender.description}
+                          </p>
+                        </div>
+                      )}
+                      
                       <div className="mt-4 p-4 bg-muted/50 rounded-md">
                         <p className="text-sm whitespace-pre-wrap">{request.message}</p>
                       </div>
