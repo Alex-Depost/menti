@@ -5,7 +5,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.base import session_scope
 from src.data.models import Request, RequestStatus, EntityType, User, Mentor
-from src.schemas.request_schemas import RequestCreate, RequestResponse, RequestResponseWithSender, RequestResponseWithReceiver
+from src.schemas.request_schemas import (
+    RequestCreate, RequestResponse, RequestResponseWithSender, RequestResponseWithReceiver,
+    RequestApproveResponse, RequestRejectResponse, ContactInfo
+)
 from src.security.auth import get_optional_current_user, get_optional_current_mentor
 from src.schemas.schemas import UserFeedResponse, MentorFeedResponse
 from src.utils.constants import AVATAR_URL
@@ -227,7 +230,7 @@ async def get_received_requests(
         return requests_with_senders
 
 
-@router.post("/approve/{request_id}")
+@router.post("/approve/{request_id}", response_model=RequestApproveResponse)
 async def approve_request(
     request_id: int,
     current_user: Union[User, Mentor] = Depends(get_current_user_or_mentor),
@@ -238,6 +241,9 @@ async def approve_request(
     - Пользователь может подтвердить заявку от ментора
     - Ментор может подтвердить заявку от пользователя
     - Можно подтвердить только заявки в статусе "в ожидании"
+    
+    Returns:
+        RequestApproveResponse: Сообщение об успешном подтверждении и контактная информация отправителя
     """
     # Определяем тип получателя
     receiver_type = EntityType.USER if isinstance(current_user, User) else EntityType.MENTOR
@@ -280,16 +286,20 @@ async def approve_request(
         request.status = RequestStatus.ACCEPTED
         await session.commit()
         
-        return {
-            "message": "Заявка успешно подтверждена",
-            "contact_info": {
-                "email": sender.email,
-                "telegram_link": sender.telegram_link
-            }
-        }
+        # Создаем объект ContactInfo
+        contact_info = ContactInfo(
+            email=sender.email,
+            telegram_link=sender.telegram_link
+        )
+        
+        # Возвращаем ответ в соответствии со схемой RequestApproveResponse
+        return RequestApproveResponse(
+            message="Заявка успешно подтверждена",
+            contact_info=contact_info
+        )
 
 
-@router.post("/reject/{request_id}")
+@router.post("/reject/{request_id}", response_model=RequestRejectResponse)
 async def reject_request(
     request_id: int,
     current_user: Union[User, Mentor] = Depends(get_current_user_or_mentor),
@@ -300,6 +310,9 @@ async def reject_request(
     - Пользователь может отклонить заявку от ментора
     - Ментор может отклонить заявку от пользователя
     - Можно отклонить только заявки в статусе "в ожидании"
+    
+    Returns:
+        RequestRejectResponse: Сообщение об успешном отклонении заявки
     """
     # Определяем тип получателя
     receiver_type = EntityType.USER if isinstance(current_user, User) else EntityType.MENTOR
@@ -327,4 +340,5 @@ async def reject_request(
         request.status = RequestStatus.REJECTED
         await session.commit()
         
-        return {"message": "Заявка успешно отклонена"} 
+        # Возвращаем ответ в соответствии со схемой RequestRejectResponse
+        return RequestRejectResponse(message="Заявка успешно отклонена")
