@@ -1,20 +1,23 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { AVATAR_URL } from "@/app/service/config";
-import { 
-  getIncomingMentorshipRequestsForUI, 
-  MentorshipRequestDisplay, 
-  acceptMentorshipRequest, 
-  rejectMentorshipRequest 
+import {
+  getIncomingMentorshipRequestsForUI,
+  MentorshipRequestDisplay,
+  acceptMentorshipRequest,
+  rejectMentorshipRequest
 } from "@/app/service/mentorship";
 import { toast } from "sonner";
-import { Check, X, Loader2 } from "lucide-react";
+import { Check, X, Loader2, Filter, Search, RefreshCw } from "lucide-react";
+import { SenderCard } from "@/components/sender-card";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 
 export default function MentorInboxPage() {
   const router = useRouter();
@@ -22,48 +25,38 @@ export default function MentorInboxPage() {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<MentorshipRequestDisplay[]>([]);
   const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
+  
+  // Filter states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  useEffect(() => {
-    async function loadRequests() {
-      if (!isAuthenticated || isUser) {
-        return;
-      }
-
-      try {
-        const data = await getIncomingMentorshipRequestsForUI();
-        setRequests(data);
-      } catch (err) {
-        toast.error("Не удалось загрузить входящие заявки");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
+  const loadRequests = async () => {
+    if (!isAuthenticated || isUser) {
+      return;
     }
 
+    try {
+      setIsRefreshing(true);
+      const data = await getIncomingMentorshipRequestsForUI();
+      setRequests(data);
+    } catch (err) {
+      toast.error("Не удалось загрузить входящие заявки");
+      console.error(err);
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
     loadRequests();
   }, [isAuthenticated, isUser, router]);
 
-  // Get initials for avatar
-  const getInitials = (name: string) => {
-    return name
-      .split(' ')
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .substring(0, 2);
+  const handleRefresh = () => {
+    loadRequests();
   };
 
-  // Generate a consistent pastel color based on the name
-  const generatePastelColor = (name: string) => {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
-    }
-
-    // Generate pastel color (higher lightness, lower saturation)
-    const h = hash % 360;
-    return `hsl(${h}, 70%, 85%)`;
-  };
 
   const handleAccept = async (requestId: number) => {
     setProcessingRequestId(requestId);
@@ -111,6 +104,38 @@ export default function MentorInboxPage() {
     }
   };
 
+  // Filter and search functionality
+  const filteredRequests = useMemo(() => {
+    return requests.filter(request => {
+      // Status filter
+      if (statusFilter !== "all" && request.status !== statusFilter) {
+        return false;
+      }
+      
+      // Search filter (case insensitive)
+      if (searchQuery) {
+        const query = searchQuery.toLowerCase();
+        return (
+          (request.sender_name?.toLowerCase().includes(query) || false) ||
+          (request.sender_email?.toLowerCase().includes(query) || false) ||
+          (request.message.toLowerCase().includes(query))
+        );
+      }
+      
+      return true;
+    });
+  }, [requests, statusFilter, searchQuery]);
+
+  // Count requests by status
+  const requestCounts = useMemo(() => {
+    return {
+      all: requests.length,
+      pending: requests.filter(r => r.status === 'pending').length,
+      accepted: requests.filter(r => r.status === 'accepted').length,
+      rejected: requests.filter(r => r.status === 'rejected').length
+    };
+  }, [requests]);
+
   if (loading) {
     return (
       <div className="container mx-auto py-8 px-4 md:px-8">
@@ -124,114 +149,125 @@ export default function MentorInboxPage() {
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-8">
-      <h1 className="text-2xl font-bold mb-6">Входящие заявки</h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between mb-6 gap-4">
+        <h1 className="text-2xl font-bold">Входящие заявки</h1>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handleRefresh}
+          disabled={isRefreshing}
+          className="self-start md:self-auto"
+        >
+          {isRefreshing ? (
+            <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+          ) : (
+            <RefreshCw className="h-4 w-4 mr-2" />
+          )}
+          Обновить
+        </Button>
+      </div>
 
-      {requests.length === 0 ? (
+      {/* Filter section */}
+      <Card className="mb-6">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-base font-medium flex items-center">
+            <Filter className="h-4 w-4 mr-2" />
+            Фильтры
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                <Input
+                  type="search"
+                  placeholder="Поиск по имени или сообщению..."
+                  className="pl-8"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
+              </div>
+            </div>
+            <div className="w-full md:w-48">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Статус" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">
+                    Все заявки <Badge variant="outline" className="ml-2">{requestCounts.all}</Badge>
+                  </SelectItem>
+                  <SelectItem value="pending">
+                    Ожидающие <Badge variant="outline" className="ml-2">{requestCounts.pending}</Badge>
+                  </SelectItem>
+                  <SelectItem value="accepted">
+                    Принятые <Badge variant="outline" className="ml-2">{requestCounts.accepted}</Badge>
+                  </SelectItem>
+                  <SelectItem value="rejected">
+                    Отклоненные <Badge variant="outline" className="ml-2">{requestCounts.rejected}</Badge>
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {filteredRequests.length === 0 ? (
         <Card>
           <CardContent className="py-10">
             <div className="text-center text-muted-foreground">
-              У вас пока нет входящих заявок от пользователей
+              {requests.length === 0
+                ? "У вас пока нет входящих заявок от пользователей"
+                : "Нет заявок, соответствующих выбранным фильтрам"}
             </div>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
-          {requests.map((request) => {
-            const avatarColor = generatePastelColor(request.sender_name || '');
+          {filteredRequests.map((request) => {
             const isProcessing = processingRequestId === request.id;
             
             return (
-              <Card key={request.id} className="overflow-hidden">
-                <CardContent className="p-6">
-                  <div className="flex items-start gap-4">
-                    <Avatar className="h-12 w-12 border border-border/50">
-                      {request.sender_avatar && (
-                        <AvatarImage
-                          src={`${AVATAR_URL}/${request.sender_avatar}`}
-                          alt={request.sender_name || ''}
-                        />
-                      )}
-                      <AvatarFallback
-                        className="text-primary-foreground text-sm font-medium"
-                        style={{ backgroundColor: avatarColor }}
-                      >
-                        {getInitials(request.sender_name || '')}
-                      </AvatarFallback>
-                    </Avatar>
-                    
-                    <div className="flex-1">
-                      <div className="flex justify-between items-start">
-                        <div>
-                          <h3 className="font-medium">{request.sender_name}</h3>
-                          <p className="text-sm text-muted-foreground">{request.sender_email}</p>
-                        </div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(request.created_at).toLocaleDateString('ru-RU')}
-                        </div>
-                      </div>
-                      
-                      {request.sender?.description && (
-                        <div className="mt-2">
-                          <p className="text-sm text-muted-foreground">
-                            {request.sender.description.length > 100
-                              ? `${request.sender.description.substring(0, 100)}...`
-                              : request.sender.description}
-                          </p>
-                        </div>
-                      )}
-                      
-                      {request.sender?.target_universities && request.sender.target_universities.length > 0 && (
-                        <div className="mt-1 flex flex-wrap gap-1">
-                          {request.sender.target_universities.map((uni, index) => (
-                            <span key={index} className="text-xs bg-muted px-2 py-1 rounded-full">
-                              {uni}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                      
-                      <div className="mt-4 p-4 bg-muted/50 rounded-md">
-                        <p className="text-sm whitespace-pre-wrap">{request.message}</p>
-                      </div>
-                      
-                      {request.status === 'pending' && (
-                        <div className="mt-4 flex justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleReject(request.id)}
-                            disabled={isProcessing}
-                          >
-                            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4 mr-1" />}
-                            Отклонить
-                          </Button>
-                          <Button
-                            variant="default"
-                            size="sm"
-                            onClick={() => handleAccept(request.id)}
-                            disabled={isProcessing}
-                          >
-                            {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
-                            Принять
-                          </Button>
-                        </div>
-                      )}
-                      
-                      {request.status === 'accepted' && (
-                        <div className="mt-4 text-sm text-green-600 font-medium">
-                          Заявка принята
-                        </div>
-                      )}
-                      
-                      {request.status === 'rejected' && (
-                        <div className="mt-4 text-sm text-muted-foreground">
-                          Заявка отклонена
-                        </div>
-                      )}
-                    </div>
+              <div key={request.id} className="space-y-2">
+                <SenderCard request={request} showActions={false} />
+                
+                {request.status === 'pending' && (
+                  <div className="flex justify-end gap-2 mt-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleReject(request.id)}
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <X className="h-4 w-4 mr-1" />}
+                      Отклонить
+                    </Button>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={() => handleAccept(request.id)}
+                      disabled={isProcessing}
+                    >
+                      {isProcessing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4 mr-1" />}
+                      Принять
+                    </Button>
                   </div>
-                </CardContent>
-              </Card>
+                )}
+                
+                {request.status === 'accepted' && (
+                  <div className="mt-2 text-sm text-green-600 font-medium text-right">
+                    Заявка принята
+                  </div>
+                )}
+                
+                {request.status === 'rejected' && (
+                  <div className="mt-2 text-sm text-muted-foreground text-right">
+                    Заявка отклонена
+                  </div>
+                )}
+              </div>
             );
           })}
         </div>

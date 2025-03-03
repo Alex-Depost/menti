@@ -28,11 +28,12 @@ deploy_to_production:
     # Create main directory on remote server
     - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR"
     
-    # Copy the entire repository to the remote server
-    - scp -r ./* $SSH_ADDRESS:$REMOTE_DIR/
-    
-    # Run the containers
+    # Stop containers and remove old project
     - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker compose down || true"
+    - ssh $SSH_ADDRESS "rm -rf $REMOTE_DIR/*"
+    
+    # Copy the new project and run containers
+    - scp -r ./* $SSH_ADDRESS:$REMOTE_DIR/
     - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker compose up -d --build"
     
     # Clean up unused images
