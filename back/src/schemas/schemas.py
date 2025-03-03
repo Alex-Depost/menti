@@ -94,6 +94,8 @@ class UserResponse(BaseModel):
         """Проверка формата ссылки на телеграм."""
         if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
             raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        if v.startswith('t.me/'):
+            v = 'https://' + v
         return v
     
     @validator('target_universities')
