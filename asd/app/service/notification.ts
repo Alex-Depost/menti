@@ -7,7 +7,7 @@ let lastOutgoingRequestsMap: Record<number, string> = {}; // Map of request ID t
 let isInitialized = false;
 
 // Interval for checking new messages (in milliseconds)
-const CHECK_INTERVAL = 60000; // 1 minute
+const CHECK_INTERVAL = 5000; // 5 seconds
 
 // Store the interval ID to clear it when needed
 let checkIntervalId: NodeJS.Timeout | null = null;
@@ -20,19 +20,19 @@ const checkNewMessages = async (): Promise<void> => {
     // Fetch both incoming and outgoing requests
     const incomingRequests = await getIncomingMentorshipRequests();
     const outgoingRequests = await getOutgoingMentorshipRequests();
-    
+
     // Create maps of current requests
     const currentIncomingMap: Record<number, string> = {};
     const currentOutgoingMap: Record<number, string> = {};
-    
+
     incomingRequests.forEach(req => {
       currentIncomingMap[req.id] = req.status;
     });
-    
+
     outgoingRequests.forEach(req => {
       currentOutgoingMap[req.id] = req.status;
     });
-    
+
     // If this is the first check, just store the state without notification
     if (!isInitialized) {
       lastIncomingRequestsMap = currentIncomingMap;
@@ -40,44 +40,44 @@ const checkNewMessages = async (): Promise<void> => {
       isInitialized = true;
       return;
     }
-    
+
     // Process incoming requests
     const newIncomingRequests: MentorshipRequestResponse[] = [];
-    
+
     incomingRequests.forEach(request => {
       const requestId = request.id;
       const currentStatus = request.status;
       const previousStatus = lastIncomingRequestsMap[requestId];
-      
+
       // New request (not in our previous map)
       if (!previousStatus && currentStatus === 'pending') {
         newIncomingRequests.push(request);
       }
     });
-    
+
     // Process outgoing requests
     const acceptedRequests: MentorshipRequestResponse[] = [];
     const rejectedRequests: MentorshipRequestResponse[] = [];
-    
+
     outgoingRequests.forEach(request => {
       const requestId = request.id;
       const currentStatus = request.status;
       const previousStatus = lastOutgoingRequestsMap[requestId];
-      
+
       // Status changed from pending to accepted
       if (previousStatus === 'pending' && currentStatus === 'accepted') {
         acceptedRequests.push(request);
-      } 
+      }
       // Status changed from pending to rejected
       else if (previousStatus === 'pending' && currentStatus === 'rejected') {
         rejectedRequests.push(request);
       }
     });
-    
+
     // Count of new pending incoming requests for the badge
     const pendingRequests = incomingRequests.filter(req => req.status === 'pending');
     const pendingCount = pendingRequests.length;
-    
+
     // Show notifications for new incoming requests
     if (newIncomingRequests.length > 0) {
       newIncomingRequests.forEach(request => {
@@ -88,10 +88,10 @@ const checkNewMessages = async (): Promise<void> => {
             label: "Просмотреть",
             onClick: () => {
               // Determine the correct inbox URL based on user type
-              const inboxUrl = request.receiver_type === 'user' 
-                ? '/app/user/inbox' 
+              const inboxUrl = request.receiver_type === 'user'
+                ? '/app/user/inbox'
                 : '/app/mentor/inbox';
-              
+
               // Navigate to inbox
               window.location.href = inboxUrl;
             }
@@ -99,7 +99,7 @@ const checkNewMessages = async (): Promise<void> => {
         });
       });
     }
-    
+
     // Show notifications for accepted outgoing requests
     if (acceptedRequests.length > 0) {
       acceptedRequests.forEach(request => {
@@ -110,10 +110,10 @@ const checkNewMessages = async (): Promise<void> => {
             label: "Просмотреть",
             onClick: () => {
               // Determine the correct outgoing URL based on user type
-              const outgoingUrl = request.sender_type === 'user' 
-                ? '/app/user/outgoing' 
+              const outgoingUrl = request.sender_type === 'user'
+                ? '/app/user/outgoing'
                 : '/app/mentor/outgoing';
-              
+
               // Navigate to outgoing requests
               window.location.href = outgoingUrl;
             }
@@ -121,7 +121,7 @@ const checkNewMessages = async (): Promise<void> => {
         });
       });
     }
-    
+
     // Show notifications for rejected outgoing requests
     if (rejectedRequests.length > 0) {
       rejectedRequests.forEach(request => {
@@ -132,10 +132,10 @@ const checkNewMessages = async (): Promise<void> => {
             label: "Просмотреть",
             onClick: () => {
               // Determine the correct outgoing URL based on user type
-              const outgoingUrl = request.sender_type === 'user' 
-                ? '/app/user/outgoing' 
+              const outgoingUrl = request.sender_type === 'user'
+                ? '/app/user/outgoing'
                 : '/app/mentor/outgoing';
-              
+
               // Navigate to outgoing requests
               window.location.href = outgoingUrl;
             }
@@ -143,18 +143,18 @@ const checkNewMessages = async (): Promise<void> => {
         });
       });
     }
-    
+
     // Update badge count in UI by dispatching a custom event
     if (pendingCount > 0) {
-      window.dispatchEvent(new CustomEvent('new-inbox-messages', { 
-        detail: { count: pendingCount } 
+      window.dispatchEvent(new CustomEvent('new-inbox-messages', {
+        detail: { count: pendingCount }
       }));
     }
-    
+
     // Update the last known state
     lastIncomingRequestsMap = currentIncomingMap;
     lastOutgoingRequestsMap = currentOutgoingMap;
-    
+
   } catch (error) {
     console.error('Failed to check for new messages:', error);
   }
@@ -168,10 +168,10 @@ const startBackgroundCheck = (): void => {
   if (checkIntervalId) {
     clearInterval(checkIntervalId);
   }
-  
+
   // Initialize with current state
   checkNewMessages();
-  
+
   // Set up interval for regular checks
   checkIntervalId = setInterval(checkNewMessages, CHECK_INTERVAL);
 };
