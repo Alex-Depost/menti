@@ -187,8 +187,13 @@ export function TagInput({
           </Badge>
         ))}
         
-        <form onSubmit={handleSubmit} className="flex flex-grow items-center relative">
-          <div className="flex-grow overflow-hidden pr-20">
+        <div className="flex flex-grow items-center relative">
+          <div className="flex-grow overflow-hidden pr-20" onKeyDown={(e) => {
+            if (e.key === "Enter" && inputValue.trim() !== "") {
+              e.preventDefault();
+              addCurrentTag();
+            }
+          }}>
             <input
               ref={inputRef}
               type="text"
@@ -214,7 +219,7 @@ export function TagInput({
           {/* Add button for mobile users */}
           {inputValue.trim() !== "" && (
             <button
-              type="submit"
+              type="button"
               className="absolute right-8 p-1 rounded-md hover:bg-gray-100 focus:outline-none"
               aria-label="Add tag"
               onClick={(e) => {
@@ -237,7 +242,7 @@ export function TagInput({
           >
             <ChevronDown size={18} className={`transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
           </button>
-        </form>
+        </div>
       </div>
       
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}
