@@ -116,7 +116,6 @@ export default function MentorInboxPage() {
         const query = searchQuery.toLowerCase();
         return (
           (request.sender_name?.toLowerCase().includes(query) || false) ||
-          (request.sender_email?.toLowerCase().includes(query) || false) ||
           (request.message.toLowerCase().includes(query))
         );
       }

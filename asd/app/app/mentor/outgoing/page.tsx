@@ -7,13 +7,14 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { AVATAR_URL } from "@/app/service/config";
-import { 
-  getOutgoingMentorshipRequestsForUI, 
-  MentorshipRequestDisplay, 
-  cancelMentorshipRequest 
+import {
+  getOutgoingMentorshipRequestsForUI,
+  MentorshipRequestDisplay,
+  cancelMentorshipRequest
 } from "@/app/service/mentorship";
 import { toast } from "sonner";
 import { X, Loader2 } from "lucide-react";
+import { HtmlContent } from "@/components/ui/html-content";
 
 export default function MentorOutgoingPage() {
   const router = useRouter();
@@ -71,8 +72,8 @@ export default function MentorOutgoingPage() {
       if (success) {
         toast.success("Заявка отменена");
         // Update the request status in the UI
-        setRequests(prevRequests => 
-          prevRequests.map(req => 
+        setRequests(prevRequests =>
+          prevRequests.map(req =>
             req.id === requestId ? { ...req, status: 'rejected' } : req
           )
         );
@@ -89,7 +90,7 @@ export default function MentorOutgoingPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-8 px-4 md:px-8">
+      <div className="container mx-auto py-8 px-4 md:px-6 max-w-4xl">
         <h1 className="text-2xl font-bold mb-6">Исходящие заявки</h1>
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -99,7 +100,7 @@ export default function MentorOutgoingPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-8">
+    <div className="container mx-auto py-8 px-4 md:px-6 max-w-4xl">
       <h1 className="text-2xl font-bold mb-6">Исходящие заявки</h1>
 
       {requests.length === 0 ? (
@@ -114,7 +115,7 @@ export default function MentorOutgoingPage() {
         <div className="space-y-4">
           {requests.map((request) => {
             const avatarColor = generatePastelColor(request.receiver_name || '');
-            
+
             return (
               <Card key={request.id} className="overflow-hidden">
                 <CardContent className="p-6">
@@ -133,39 +134,50 @@ export default function MentorOutgoingPage() {
                         {getInitials(request.receiver_name || '')}
                       </AvatarFallback>
                     </Avatar>
-                    
+
                     <div className="flex-1">
                       <div className="flex justify-between items-start">
                         <div>
                           <h3 className="font-medium">{request.receiver_name}</h3>
-                          <p className="text-sm text-muted-foreground">{request.receiver_email}</p>
+                          {request.receiver_description && (
+                            <div className="text-sm font-medium text-primary mt-1">
+                              <HtmlContent html={request.receiver_description} />
+                            </div>
+                          )}
+                          {request.receiver_university && (
+                            <p className="text-sm text-muted-foreground mt-1">{request.receiver_university}</p>
+                          )}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {new Date(request.created_at).toLocaleDateString('ru-RU')}
                         </div>
                       </div>
-                      
-                      <div className="mt-4 p-4 bg-muted/50 rounded-md">
+
+                      <div className="mt-4 p-4 bg-muted/30 rounded-md">
                         <p className="text-sm whitespace-pre-wrap">{request.message}</p>
                       </div>
-                      
-                      {request.status === 'pending' && (
-                        <div className="mt-4 text-sm text-amber-600 font-medium">
-                          Ожидает ответа
+
+                      <div className="mt-4 flex justify-between items-center">
+                        <div>
+                          {request.status === 'pending' && (
+                            <div className="text-sm text-amber-600 font-medium">
+                              Ожидает ответа
+                            </div>
+                          )}
+
+                          {request.status === 'accepted' && (
+                            <div className="text-sm text-green-600 font-medium">
+                              Заявка принята
+                            </div>
+                          )}
+
+                          {request.status === 'rejected' && (
+                            <div className="text-sm text-muted-foreground">
+                              Заявка отклонена
+                            </div>
+                          )}
                         </div>
-                      )}
-                      
-                      {request.status === 'accepted' && (
-                        <div className="mt-4 text-sm text-green-600 font-medium">
-                          Заявка принята
-                        </div>
-                      )}
-                      
-                      {request.status === 'rejected' && (
-                        <div className="mt-4 text-sm text-muted-foreground">
-                          Заявка отклонена
-                        </div>
-                      )}
+                      </div>
                     </div>
                   </div>
                 </CardContent>

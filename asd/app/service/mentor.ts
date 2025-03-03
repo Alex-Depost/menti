@@ -87,7 +87,6 @@ export class MentorService {
             }
 
             // Remove null fields from the data before sending
-            const cleanData = removeNullFields(data);
 
             const response = await fetch(`${API_URL}/auth/mentors/me`, {
                 method: 'PATCH',
@@ -95,7 +94,7 @@ export class MentorService {
                     'Authorization': `Bearer ${token}`,
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify(cleanData)
+                body: JSON.stringify(data)
             });
 
             if (!response.ok) {
