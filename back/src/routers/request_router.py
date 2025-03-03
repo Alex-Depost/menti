@@ -261,11 +261,32 @@ async def approve_request(
                 detail="Заявка не найдена или уже обработана"
             )
 
+        # Получаем данные отправителя
+        if request.sender_type == EntityType.USER:
+            sender_query = select(User).where(User.id == request.sender_id)
+        else:
+            sender_query = select(Mentor).where(Mentor.id == request.sender_id)
+        
+        sender_result = await session.execute(sender_query)
+        sender = sender_result.scalar_one_or_none()
+
+        if not sender:
+            raise HTTPException(
+                status_code=404,
+                detail="Отправитель не найден"
+            )
+
         # Обновляем статус заявки
         request.status = RequestStatus.ACCEPTED
         await session.commit()
         
-        return {"message": "Заявка успешно подтверждена"}
+        return {
+            "message": "Заявка успешно подтверждена",
+            "contact_info": {
+                "email": sender.email,
+                "telegram_link": sender.telegram_link
+            }
+        }
 
 
 @router.post("/reject/{request_id}")

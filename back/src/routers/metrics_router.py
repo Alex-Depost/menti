@@ -28,7 +28,7 @@ class Metrics:
 metrics = Metrics()
 
 
-@router.get("/", response_class=Response)
+@router.get("/", response_class=Response, include_in_schema=False)
 async def get_business_metrics():
     """
     Эндпоинт для получения бизнес-метрик в формате OpenMetrics. 
