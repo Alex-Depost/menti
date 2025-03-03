@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { MessageSquare } from "lucide-react";
 import { AVATAR_URL } from "@/app/service/config";
 import { MentorshipRequestDialog } from "./mentorship-request-dialog";
+import { HtmlContent } from "@/components/ui/html-content";
 
 interface MentorCardProps {
     item: FeedItem;
@@ -79,7 +80,14 @@ export function MentorCard({ item }: MentorCardProps) {
                     {/* Title and description together */}
                     <div>
                         <h4 className="font-medium mb-2">{item.title}</h4>
-                        <p className="text-sm text-muted-foreground">{item.description}</p>
+                        {item.description ? (
+                            <HtmlContent
+                                html={item.description}
+                                className="text-sm text-muted-foreground"
+                            />
+                        ) : (
+                            <p className="text-sm text-muted-foreground">Нет описания</p>
+                        )}
                     </div>
                 </div>
             </div>

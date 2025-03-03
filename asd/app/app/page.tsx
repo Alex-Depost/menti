@@ -11,8 +11,7 @@ import { useCallback, useEffect, useState } from "react";
 import feedService, { FeedResponse } from "../service/feed";
 
 export default function FeedPage() {
-  // Use the improved auth hook that includes isMentor
-  const { isAuthenticated, authType, isUser, isMentor } = useAuth();
+  const { isMentor } = useAuth();
   
   // Feed state
   const [feedData, setFeedData] = useState<FeedResponse>({

@@ -114,7 +114,6 @@ export default function MentorOutgoingPage() {
         <div className="space-y-4">
           {requests.map((request) => {
             const avatarColor = generatePastelColor(request.receiver_name || '');
-            const isCancelling = cancellingRequestId === request.id;
             
             return (
               <Card key={request.id} className="overflow-hidden">
