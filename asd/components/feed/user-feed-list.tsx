@@ -19,7 +19,7 @@ export function UserFeedList({
   handlePageChange
 }: UserFeedListProps) {
   return (
-    <main id="users-list" className="container mx-auto px-4 py-8">
+    <main id="menti-list" className="container mx-auto px-4 py-8">
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 6 }).map((_, index) => (
@@ -68,7 +68,7 @@ export function UserFeedList({
           <div className="w-16 h-16 rounded-full bg-muted/30 flex items-center justify-center mb-4">
             <Users className="h-8 w-8 text-muted-foreground/70" />
           </div>
-          <h3 className="text-xl font-medium mb-2">Пользователи не найдены</h3>
+          <h3 className="text-xl font-medium mb-2">Менти не найдены</h3>
           <p className="text-muted-foreground text-center max-w-md mb-6">
             Попробуйте изменить параметры поиска, чтобы увидеть больше результатов
           </p>

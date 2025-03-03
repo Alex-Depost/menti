@@ -7,10 +7,10 @@ import { useRouter } from "next/navigation";
 export function UserFeedHero() {
   const router = useRouter();
 
-  const scrollToUsers = () => {
-    const usersSection = document.getElementById('users-list');
-    if (usersSection) {
-      usersSection.scrollIntoView({ behavior: 'smooth' });
+  const scrollToMenti = () => {
+    const mentiSection = document.getElementById('menti-list');
+    if (mentiSection) {
+      mentiSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
 
@@ -24,9 +24,9 @@ export function UserFeedHero() {
               Общайтесь с другими пользователями, делитесь опытом и находите новые возможности для сотрудничества
             </p>
             <div className="flex gap-3">
-              <Button className="gap-2" onClick={scrollToUsers}>
+              <Button className="gap-2" onClick={scrollToMenti}>
                 <Users className="h-4 w-4" />
-                Найти пользователей
+                Найти менти
               </Button>
               <Button variant="outline" className="gap-2" onClick={() => router.push("/app/mentor/profile")}>
                 <Sparkles className="h-4 w-4" />
