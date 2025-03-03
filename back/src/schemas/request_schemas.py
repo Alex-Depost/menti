@@ -50,7 +50,7 @@ class RequestResponseWithReceiver(RequestResponse):
 
 class ContactInfo(BaseModel):
     """Схема для контактной информации отправителя заявки."""
-    email: str
+    email: Optional[str] = None
     telegram_link: Optional[str] = None
     
     class Config:
