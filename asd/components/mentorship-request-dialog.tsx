@@ -8,7 +8,7 @@ import { cn } from "@/lib/utils";
 import * as React from "react";
 import { MentorshipRequestError, sendMentorshipRequest } from "@/app/service/mentorship";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import userService from "@/app/service/user";
 
@@ -52,6 +52,8 @@ export function MentorshipRequestDialog({
     email: ""
   });
   const [showContactFields, setShowContactFields] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [hasValidContactInfo, setHasValidContactInfo] = useState(false);
 
   useEffect(() => {
     // При открытии диалога проверяем наличие контактной информации в профиле пользователя (отправитель)
@@ -74,14 +76,36 @@ export function MentorshipRequestDialog({
         if (userProfile?.email) {
           setContactInfo(prev => ({ ...prev, email: userProfile.email || "" }));
         }
+        
+        // Устанавливаем состояние валидности контактной информации
+        setHasValidContactInfo(hasContactInfo);
       } catch (error) {
         // В случае ошибки лучше показать поля, чтобы пользователь мог ввести данные
         setShowContactFields(true);
+        setHasValidContactInfo(false);
       }
     };
     
     checkContactInfo();
   }, [isOpen]);
+
+  // Проверяем валидность контактной информации при её изменении
+  useEffect(() => {
+    if (!showContactFields) {
+      // Если поля не отображаются, значит контактная информация уже есть в профиле
+      return;
+    }
+
+    const hasTelegram = !!contactInfo.telegram.trim();
+    const hasEmail = !!contactInfo.email.trim();
+    const isEmailValid = !contactInfo.email.trim() || isValidEmail(contactInfo.email);
+    
+    // Контактная информация валидна, если есть хотя бы одно заполненное поле и email (если указан) валиден
+    setHasValidContactInfo((hasTelegram || hasEmail) && isEmailValid);
+    
+    // Сбрасываем ошибки полей при изменении значений
+    setFieldErrors({});
+  }, [contactInfo, showContactFields]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -105,6 +129,8 @@ export function MentorshipRequestDialog({
       }
     }
     
+    // Сбрасываем ошибки полей перед отправкой
+    setFieldErrors({});
     setIsSubmitting(true);
     
     try {
@@ -119,13 +145,24 @@ export function MentorshipRequestDialog({
           
           // Сообщаем пользователю, что контактная информация была сохранена
           toast.success("Контактная информация сохранена в вашем профиле");
-        } catch (error) {
-          // Предупреждаем, но продолжаем отправку запроса
-          toast.warning("Не удалось сохранить контактную информацию");
+          
+          // Устанавливаем флаг, что теперь у пользователя есть контактная информация
+          setHasValidContactInfo(true);
+        } catch (error: any) {
+          // Если есть структурированные ошибки полей, отображаем их
+          if (error.fieldErrors) {
+            setFieldErrors(error.fieldErrors);
+            toast.error("Пожалуйста, исправьте ошибки в контактной информации");
+            return; // Прерываем выполнение, не отправляем запрос на менторство
+          } else {
+            // Общая ошибка
+            toast.error("Не удалось сохранить контактную информацию");
+            return; // Прерываем выполнение, не отправляем запрос на менторство
+          }
         }
       }
 
-      // Отправляем запрос ментору (receiver_type = 'mentor')
+      // Отправляем запрос ментору (receiver_type = 'mentor') только если контактная информация валидна
       const response = await sendMentorshipRequest(mentorId, message, 'mentor');
       
       if (response) {
@@ -133,6 +170,7 @@ export function MentorshipRequestDialog({
         onClose();
         setMessage("");
         setContactInfo({ telegram: "", email: "" });
+        setFieldErrors({});
       } else {
         toast.error("Не удалось отправить запрос на менторство");
       }
@@ -170,7 +208,14 @@ export function MentorshipRequestDialog({
                   value={contactInfo.telegram}
                   onChange={(e) => setContactInfo(prev => ({ ...prev, telegram: e.target.value }))}
                   disabled={isSubmitting}
+                  className={fieldErrors.telegram_link ? "border-red-500" : ""}
                 />
+                {fieldErrors.telegram_link && (
+                  <div className="text-sm text-red-500 flex items-center mt-1">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {fieldErrors.telegram_link}
+                  </div>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
@@ -181,7 +226,14 @@ export function MentorshipRequestDialog({
                   value={contactInfo.email}
                   onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
                   disabled={isSubmitting}
+                  className={fieldErrors.email ? "border-red-500" : ""}
                 />
+                {fieldErrors.email && (
+                  <div className="text-sm text-red-500 flex items-center mt-1">
+                    <AlertCircle className="h-4 w-4 mr-1" />
+                    {fieldErrors.email}
+                  </div>
+                )}
               </div>
               <div className="text-sm text-muted-foreground">
                 Укажите хотя бы один способ связи. Эта информация будет сохранена в вашем профиле.
@@ -210,7 +262,10 @@ export function MentorshipRequestDialog({
             >
               Отмена
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
+            <Button
+              type="submit"
+              disabled={isSubmitting || (showContactFields && !hasValidContactInfo)}
+            >
               {isSubmitting ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
