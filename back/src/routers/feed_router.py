@@ -1,10 +1,10 @@
 from math import ceil
-from typing import Optional, cast, List, Dict
+from typing import Dict, Optional
 from urllib.parse import urljoin
 
 from fastapi import APIRouter, Depends, Query, Request
 
-from src.data.models import AdmissionType, Mentor, User
+from src.data.models import Mentor, User
 from src.repository.mentor_repository import get_filtered_mentors, get_mentors
 from src.repository.user_repository import get_filtered_users, get_users
 from src.schemas.schemas import FeedResponse, MentorFeedResponse, UserFeedResponse
@@ -105,7 +105,7 @@ async def get_mentors_feed(
     mentor_list = []
     mentor_data_list = []
     base_url = str(request.base_url)
-    
+
     for mentor in mentors:
         mentor_data = prepare_mentor_data(mentor, base_url)
         mentor_data_list.append(mentor_data)
@@ -216,7 +216,7 @@ async def get_users_feed(
     user_list = []
     user_data_list = []
     base_url = str(request.base_url)
-    
+
     for user in users:
         user_data = prepare_user_data(user, base_url)
         user_data_list.append(user_data)

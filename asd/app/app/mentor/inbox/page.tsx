@@ -45,14 +45,15 @@ export default function MentorInboxPage() {
       notificationService.resetNotificationState();
       
       // Extract contact info from accepted requests
-      const contactInfoMap: Record<number, { email: string; telegram_link?: string }> = {};
+      const contactInfoMap: Record<number, { email?: string; telegram_link?: string }> = {};
       
       data.filter(req => req.status === 'accepted').forEach(request => {
         // Only add contact info if email exists
-        if (request.sender && request.sender.email) {
-          const contactInfo: { email: string; telegram_link?: string } = {
-            email: request.sender.email
-          };
+        if (request.sender) {
+          const contactInfo: { email?: string; telegram_link?: string } = {};
+          if (request.sender.email) {
+            contactInfo.email = request.sender.email;
+          }
           
           // Check if telegram_link exists in the sender object
           if (request.sender.telegram_link) {
@@ -88,7 +89,7 @@ export default function MentorInboxPage() {
   };
 
 
-  const [contactInfo, setContactInfo] = useState<Record<number, { email: string; telegram_link?: string }>>({});
+  const [contactInfo, setContactInfo] = useState<Record<number, { email?: string; telegram_link?: string }>>({});
 
   const handleAccept = async (requestId: number) => {
     setProcessingRequestId(requestId);
