@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { useAuth } from './use-auth';
 import userService from '@/app/service/user';
 import mentorService from '@/app/service/mentor';
+import { authService } from '@/app/service/auth';
+import { useRouter } from 'next/navigation';
 
 // Тип для данных профиля (общий для пользователя и ментора)
 export type ProfileData = {
@@ -19,6 +21,7 @@ export function useProfile() {
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchProfileData() {
@@ -39,14 +42,24 @@ export function useProfile() {
         
         setProfileData(data);
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Ошибка при загрузке данных профиля");
+        const errorMessage = error instanceof Error ? error.message : "Ошибка при загрузке данных профиля";
+        setError(errorMessage);
+        
+        // Check if this is a session expired error
+        if (error instanceof Error &&
+            error.message === 'Сессия истекла. Пожалуйста, войдите снова.') {
+          // Show alert to the user
+          alert('Сессия истекла. Пожалуйста, войдите снова.');
+          // Redirect to login page
+          router.push('/auth/signin');
+        }
       } finally {
         setLoading(false);
       }
     }
 
     fetchProfileData();
-  }, [isAuthenticated, isUser]);
+  }, [isAuthenticated, isUser, router]);
 
   // Функция для получения инициалов из имени
   const getInitials = (name?: string): string => {

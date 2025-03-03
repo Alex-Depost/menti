@@ -1,5 +1,5 @@
 import { API_URL } from '../service/config';
-import { getAuthToken } from './auth';
+import { getAuthToken, logout } from './auth';
 import { removeNullFields } from '@/lib/utils';
 
 export interface MentorResumeData {
@@ -24,6 +24,10 @@ export async function getMyResumes() {
   });
   
   if (!response.ok) {
+    if (response.status === 401) {
+      logout();
+      throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+    }
     throw new Error('Не удалось получить список резюме');
   }
   
@@ -45,6 +49,10 @@ export async function getMentorResume(resumeId: number) {
   });
   
   if (!response.ok) {
+    if (response.status === 401) {
+      logout();
+      throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+    }
     throw new Error('Не удалось получить резюме');
   }
   
@@ -72,6 +80,10 @@ export async function createMentorResume(resumeData: MentorResumeData) {
   });
   
   if (!response.ok) {
+    if (response.status === 401) {
+      logout();
+      throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+    }
     throw new Error('Не удалось создать резюме');
   }
   
@@ -99,6 +111,10 @@ export async function updateMentorResume(resumeId: number, resumeData: Partial<M
   });
   
   if (!response.ok) {
+    if (response.status === 401) {
+      logout();
+      throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+    }
     throw new Error('Не удалось обновить резюме');
   }
   
@@ -125,6 +141,10 @@ export async function uploadAvatar(file: File): Promise<void> {
   });
   
   if (!response.ok) {
+    if (response.status === 401) {
+      logout();
+      throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+    }
     throw new Error('Не удалось загрузить аватарку');
   }
 }
@@ -145,6 +165,10 @@ export async function removeAvatar() {
   });
   
   if (!response.ok) {
+    if (response.status === 401) {
+      logout();
+      throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+    }
     throw new Error('Не удалось удалить аватарку');
   }
   

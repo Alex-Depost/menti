@@ -70,7 +70,7 @@ services:
   pgadmin:
     image: dpage/pgadmin4
     container_name: pgadmin
-    restart: unless-stopped
+    restart: always
     environment:
       - PGADMIN_DEFAULT_EMAIL=admin@admin.com
       - PGADMIN_DEFAULT_PASSWORD=admin
@@ -98,6 +98,7 @@ services:
     image: prom/prometheus:v2.51.1
     container_name: prometheus
     hostname: prometheus
+    restart: always
     environment:
       - TZ=Europe/Moscow
     ports:
@@ -167,7 +168,7 @@ services:
       - ^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)
     ports:
       - 9100:9100
-    restart: unless-stopped
+    restart: always
     networks:
       - app-network
 

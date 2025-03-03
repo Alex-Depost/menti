@@ -43,6 +43,11 @@ export class UserService {
             });
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    // Session expired, log the user out
+                    await authService.logout();
+                    throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+                }
                 throw new Error('Failed to fetch user data');
             }
 
@@ -68,7 +73,12 @@ export class UserService {
             const userData = await this.getCurrentUser() as UserData;
 
             return userData;
-        } catch (error) {
+        } catch (error: any) {
+            // Check if this is a session expired error
+            if (error.message === 'Сессия истекла. Пожалуйста, войдите снова.') {
+                // Just rethrow the error as it's already handled
+                throw error;
+            }
             throw new Error('Ошибка при загрузке аватара');
         }
     }
@@ -91,6 +101,12 @@ export class UserService {
             });
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    // Session expired, log the user out
+                    await authService.logout();
+                    throw new Error('Сессия истекла. Пожалуйста, войдите снова.');
+                }
+                
                 const errorData = await response.json();
 
                 // Handle complex error structure

@@ -6,8 +6,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { HtmlContent } from "@/components/ui/html-content";
-import { formatDistanceToNow } from "date-fns";
-import { ru } from "date-fns/locale";
+import { formatRelativeTimeUTC } from "@/lib/utils";
 import { CalendarDays, Mail } from "lucide-react";
 
 interface SenderCardProps {
@@ -60,11 +59,8 @@ export function SenderCard({
         target_universities: [] as string[]
     };
 
-    // Format date for better readability
-    const formattedDate = formatDistanceToNow(new Date(request.created_at), {
-        addSuffix: true,
-        locale: ru
-    });
+    // Format date for better readability using UTC time
+    const formattedDate = formatRelativeTimeUTC(request.created_at);
 
     // Get status badge
     const getStatusBadge = () => {
