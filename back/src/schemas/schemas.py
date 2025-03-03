@@ -94,7 +94,7 @@ class UserResponse(BaseModel):
         """Проверка формата ссылки на телеграм."""
         if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
             raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
-        if v.startswith('t.me/'):
+        if v and v.startswith('t.me/'):
             v = 'https://' + v
         return v
     
@@ -138,6 +138,8 @@ class MentorResponse(BaseModel):
         """Проверка формата ссылки на телеграм."""
         if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
             raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        if v and v.startswith('t.me/'):
+            v = 'https://' + v
         return v
 
     class Config:
@@ -182,6 +184,8 @@ class UserDisplay(BaseModel):
         """Проверка формата ссылки на телеграм."""
         if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
             raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        if v and v.startswith('t.me/'):
+            v = 'https://' + v
         return v
     
     @validator('target_universities')
@@ -222,6 +226,8 @@ class UserUpdateSchema(BaseModel):
         """Проверка формата ссылки на телеграм."""
         if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
             raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        if v and v.startswith('t.me/'):
+            v = 'https://' + v
         return v
     
     @validator('target_universities')
@@ -262,6 +268,8 @@ class MentorDisplay(BaseModel):
         """Проверка формата ссылки на телеграм."""
         if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
             raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        if v and v.startswith('t.me/'):
+            v = 'https://' + v
         return v
 
     class Config:
@@ -295,6 +303,8 @@ class MentorUpdateSchema(BaseModel):
         """Проверка формата ссылки на телеграм."""
         if v and not re.match(r'^(https:\/\/)?t\.me\/[A-Za-z\d_]{5,32}$', v):
             raise ValueError('Ссылка на телеграм должна соответствовать формату: t.me/username или https://t.me/username, где username состоит из английских букв, цифр и подчеркиваний, длиной от 5 до 32 символов')
+        if v and v.startswith('t.me/'):
+            v = 'https://' + v
         return v
 
     class Config:
