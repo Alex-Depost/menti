@@ -2,6 +2,7 @@
 import { authService } from "@/app/service/auth";
 import { LoginForm } from "@/components/login-form";
 import { TabsAuth } from "@/components/tabs-auth";
+import { MetricsButton } from "@/components/metrics-button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useState } from "react";
 
@@ -63,6 +64,7 @@ function SignInContent() {
 export default function SignInPage() {
     return (
         <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10 bg-gradient-to-b from-transparent to-gray-50/30">
+            <MetricsButton />
             <Suspense fallback={<div className="animate-pulse">Loading...</div>}>
                 <SignInContent />
             </Suspense>

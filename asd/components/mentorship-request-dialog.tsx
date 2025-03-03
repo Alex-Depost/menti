@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,8 @@ import * as React from "react";
 import { MentorshipRequestError, sendMentorshipRequest } from "@/app/service/mentorship";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import userService from "@/app/service/user";
 
 // Custom Textarea component
 export interface TextareaProps
@@ -45,25 +47,92 @@ export function MentorshipRequestDialog({
 }: MentorshipRequestDialogProps) {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [contactInfo, setContactInfo] = useState({
+    telegram: "",
+    email: ""
+  });
+  const [showContactFields, setShowContactFields] = useState(false);
+
+  useEffect(() => {
+    // При открытии диалога проверяем наличие контактной информации в профиле пользователя (отправитель)
+    const checkContactInfo = async () => {
+      if (!isOpen) return;
+      
+      try {
+        const userProfile = await userService.getCurrentUser();
+        
+        // Проверяем, есть ли контактная информация в профиле
+        const hasContactInfo = !!(userProfile?.telegram_link || userProfile?.email);
+        
+        // Показываем поля для ввода только если нет контактной информации
+        setShowContactFields(!hasContactInfo);
+        
+        // Заполняем имеющиеся данные, если они есть
+        if (userProfile?.telegram_link) {
+          setContactInfo(prev => ({ ...prev, telegram: userProfile.telegram_link || "" }));
+        }
+        if (userProfile?.email) {
+          setContactInfo(prev => ({ ...prev, email: userProfile.email || "" }));
+        }
+      } catch (error) {
+        // В случае ошибки лучше показать поля, чтобы пользователь мог ввести данные
+        setShowContactFields(true);
+      }
+    };
+    
+    checkContactInfo();
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     
+    // Валидация сообщения
     if (!message.trim()) {
       toast.error("Пожалуйста, введите сообщение для ментора");
       return;
+    }
+
+    // Валидация контактной информации, если поля отображаются
+    if (showContactFields) {
+      if (!contactInfo.telegram.trim() && !contactInfo.email.trim()) {
+        toast.error("Пожалуйста, укажите хотя бы один способ связи");
+        return;
+      }
+
+      if (contactInfo.email && !isValidEmail(contactInfo.email)) {
+        toast.error("Пожалуйста, укажите корректный email");
+        return;
+      }
     }
     
     setIsSubmitting(true);
     
     try {
-      // When a user sends a request to a mentor, the receiver type should be 'mentor'
+      // Сначала обновляем контактную информацию в профиле, если она отсутствовала
+      if (showContactFields) {
+        try {
+          // Используем PATCH запрос для обновления только контактной информации
+          await userService.updateUserProfile({
+            telegram_link: contactInfo.telegram || null,
+            email: contactInfo.email || null
+          });
+          
+          // Сообщаем пользователю, что контактная информация была сохранена
+          toast.success("Контактная информация сохранена в вашем профиле");
+        } catch (error) {
+          // Предупреждаем, но продолжаем отправку запроса
+          toast.warning("Не удалось сохранить контактную информацию");
+        }
+      }
+
+      // Отправляем запрос ментору (receiver_type = 'mentor')
       const response = await sendMentorshipRequest(mentorId, message, 'mentor');
       
       if (response) {
         toast.success("Запрос на менторство успешно отправлен");
         onClose();
         setMessage("");
+        setContactInfo({ telegram: "", email: "" });
       } else {
         toast.error("Не удалось отправить запрос на менторство");
       }
@@ -73,6 +142,11 @@ export function MentorshipRequestDialog({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // Простая валидация email
+  const isValidEmail = (email: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
   return (
@@ -86,6 +160,35 @@ export function MentorshipRequestDialog({
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {showContactFields && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="telegram">Telegram</Label>
+                <Input
+                  id="telegram"
+                  placeholder="t.me/username"
+                  value={contactInfo.telegram}
+                  onChange={(e) => setContactInfo(prev => ({ ...prev, telegram: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={contactInfo.email}
+                  onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Укажите хотя бы один способ связи. Эта информация будет сохранена в вашем профиле.
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="message">Сообщение для ментора</Label>
             <Textarea
