@@ -9,3 +9,4 @@ greenlet
 uvicorn
 transliterate
 prometheus_client
+redis>=5.0.1

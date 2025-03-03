@@ -1,5 +1,5 @@
 from math import ceil
-from typing import Optional, cast
+from typing import Optional, cast, List, Dict
 from urllib.parse import urljoin
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -13,6 +13,7 @@ from src.security.auth import (
     get_optional_current_user,
 )
 from src.services.interest_rating import InterestRatingService
+from src.services.redis_service import RedisService, get_redis_service
 
 router = APIRouter(
     tags=["feed"],
@@ -22,10 +23,49 @@ router = APIRouter(
 interest_service = InterestRatingService()
 
 
+def prepare_mentor_data(mentor: Mentor, base_url: str) -> Dict:
+    """Подготовка данных ментора для кеширования"""
+    avatar_url = None
+    if mentor.avatar_uuid is not None:
+        avatar_url = urljoin(base_url, f"img/{mentor.avatar_uuid}")
+
+    return {
+        "id": mentor.id,
+        "name": mentor.name,
+        "login": mentor.login,
+        "title": mentor.title,
+        "description": mentor.description,
+        "university": mentor.university,
+        "email": mentor.email,
+        "avatar_url": avatar_url,
+    }
+
+
+def prepare_user_data(user: User, base_url: str) -> Dict:
+    """Подготовка данных пользователя для кеширования"""
+    avatar_url = None
+    if user.avatar_uuid is not None:
+        avatar_url = urljoin(base_url, f"img/{user.avatar_uuid}")
+
+    admission_type = str(user.admission_type) if user.admission_type else None
+
+    return {
+        "id": user.id,
+        "name": user.name,
+        "login": user.login,
+        "description": user.description,
+        "target_universities": user.target_universities,
+        "admission_type": admission_type,
+        "email": user.email,
+        "avatar_url": avatar_url,
+    }
+
+
 @router.get("/mentors", response_model=FeedResponse)
 async def get_mentors_feed(
     request: Request,
     current_user: Optional[User] = Depends(get_optional_current_user),
+    redis_service: RedisService = Depends(get_redis_service),
     filtered: bool = Query(True, description="Whether to filter by profile parameters"),
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Number of items per page"),
@@ -36,7 +76,6 @@ async def get_mentors_feed(
     If filtered=false, returns all mentors.
     Mentors are sorted by interest relevance if user is authenticated.
     """
-    # Проверка на корректность входных параметров пагинации
     if page < 1:
         page = 1
     if size < 1:
@@ -47,9 +86,8 @@ async def get_mentors_feed(
     items = []
     total = 0
 
-    # Если filtered=true и есть авторизованный пользователь, применяем фильтры
+    # Получаем список менторов
     if filtered and current_user:
-        # Фильтрация по параметрам профиля
         target_universities = current_user.target_universities if current_user else []
         admission_type_value = ""
 
@@ -59,81 +97,87 @@ async def get_mentors_feed(
         mentors, total = await get_filtered_mentors(
             target_universities=target_universities,
             admission_type=admission_type_value,
-            page=1,  # Получаем все менторы для сортировки
-            size=1000,  # Используем большой размер, чтобы получить всех менторов
+            page=1,
+            size=1000,
         )
     else:
-        # Возвращаем всех менторов без фильтрации
         mentors, total = await get_mentors(page=1, size=1000)
 
-    # Подготавливаем список менторов для сортировки
+    # Подготавливаем данные менторов
     mentor_list = []
+    mentor_data_list = []
+    base_url = str(request.base_url)
+    
     for mentor in mentors:
-        # Формируем URL для аватара
-        avatar_url = None
-        if mentor.avatar_uuid is not None:
-            base_url = str(request.base_url)
-            avatar_url = urljoin(base_url, f"img/{mentor.avatar_uuid}")
+        mentor_data = prepare_mentor_data(mentor, base_url)
+        mentor_data_list.append(mentor_data)
+        mentor_list.append(MentorFeedResponse(**mentor_data))
 
-        mentor_data = MentorFeedResponse(
-            id=mentor.id,
-            name=mentor.name,
-            login=mentor.login,
-            title=mentor.title,
-            description=mentor.description,
-            university=mentor.university,
-            email=mentor.email,
-            avatar_url=avatar_url,
-        )
-        mentor_list.append(mentor_data)
-
-    # Если есть авторизованный пользователь, сортируем менторов по интересности
+    # Проверяем кеш, если есть авторизованный пользователь
     if current_user and current_user.description:
-        # Подготавливаем данные для сервиса интересности
+        cache_key = redis_service.generate_feed_cache_key(
+            current_user.description,
+            mentor_data_list,
+            filtered,
+            page,
+            size,
+        )
+        cached_response = await redis_service.get_cache(cache_key)
+        if cached_response:
+            return FeedResponse(**cached_response)
+
+    if current_user and current_user.description:
         mentors_for_ranking = [
             {"id": m.id, "description": m.description or ""} for m in mentor_list
         ]
 
-        # Получаем отсортированный список ID менторов
         ranked_mentor_ids = await interest_service.get_ranked_mentors(
             mentors=mentors_for_ranking, user_description=current_user.description
         )
 
-        # Создаем словарь для быстрого поиска менторов по ID
         mentor_dict = {m.id: m for m in mentor_list}
 
-        # Сортируем список менторов согласно рейтингу
         sorted_mentors = []
         for mentor_id in ranked_mentor_ids:
             if mentor_id in mentor_dict:
                 sorted_mentors.append(mentor_dict[mentor_id])
 
-        # Добавляем оставшихся менторов (если такие есть)
         remaining_mentors = [m for m in mentor_list if m.id not in ranked_mentor_ids]
         sorted_mentors.extend(remaining_mentors)
 
-        # Применяем пагинацию к отсортированному списку
         start_idx = (page - 1) * size
         end_idx = start_idx + size
         items = sorted_mentors[start_idx:end_idx]
     else:
-        # Если нет авторизованного пользователя или описания, применяем обычную пагинацию
         start_idx = (page - 1) * size
         end_idx = start_idx + size
         items = mentor_list[start_idx:end_idx]
 
-    # Корректно вычисляем общее количество страниц
     total_pages = ceil(total / size) if total > 0 else 1
 
-    return FeedResponse(
+    response = FeedResponse(
         items=items, total=total, page=page, size=size, pages=total_pages
     )
+
+    # Сохраняем результат в кеш, если есть авторизованный пользователь
+    if current_user and current_user.description:
+        cache_key = redis_service.generate_feed_cache_key(
+            current_user.description,
+            mentor_data_list,
+            filtered,
+            page,
+            size,
+        )
+        await redis_service.set_cache(cache_key, response.dict())
+
+    return response
 
 
 @router.get("/users", response_model=FeedResponse)
 async def get_users_feed(
     request: Request,
     current_mentor: Optional[Mentor] = Depends(get_optional_current_mentor),
+    redis_service: RedisService = Depends(get_redis_service),
     filtered: bool = Query(True, description="Whether to filter by profile parameters"),
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Number of items per page"),
@@ -143,7 +187,6 @@ async def get_users_feed(
     If filtered=true, returns users that match the current mentor's profile.
     If filtered=false, returns all users.
     """
-    # Проверка на корректность входных параметров пагинации
     if page < 1:
         page = 1
     if size < 1:
@@ -154,9 +197,8 @@ async def get_users_feed(
     items = []
     total = 0
 
-    # Если filtered=true и есть авторизованный ментор, применяем фильтры
+    # Получаем список пользователей
     if filtered and current_mentor:
-        # Фильтрация по параметрам профиля
         university = current_mentor.university
         admission_type_value = ""
 
@@ -166,77 +208,77 @@ async def get_users_feed(
         users, total = await get_filtered_users(
             university=university,
             admission_type=admission_type_value,
-            page=1,  # Получаем всех пользователей для сортировки
-            size=1000,  # Используем большой размер, чтобы получить всех пользователей
+            page=1,
+            size=1000,
         )
     else:
-        # Возвращаем всех пользователей без фильтрации
         users, total = await get_users(page=1, size=1000)
 
-    # Формируем список пользователей
+    # Подготавливаем данные пользователей
     user_list = []
+    user_data_list = []
+    base_url = str(request.base_url)
+    
     for user in users:
-        # Формируем URL для аватара
-        avatar_url = None
-        if user.avatar_uuid is not None:
-            base_url = str(request.base_url)
-            avatar_url = urljoin(base_url, f"img/{user.avatar_uuid}")
+        user_data = prepare_user_data(user, base_url)
+        user_data_list.append(user_data)
+        user_list.append(UserFeedResponse(**user_data))
 
-        # Применяем type cast к enum
-        admission_type: Optional[AdmissionType] = None
-        if user.admission_type:
-            admission_type = cast(AdmissionType, user.admission_type)
-
-        user_data = UserFeedResponse(
-            id=user.id,
-            name=user.name,
-            login=user.login,
-            description=user.description,
-            target_universities=user.target_universities,
-            admission_type=admission_type,
-            email=user.email,
-            avatar_url=avatar_url,
-        )
-        user_list.append(user_data)
-
-    # Если есть авторизованный ментор, сортируем пользователей по интересности
+    # Проверяем кеш, если есть авторизованный ментор
     if current_mentor and current_mentor.description:
-        # Подготавливаем данные для сервиса интересности
+        cache_key = redis_service.generate_feed_cache_key(
+            current_mentor.description,
+            user_data_list,
+            filtered,
+            page,
+            size,
+        )
+        cached_response = await redis_service.get_cache(cache_key)
+        if cached_response:
+            return FeedResponse(**cached_response)
+
+    if current_mentor and current_mentor.description:
         users_for_ranking = [
             {"id": u.id, "description": u.description or ""} for u in user_list
         ]
 
-        # Получаем отсортированный список ID пользователей
         ranked_user_ids = await interest_service.get_ranked_users(
             users=users_for_ranking, mentor_description=current_mentor.description
         )
 
-        # Создаем словарь для быстрого поиска пользователей по ID
         user_dict = {u.id: u for u in user_list}
 
-        # Сортируем список пользователей согласно рейтингу
         sorted_users = []
         for user_id in ranked_user_ids:
             if user_id in user_dict:
                 sorted_users.append(user_dict[user_id])
 
-        # Добавляем оставшихся пользователей (если такие есть)
         remaining_users = [u for u in user_list if u.id not in ranked_user_ids]
         sorted_users.extend(remaining_users)
 
-        # Применяем пагинацию к отсортированному списку
         start_idx = (page - 1) * size
         end_idx = start_idx + size
         items = sorted_users[start_idx:end_idx]
     else:
-        # Если нет авторизованного ментора или описания, применяем обычную пагинацию
         start_idx = (page - 1) * size
         end_idx = start_idx + size
         items = user_list[start_idx:end_idx]
 
-    # Корректно вычисляем общее количество страниц
     total_pages = ceil(total / size) if total > 0 else 1
 
-    return FeedResponse(
+    response = FeedResponse(
         items=items, total=total, page=page, size=size, pages=total_pages
     )
+
+    # Сохраняем результат в кеш, если есть авторизованный ментор
+    if current_mentor and current_mentor.description:
+        cache_key = redis_service.generate_feed_cache_key(
+            current_mentor.description,
+            user_data_list,
+            filtered,
+            page,
+            size,
+        )
+        await redis_service.set_cache(cache_key, response.dict())
+
+    return response

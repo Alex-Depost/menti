@@ -80,6 +80,15 @@ services:
     depends_on:
       - postgresprod
 
+  redis:
+    image: redis:7-alpine
+    container_name: redis
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis_data:/data
+
   prometheus:
     image: prom/prometheus:v2.51.1
     container_name: prometheus
@@ -139,6 +148,8 @@ volumes:
   pgadmin-data:
     driver: local
   grafana-data:
+    driver: local
+  redis_data:
     driver: local
 networks:
   app-network:

@@ -17,6 +17,11 @@ CONNECTION_STRING = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{
 # GEMINI API
 GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'sk-9c33e1ecb15640c8b060fe63eeaea71c')
 
+# Redis
+REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
+REDIS_PORT = os.environ.get('REDIS_PORT', '6379')
+REDIS_CACHE_TTL = int(os.environ.get('REDIS_CACHE_TTL', '3600'))  # Time in seconds (1 hour default)
+
 # Roles
 class Roles:
     ADMIN = "admin"

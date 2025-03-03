@@ -135,7 +135,7 @@ class InterestRatingService:
                         "Authorization": f"Bearer {self.api_key}"
                     },
                     json={
-                        "model": "gpt-3.5-turbo",
+                        "model": "qodo/gemini-2.0-flash",
                         "messages": [
                             {"role": "system", "content": "Ты помогаешь сортировать пользователей по их интересности для ментора на основе описаний."},
                             {"role": "user", "content": prompt}
@@ -147,7 +147,8 @@ class InterestRatingService:
                 response.raise_for_status()
                 data = response.json()
                 result_text = data["choices"][0]["message"]["content"]
-                
+                result_text = result_text.replace("```json", "").replace("```", "")
+
                 try:
                     ranked_ids = json.loads(result_text)
                     if isinstance(ranked_ids, list):
