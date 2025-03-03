@@ -1,23 +1,22 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
-import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/use-auth";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import {
+  acceptMentorshipRequest,
   getIncomingMentorshipRequestsForUI,
   MentorshipRequestDisplay,
-  acceptMentorshipRequest,
   rejectMentorshipRequest
 } from "@/app/service/mentorship";
-import { toast } from "sonner";
-import { Check, X, Loader2, Filter, Search, RefreshCw } from "lucide-react";
 import { SenderCard } from "@/components/sender-card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/hooks/use-auth";
+import { Check, Filter, Loader2, RefreshCw, Search, X } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 export default function UserInboxPage() {
   const router = useRouter();
@@ -51,7 +50,7 @@ export default function UserInboxPage() {
 
   useEffect(() => {
     loadRequests();
-  }, [isAuthenticated, isUser, router]);
+  }, [isAuthenticated, isUser, router, loadRequests]);
 
   const handleRefresh = () => {
     loadRequests();
