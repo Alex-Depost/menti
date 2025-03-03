@@ -50,6 +50,7 @@ export default function UserOutgoingPage() {
       
       data.filter(req => req.status === 'accepted').forEach(request => {
         try {
+          // Only add contact info if email exists
           if (request.receiver && request.receiver.email) {
             const contactInfo: { email: string; telegram_link?: string } = {
               email: request.receiver.email

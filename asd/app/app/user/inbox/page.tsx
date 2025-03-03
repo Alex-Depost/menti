@@ -48,6 +48,7 @@ export default function UserInboxPage() {
       const contactInfoMap: Record<number, { email: string; telegram_link?: string }> = {};
       
       data.filter(req => req.status === 'accepted').forEach(request => {
+        // Only add contact info if email exists
         if (request.sender && request.sender.email) {
           const contactInfo: { email: string; telegram_link?: string } = {
             email: request.sender.email

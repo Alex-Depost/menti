@@ -48,15 +48,22 @@ export default function MentorInboxPage() {
       const contactInfoMap: Record<number, { email: string; telegram_link?: string }> = {};
       
       data.filter(req => req.status === 'accepted').forEach(request => {
+        // Only add contact info if email exists
         if (request.sender && request.sender.email) {
           const contactInfo: { email: string; telegram_link?: string } = {
             email: request.sender.email
           };
           
           // Check if telegram_link exists in the sender object
-          if (request.sender && 'telegram_link' in request.sender) {
-            contactInfo.telegram_link = (request.sender as any).telegram_link;
+          if (request.sender.telegram_link) {
+            contactInfo.telegram_link = request.sender.telegram_link;
           }
+          
+          contactInfoMap[request.id] = contactInfo;
+        } else if (request.sender_email) {
+          const contactInfo: { email: string; telegram_link?: string } = {
+            email: request.sender_email
+          };
           
           contactInfoMap[request.id] = contactInfo;
         }
