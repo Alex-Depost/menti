@@ -112,7 +112,7 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
     ports:
-      - "3002:3000"
+      - "3000:3000"
     volumes:
       - grafana-data:/var/lib/grafana
       - ./infrastructure/grafana/prometheus_ds.yml:/etc/grafana/provisioning/datasources/prometheus_ds.yml

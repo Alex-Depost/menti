@@ -286,11 +286,14 @@ async def approve_request(
         request.status = RequestStatus.ACCEPTED
         await session.commit()
         
-        # Создаем объект ContactInfo
-        contact_info = ContactInfo(
-            email=sender.email,
-            telegram_link=sender.telegram_link
-        )
+        # Создаем объект ContactInfo с учетом возможных None значений
+        contact_info_data = {}
+        if hasattr(sender, 'email') and sender.email is not None:
+            contact_info_data['email'] = sender.email
+        if hasattr(sender, 'telegram_link') and sender.telegram_link is not None:
+            contact_info_data['telegram_link'] = sender.telegram_link
+            
+        contact_info = ContactInfo(**contact_info_data)
         
         # Возвращаем ответ в соответствии со схемой RequestApproveResponse
         return RequestApproveResponse(
