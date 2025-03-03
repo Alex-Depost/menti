@@ -24,7 +24,7 @@ export default function MentorInboxPage() {
   const [loading, setLoading] = useState(true);
   const [requests, setRequests] = useState<MentorshipRequestDisplay[]>([]);
   const [processingRequestId, setProcessingRequestId] = useState<number | null>(null);
-  
+
   // Filter states
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
@@ -50,7 +50,7 @@ export default function MentorInboxPage() {
 
   useEffect(() => {
     loadRequests();
-  }, [isAuthenticated, isUser, router, loadRequests]);
+  }, [isAuthenticated, isUser, router]);
 
   const handleRefresh = () => {
     loadRequests();
@@ -64,8 +64,8 @@ export default function MentorInboxPage() {
       if (success) {
         toast.success("Заявка принята");
         // Update the request status in the UI
-        setRequests(prevRequests => 
-          prevRequests.map(req => 
+        setRequests(prevRequests =>
+          prevRequests.map(req =>
             req.id === requestId ? { ...req, status: 'accepted' } : req
           )
         );
@@ -87,8 +87,8 @@ export default function MentorInboxPage() {
       if (success) {
         toast.success("Заявка отклонена");
         // Update the request status in the UI
-        setRequests(prevRequests => 
-          prevRequests.map(req => 
+        setRequests(prevRequests =>
+          prevRequests.map(req =>
             req.id === requestId ? { ...req, status: 'rejected' } : req
           )
         );
@@ -110,7 +110,7 @@ export default function MentorInboxPage() {
       if (statusFilter !== "all" && request.status !== statusFilter) {
         return false;
       }
-      
+
       // Search filter (case insensitive)
       if (searchQuery) {
         const query = searchQuery.toLowerCase();
@@ -120,7 +120,7 @@ export default function MentorInboxPage() {
           (request.message.toLowerCase().includes(query))
         );
       }
-      
+
       return true;
     });
   }, [requests, statusFilter, searchQuery]);
@@ -227,11 +227,11 @@ export default function MentorInboxPage() {
         <div className="space-y-4">
           {filteredRequests.map((request) => {
             const isProcessing = processingRequestId === request.id;
-            
+
             return (
               <div key={request.id} className="space-y-2">
                 <SenderCard request={request} showActions={false} />
-                
+
                 {request.status === 'pending' && (
                   <div className="flex justify-end gap-2 mt-2">
                     <Button
@@ -254,13 +254,13 @@ export default function MentorInboxPage() {
                     </Button>
                   </div>
                 )}
-                
+
                 {request.status === 'accepted' && (
                   <div className="mt-2 text-sm text-green-600 font-medium text-right">
                     Заявка принята
                   </div>
                 )}
-                
+
                 {request.status === 'rejected' && (
                   <div className="mt-2 text-sm text-muted-foreground text-right">
                     Заявка отклонена

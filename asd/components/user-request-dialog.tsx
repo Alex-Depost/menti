@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import * as React from "react";
-import { sendMentorshipRequest } from "@/app/service/mentorship";
+import { MentorshipRequestError, sendMentorshipRequest } from "@/app/service/mentorship";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
@@ -69,7 +69,13 @@ export function UserRequestDialog({
       }
     } catch (error) {
       console.error("Error sending user request:", error);
-      toast.error("Произошла ошибка при отправке запроса");
+      
+      // Handle specific error for existing request
+      if (error instanceof MentorshipRequestError && error.code === 'EXISTING_REQUEST') {
+        toast.error("У вас уже есть активная заявка к этому пользователю");
+      } else {
+        toast.error("Произошла ошибка при отправке запроса");
+      }
     } finally {
       setIsSubmitting(false);
     }

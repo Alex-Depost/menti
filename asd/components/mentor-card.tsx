@@ -1,14 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { Card } from "@/components/ui/card";
+import { AVATAR_URL } from "@/app/service/config";
 import { FeedItem } from "@/app/service/feed";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { MessageSquare } from "lucide-react";
-import { AVATAR_URL } from "@/app/service/config";
-import { MentorshipRequestDialog } from "./mentorship-request-dialog";
+import { Card } from "@/components/ui/card";
 import { HtmlContent } from "@/components/ui/html-content";
+import { Briefcase, GraduationCap, MessageSquare } from "lucide-react";
+import { useState } from "react";
+import { MentorshipRequestDialog } from "./mentorship-request-dialog";
 
 interface MentorCardProps {
     item: FeedItem;
@@ -42,11 +42,14 @@ export function MentorCard({ item }: MentorCardProps) {
     const avatarColor = generatePastelColor(item.name || '');
 
     return (
-        <Card className="w-full overflow-hidden transition-all hover:shadow-md hover:border-primary/20 duration-300 flex flex-col group">
-            <div className="p-5">
+        <Card className="w-full overflow-hidden transition-all hover:shadow-lg group border-border/30 hover:border-primary/30 duration-300">
+            {/* Top colored bar - uses the same color as the avatar for consistency */}
+            <div className="h-2" style={{ backgroundColor: avatarColor }}></div>
+            
+            <div className="p-6">
                 {/* Header section with mentor info */}
-                <div className="flex items-center gap-4 pb-4 border-b border-border/30">
-                    <Avatar className="h-16 w-16 border border-border/50 ring-2 ring-background">
+                <div className="flex items-start gap-4">
+                    <Avatar className="h-16 w-16 border-2 border-background shadow-md ring-2 ring-background">
                         {(item.avatar_url || item.avatar_uuid) && (
                             <AvatarImage
                                 src={item.avatar_url || `${AVATAR_URL}/${item.avatar_uuid}`}
@@ -60,14 +63,31 @@ export function MentorCard({ item }: MentorCardProps) {
                             {getInitials(item.name || '')}
                         </AvatarFallback>
                     </Avatar>
+                    
                     <div className="flex-1">
-                        <h3 className="font-medium text-lg">{item.name}</h3>
-                        <p className="text-sm text-muted-foreground">{item.email}</p>
+                        <h3 className="font-semibold text-xl">{item.name}</h3>
+                        
+                        <div className="flex flex-col gap-1 mt-1">
+                            {item.title && (
+                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                    <Briefcase className="h-3.5 w-3.5 text-muted-foreground/70" />
+                                    <span>{item.title}</span>
+                                </div>
+                            )}
+                            
+                            {item.university && (
+                                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                    <GraduationCap className="h-3.5 w-3.5 text-muted-foreground/70" />
+                                    <span>{item.university}</span>
+                                </div>
+                            )}
+                        </div>
                     </div>
+                    
                     <Button
                         variant="default"
                         size="sm"
-                        className="gap-2 text-sm whitespace-nowrap"
+                        className="gap-2 text-sm whitespace-nowrap shadow-sm"
                         onClick={() => setIsRequestDialogOpen(true)}
                     >
                         <MessageSquare className="h-4 w-4" />
@@ -75,20 +95,19 @@ export function MentorCard({ item }: MentorCardProps) {
                     </Button>
                 </div>
 
-                {/* Resume content section */}
-                <div className="mt-4 space-y-4">
-                    {/* Title and description together */}
-                    <div>
-                        <h4 className="font-medium mb-2">{item.title}</h4>
-                        {item.description ? (
-                            <HtmlContent
-                                html={item.description}
-                                className="text-sm text-muted-foreground"
-                            />
-                        ) : (
-                            <p className="text-sm text-muted-foreground">Нет описания</p>
-                        )}
-                    </div>
+                {/* Divider */}
+                <div className="h-px w-full bg-border/40 my-4"></div>
+
+                {/* Description section */}
+                <div className="mt-2">
+                    {item.description ? (
+                        <HtmlContent
+                            html={item.description}
+                            className="text-sm text-muted-foreground prose-sm max-w-none prose-p:leading-relaxed prose-p:my-1"
+                        />
+                    ) : (
+                        <p className="text-sm text-muted-foreground italic">Нет описания</p>
+                    )}
                 </div>
             </div>
             

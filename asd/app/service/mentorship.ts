@@ -60,6 +60,17 @@ export interface MentorshipRequestDisplay {
  * @param message Сообщение для получателя
  * @param receiverType Тип получателя (user или mentor)
  */
+// Custom error type for mentorship request errors
+export class MentorshipRequestError extends Error {
+  constructor(
+    message: string,
+    public readonly code: string
+  ) {
+    super(message);
+    this.name = 'MentorshipRequestError';
+  }
+}
+
 export async function sendMentorshipRequest(
   receiverId: number,
   message: string,
@@ -88,11 +99,26 @@ export async function sendMentorshipRequest(
 
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.detail || 'Failed to send mentorship request');
+      const errorDetail = errorData.detail || 'Failed to send mentorship request';
+      
+      // Check for the specific error about existing active request
+      if (errorDetail === 'У вас уже есть активная заявка к этому получателю') {
+        throw new MentorshipRequestError(
+          'У вас уже есть активная заявка к этому получателю',
+          'EXISTING_REQUEST'
+        );
+      }
+      
+      throw new Error(errorDetail);
     }
 
     return await response.json();
   } catch (error) {
+    // Re-throw MentorshipRequestError so it can be handled by the components
+    if (error instanceof MentorshipRequestError) {
+      throw error;
+    }
+    
     console.error('Failed to send mentorship request:', error);
     return null;
   }
