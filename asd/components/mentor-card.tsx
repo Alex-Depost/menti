@@ -6,9 +6,11 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { HtmlContent } from "@/components/ui/html-content";
-import { Briefcase, GraduationCap, MessageSquare } from "lucide-react";
+import { Briefcase, GraduationCap, MessageSquare, LogIn } from "lucide-react";
 import { useState } from "react";
 import { MentorshipRequestDialog } from "./mentorship-request-dialog";
+import { useAuth } from "@/hooks/use-auth";
+import { useRouter } from "next/navigation";
 
 interface MentorCardProps {
     item: FeedItem;
@@ -16,6 +18,8 @@ interface MentorCardProps {
 
 export function MentorCard({ item }: MentorCardProps) {
     const [isRequestDialogOpen, setIsRequestDialogOpen] = useState(false);
+    const { isAuthenticated } = useAuth();
+    const router = useRouter();
 
     // Get mentor initials for avatar
     const getInitials = (name: string) => {
@@ -48,7 +52,7 @@ export function MentorCard({ item }: MentorCardProps) {
             
             <div className="p-6">
                 {/* Header section with mentor info */}
-                <div className="flex items-start gap-4">
+                <div className="flex flex-col sm:flex-row gap-4">
                     <Avatar className="h-16 w-16 border-2 border-background shadow-md ring-2 ring-background">
                         {(item.avatar_url || item.avatar_uuid) && (
                             <AvatarImage
@@ -64,35 +68,39 @@ export function MentorCard({ item }: MentorCardProps) {
                         </AvatarFallback>
                     </Avatar>
                     
-                    <div className="flex-1">
-                        <h3 className="font-semibold text-xl">{item.name}</h3>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                            <h3 className="font-semibold text-xl truncate max-w-full">{item.name}</h3>
+                            
+                            <Button
+                                variant="default"
+                                size="sm"
+                                className="gap-2 text-sm whitespace-nowrap shadow-sm shrink-0"
+                                onClick={() => isAuthenticated ? setIsRequestDialogOpen(true) : router.push("/auth/signin")}
+                                disabled={!isAuthenticated}
+                                title={!isAuthenticated ? "Войдите, чтобы связаться с ментором" : ""}
+                            >
+                                <MessageSquare className="h-4 w-4" />
+                                Связаться
+                            </Button>
+                        </div>
                         
                         <div className="flex flex-col gap-1 mt-1">
                             {item.title && (
                                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                    <Briefcase className="h-3.5 w-3.5 text-muted-foreground/70" />
-                                    <span>{item.title}</span>
+                                    <Briefcase className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+                                    <span className="truncate">{item.title}</span>
                                 </div>
                             )}
                             
                             {item.university && (
                                 <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                                    <GraduationCap className="h-3.5 w-3.5 text-muted-foreground/70" />
-                                    <span>{item.university}</span>
+                                    <GraduationCap className="h-3.5 w-3.5 text-muted-foreground/70 shrink-0" />
+                                    <span className="truncate">{item.university}</span>
                                 </div>
                             )}
                         </div>
                     </div>
-                    
-                    <Button
-                        variant="default"
-                        size="sm"
-                        className="gap-2 text-sm whitespace-nowrap shadow-sm"
-                        onClick={() => setIsRequestDialogOpen(true)}
-                    >
-                        <MessageSquare className="h-4 w-4" />
-                        Связаться
-                    </Button>
                 </div>
 
                 {/* Divider */}

@@ -46,7 +46,7 @@ export function UserCard({ item }: UserCardProps) {
         <Card className="w-full overflow-hidden transition-all hover:shadow-md hover:border-primary/20 duration-300 flex flex-col group">
             <div className="p-5">
                 {/* Header section with user info */}
-                <div className="flex items-center gap-4 pb-4 border-b border-border/30">
+                <div className="flex flex-col sm:flex-row gap-4 pb-4 border-b border-border/30">
                     <Avatar className="h-16 w-16 border border-border/50 ring-2 ring-background">
                         {(item.avatar_url || item.avatar_uuid) && (
                             <AvatarImage
@@ -61,19 +61,23 @@ export function UserCard({ item }: UserCardProps) {
                             {getInitials(item.name || '')}
                         </AvatarFallback>
                     </Avatar>
-                    <div className="flex-1">
-                        <h3 className="font-medium text-lg">{item.name}</h3>
-                        <p className="text-sm text-muted-foreground">{item.email}</p>
+                    <div className="flex-1 min-w-0">
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                            <div>
+                                <h3 className="font-medium text-lg truncate max-w-full">{item.name}</h3>
+                                <p className="text-sm text-muted-foreground truncate">{item.email}</p>
+                            </div>
+                            <Button
+                                variant="default"
+                                size="sm"
+                                className="gap-2 text-sm whitespace-nowrap shrink-0"
+                                onClick={() => setIsRequestDialogOpen(true)}
+                            >
+                                <MessageSquare className="h-4 w-4" />
+                                Связаться
+                            </Button>
+                        </div>
                     </div>
-                    <Button
-                        variant="default"
-                        size="sm"
-                        className="gap-2 text-sm whitespace-nowrap"
-                        onClick={() => setIsRequestDialogOpen(true)}
-                    >
-                        <MessageSquare className="h-4 w-4" />
-                        Связаться
-                    </Button>
                 </div>
 
                 {/* User content section */}

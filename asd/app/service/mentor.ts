@@ -1,7 +1,6 @@
+import { uploadAvatar as apiUploadAvatar } from "@/app/api/profile";
 import { authService } from "./auth";
 import { API_URL, AVATAR_URL } from "./config";
-import { uploadAvatar as apiUploadAvatar } from "@/app/api/profile";
-import { removeNullFields } from "@/lib/utils";
 
 export interface MentorData {
     email: string;
