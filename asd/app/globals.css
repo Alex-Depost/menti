@@ -136,6 +136,7 @@
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -146,6 +147,7 @@
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -156,6 +158,7 @@
   from {
     transform: scale(0.95);
   }
+
   to {
     transform: scale(1);
   }
@@ -165,6 +168,7 @@
   from {
     background-position: 0% 0%;
   }
+
   to {
     background-position: 100% 0%;
   }
@@ -174,46 +178,22 @@
   0% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-2px);
   }
+
   100% {
     transform: translateY(0);
   }
 }
 
-@keyframes glowPulse {
-  0% {
-    box-shadow: 0 0 0 0 var(--primary);
-  }
-  70% {
-    box-shadow: 0 0 0 4px transparent;
-  }
-  100% {
-    box-shadow: 0 0 0 0 transparent;
-  }
-}
-
-@keyframes borderFlow {
-  0% {
-    border-color: var(--primary);
-    border-width: 1px;
-  }
-  50% {
-    border-color: var(--accent);
-    border-width: 2px;
-  }
-  100% {
-    border-color: var(--primary);
-    border-width: 1px;
-  }
-}
 
 @layer utilities {
   .animate-fadeIn {
     animation: fadeIn 0.6s ease-out;
   }
-  
+
   .animate-slideUp {
     animation: slideUp 0.5s ease-out;
   }
