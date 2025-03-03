@@ -36,7 +36,6 @@ def prepare_mentor_data(mentor: Mentor, base_url: str) -> Dict:
         "title": mentor.title,
         "description": mentor.description,
         "university": mentor.university,
-        "email": mentor.email,
         "avatar_url": avatar_url,
     }
 
@@ -56,7 +55,6 @@ def prepare_user_data(user: User, base_url: str) -> Dict:
         "description": user.description,
         "target_universities": user.target_universities,
         "admission_type": admission_type,
-        "email": user.email,
         "avatar_url": avatar_url,
     }
 
