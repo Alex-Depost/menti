@@ -6,7 +6,7 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
-  title: "GOYDA - Наставники и менти",
+  title: "Менти - Наставники и менти",
   description: "Платформа для взаимодействия наставников и менти",
 };
 
