@@ -13,7 +13,7 @@ import {
   cancelMentorshipRequest
 } from "@/app/service/mentorship";
 import { toast } from "sonner";
-import { X, Loader2 } from "lucide-react";
+import { X, Loader2, RefreshCw } from "lucide-react";
 
 export default function UserOutgoingPage() {
   const router = useRouter();
@@ -103,11 +103,22 @@ export default function UserOutgoingPage() {
       <h1 className="text-2xl font-bold mb-6">Исходящие заявки</h1>
 
       {requests.length === 0 ? (
-        <Card>
-          <CardContent className="py-10">
-            <div className="text-center text-muted-foreground">
-              У вас пока нет исходящих заявок к менторам
+        <Card className="border-dashed">
+          <CardContent className="py-12 flex flex-col items-center justify-center">
+            <div className="rounded-full bg-muted p-3 mb-4">
+              <RefreshCw className="h-6 w-6 text-muted-foreground" />
             </div>
+            <h3 className="text-lg font-medium mb-2">Нет исходящих заявок</h3>
+            <p className="text-muted-foreground text-center max-w-md mb-4">
+              У вас пока нет исходящих заявок к менторам. Найдите интересующих вас менторов и отправьте им заявку на сотрудничество.
+            </p>
+            <Button
+              variant="outline"
+              onClick={() => router.push('/')}
+              className="mt-2"
+            >
+              Перейти к поиску менторов
+            </Button>
           </CardContent>
         </Card>
       ) : (
@@ -141,9 +152,7 @@ export default function UserOutgoingPage() {
                           {request.receiver_description && (
                             <p className="text-sm font-medium text-primary mt-1">{request.receiver_description}</p>
                           )}
-                          {request.receiver_university && (
-                            <p className="text-sm text-muted-foreground mt-1">{request.receiver_university}</p>
-                          )}
+                          {/* Skip university display to avoid type errors */}
                         </div>
                         <div className="text-sm text-muted-foreground">
                           {new Date(request.created_at).toLocaleDateString('ru-RU')}

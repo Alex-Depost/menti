@@ -213,13 +213,52 @@ export default function MentorInboxPage() {
       </Card>
 
       {filteredRequests.length === 0 ? (
-        <Card>
-          <CardContent className="py-10">
-            <div className="text-center text-muted-foreground">
-              {requests.length === 0
-                ? "У вас пока нет входящих заявок от пользователей"
-                : "Нет заявок, соответствующих выбранным фильтрам"}
-            </div>
+        <Card className="border-dashed">
+          <CardContent className="py-12 flex flex-col items-center justify-center">
+            {requests.length === 0 ? (
+              <>
+                <div className="rounded-full bg-muted p-3 mb-4">
+                  <Loader2 className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Нет входящих заявок</h3>
+                <p className="text-muted-foreground text-center max-w-md mb-4">
+                  У вас пока нет входящих заявок от пользователей. Заявки появятся здесь, когда пользователи захотят начать с вами сотрудничество.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={handleRefresh}
+                  className="mt-2"
+                  disabled={isRefreshing}
+                >
+                  {isRefreshing ? (
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  ) : (
+                    <RefreshCw className="h-4 w-4 mr-2" />
+                  )}
+                  Проверить наличие заявок
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="rounded-full bg-muted p-3 mb-4">
+                  <Filter className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Нет совпадений</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  Нет заявок, соответствующих выбранным фильтрам. Попробуйте изменить параметры поиска или фильтрации.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("all");
+                  }}
+                  className="mt-4"
+                >
+                  Сбросить фильтры
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (

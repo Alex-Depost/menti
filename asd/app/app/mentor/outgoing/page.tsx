@@ -163,13 +163,46 @@ export default function MentorOutgoingPage() {
       </Card>
 
       {filteredRequests.length === 0 ? (
-        <Card>
-          <CardContent className="py-10">
-            <div className="text-center text-muted-foreground">
-              {requests.length === 0
-                ? "У вас пока нет исходящих заявок к пользователям"
-                : "Нет заявок, соответствующих выбранным фильтрам"}
-            </div>
+        <Card className="border-dashed">
+          <CardContent className="py-12 flex flex-col items-center justify-center">
+            {requests.length === 0 ? (
+              <>
+                <div className="rounded-full bg-muted p-3 mb-4">
+                  <RefreshCw className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Нет исходящих заявок</h3>
+                <p className="text-muted-foreground text-center max-w-md mb-4">
+                  У вас пока нет исходящих заявок к пользователям. Найдите интересующих вас пользователей и отправьте им заявку на менторство.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => router.push('/')}
+                  className="mt-2"
+                >
+                  Перейти к поиску пользователей
+                </Button>
+              </>
+            ) : (
+              <>
+                <div className="rounded-full bg-muted p-3 mb-4">
+                  <Filter className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <h3 className="text-lg font-medium mb-2">Нет совпадений</h3>
+                <p className="text-muted-foreground text-center max-w-md">
+                  Нет заявок, соответствующих выбранным фильтрам. Попробуйте изменить параметры поиска или фильтрации.
+                </p>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setStatusFilter("all");
+                  }}
+                  className="mt-4"
+                >
+                  Сбросить фильтры
+                </Button>
+              </>
+            )}
           </CardContent>
         </Card>
       ) : (
