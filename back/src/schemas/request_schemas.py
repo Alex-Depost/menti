@@ -1,8 +1,9 @@
 from datetime import datetime
-from typing import Optional
+from typing import Optional, Union
 from pydantic import BaseModel
 
 from src.data.models import RequestStatus, EntityType
+from src.schemas.schemas import UserFeedResponse, MentorFeedResponse
 
 
 class RequestCreate(BaseModel):
@@ -23,6 +24,15 @@ class RequestResponse(BaseModel):
     status: RequestStatus
     created_at: datetime
     updated_at: datetime
+
+    class Config:
+        """Pydantic config."""
+        from_attributes = True
+
+
+class RequestResponseWithSender(RequestResponse):
+    """Схема для ответа с заявкой, включающая информацию об отправителе."""
+    sender: Optional[Union[UserFeedResponse, MentorFeedResponse]] = None
 
     class Config:
         """Pydantic config."""

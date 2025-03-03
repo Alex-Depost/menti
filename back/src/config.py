@@ -14,6 +14,9 @@ POSTGRES_PORT = os.environ.get('POSTGRES_PORT', '5432')
 POSTGRES_DB = os.environ.get('POSTGRES_DB', 'app')
 CONNECTION_STRING = f"postgresql+asyncpg://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 
+# GEMINI API
+GEMINI_API_KEY = os.environ.get('GEMINI_API_KEY', 'sk-9c33e1ecb15640c8b060fe63eeaea71c')
+
 # Roles
 class Roles:
     ADMIN = "admin"

@@ -1,12 +1,14 @@
-from typing import List, Union
+from typing import List, Union, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.data.base import session_scope
 from src.data.models import Request, RequestStatus, EntityType, User, Mentor
-from src.schemas.request_schemas import RequestCreate, RequestResponse
+from src.schemas.request_schemas import RequestCreate, RequestResponse, RequestResponseWithSender
 from src.security.auth import get_optional_current_user, get_optional_current_mentor
+from src.schemas.schemas import UserFeedResponse, MentorFeedResponse
+from src.utils.constants import AVATAR_URL
 
 
 async def get_current_user_or_mentor(
@@ -135,7 +137,7 @@ async def get_sent_requests(
         return list(requests)
 
 
-@router.get("/got", response_model=List[RequestResponse])
+@router.get("/got", response_model=List[RequestResponseWithSender])
 async def get_received_requests(
     current_user: Union[User, Mentor] = Depends(get_current_user_or_mentor),
 ):
@@ -157,7 +159,40 @@ async def get_received_requests(
         )
         result = await session.execute(query)
         requests = result.scalars().all()
-        return list(requests)
+        
+        # Создаем список для хранения ответов с информацией об отправителях
+        requests_with_senders = []
+        
+        for request in requests:
+            # Получаем информацию об отправителе
+            sender = None
+            if request.sender_type == EntityType.USER:
+                # Если отправитель - пользователь, получаем информацию о нем
+                user_query = select(User).where(User.id == request.sender_id)
+                user_result = await session.execute(user_query)
+                user = user_result.scalars().first()
+                if user:
+                    sender = UserFeedResponse.model_validate(user)
+                    # Добавляем URL аватара, если есть UUID
+                    if user.avatar_uuid and not sender.avatar_url:
+                        sender.avatar_url = f"{AVATAR_URL}/{user.avatar_uuid}"
+            else:
+                # Если отправитель - ментор, получаем информацию о нем
+                mentor_query = select(Mentor).where(Mentor.id == request.sender_id)
+                mentor_result = await session.execute(mentor_query)
+                mentor = mentor_result.scalars().first()
+                if mentor:
+                    sender = MentorFeedResponse.model_validate(mentor)
+                    # Добавляем URL аватара, если есть UUID
+                    if mentor.avatar_uuid and not sender.avatar_url:
+                        sender.avatar_url = f"{AVATAR_URL}/{mentor.avatar_uuid}"
+            
+            # Создаем объект ответа с информацией об отправителе
+            request_response = RequestResponseWithSender.model_validate(request)
+            request_response.sender = sender
+            requests_with_senders.append(request_response)
+        
+        return requests_with_senders
 
 
 @router.post("/approve/{request_id}")
