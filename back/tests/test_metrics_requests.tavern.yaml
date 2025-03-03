@@ -1,0 +1,131 @@
+---
+# Тесты для API запросов
+test_name: Проверка API запросов
+
+stages:
+  # Регистрация пользователя для тестов запросов
+  - name: Регистрация пользователя для тестов запросов
+    request:
+      url: "{tavern.env_vars.API_URL}/auth/users/signup"
+      method: POST
+      json:
+        login: "request_test_user"
+        name: "Тестовый Пользователь для Запросов"
+        password: "Password123!"
+        age: 18
+        description: "Тестовый пользователь для тестов запросов"
+        target_universities: ["МГУ"]
+        admission_type: "ЕГЭ"
+        email: "request_test@example.com"
+        telegram_link: "https://t.me/request_test_user"
+    response:
+      status_code: 201
+      save:
+        json:
+          user_token: access_token
+
+  # Регистрация ментора для тестов запросов
+  - name: Регистрация ментора для тестов запросов
+    request:
+      url: "{tavern.env_vars.API_URL}/auth/mentors/signup"
+      method: POST
+      json:
+        login: "request_test_mentor"
+        name: "Тестовый Ментор для Запросов"
+        password: "Password123!"
+        description: "Тестовый ментор для тестов запросов" 
+        universities: ["МГУ"]
+        faculty: "Факультет ВМК"
+        admission_type: "ЕГЭ"
+        email: "request_test_mentor@example.com"
+        telegram_link: "https://t.me/request_test_mentor"
+    response:
+      status_code: 201
+      save:
+        json:
+          mentor_token: access_token
+
+  # Пользователь создает запрос к ментору
+  - name: Создание запроса к ментору
+    request:
+      url: "{tavern.env_vars.API_URL}/requests/create"
+      method: POST
+      headers:
+        Authorization: "Bearer {user_token}"
+      json:
+        mentor_id: !int "{mentor_id}"
+        message: "Тестовый запрос от пользователя"
+    response:
+      status_code: 201
+      json:
+        id: !anything
+        status: "PENDING"
+      save:
+        json:
+          request_id: id
+
+  # Ментор получает свои запросы
+  - name: Получение запросов ментора
+    request:
+      url: "{tavern.env_vars.API_URL}/requests/mentors/me"
+      method: GET
+      headers:
+        Authorization: "Bearer {mentor_token}"
+    response:
+      status_code: 200
+      verify_response_with:
+        function: back.tests.utils:verify_request_list
+
+  # Пользователь получает свои запросы
+  - name: Получение запросов пользователя
+    request:
+      url: "{tavern.env_vars.API_URL}/requests/users/me"
+      method: GET
+      headers:
+        Authorization: "Bearer {user_token}"
+    response:
+      status_code: 200
+      verify_response_with:
+        function: back.tests.utils:verify_request_list
+
+---
+# Тесты для API метрик
+test_name: Проверка API метрик
+
+stages:
+  # Регистрация ментора для тестов метрик
+  - name: Регистрация ментора для тестов метрик
+    request:
+      url: "{tavern.env_vars.API_URL}/auth/mentors/signup"
+      method: POST
+      json:
+        login: "metrics_test_mentor"
+        name: "Тестовый Ментор для Метрик"
+        password: "Password123!"
+        description: "Тестовый ментор для тестов метрик" 
+        universities: ["МГУ"]
+        faculty: "Факультет ВМК"
+        admission_type: "ЕГЭ"
+        email: "metrics_test_mentor@example.com"
+        telegram_link: "https://t.me/metrics_test_mentor"
+    response:
+      status_code: 201
+      save:
+        json:
+          mentor_token: access_token
+
+  # Получение метрик доступно только для менторов
+  - name: Получение метрик для ментора
+    request:
+      url: "{tavern.env_vars.API_URL}/metrics/mentor"
+      method: GET
+      headers:
+        Authorization: "Bearer {mentor_token}"
+    response:
+      status_code: 200
+      json:
+        total_views: !int
+        total_requests: !int
+        approved_requests: !int
+        rejected_requests: !int
+        average_rating: !anything 

@@ -1,0 +1,10 @@
+---
+# Конфигурационный файл для тестов Tavern
+name: Тесты API GOYDA
+
+variables:
+  API_URL: http://localhost:8000
+
+# Общие заголовки для всех запросов
+strict:
+  - json:body 
