@@ -1,10 +1,11 @@
 "use client";
 
-import { AVATAR_URL } from "@/app/service/config";
+import { API_URL } from "@/app/service/config";
 import { MentorshipRequestDisplay } from "@/app/service/mentorship";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
+import { HtmlContent } from "@/components/ui/html-content";
 import { formatDistanceToNow } from "date-fns";
 import { ru } from "date-fns/locale";
 import { CalendarDays, Mail } from "lucide-react";
@@ -66,7 +67,7 @@ export function SenderCard({
 
     // Get status badge
     const getStatusBadge = () => {
-        switch(request.status) {
+        switch (request.status) {
             case 'pending':
                 return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Ожидает ответа</Badge>;
             case 'accepted':
@@ -84,9 +85,9 @@ export function SenderCard({
                 {/* Header section with sender info */}
                 <div className="flex items-start gap-4">
                     <Avatar className="h-16 w-16 border border-border/50 ring-2 ring-background shadow-sm">
-                        {request.sender_avatar && (
+                        {request.sender?.avatar_url && (
                             <AvatarImage
-                                src={`${AVATAR_URL}/${request.sender_avatar}`}
+                                src={`${API_URL}${request.sender.avatar_url}`}
                                 alt={request.sender_name || ''}
                             />
                         )}
@@ -115,12 +116,13 @@ export function SenderCard({
                             </div>
                         </div>
 
-                        {/* Sender description */}
+                        {/* Sender description with formatted content */}
                         {senderInfo.description && (
                             <div className="mt-3">
-                                <p className="text-sm text-muted-foreground">
-                                    {senderInfo.description}
-                                </p>
+                                <HtmlContent
+                                    html={senderInfo.description}
+                                    className="text-sm text-muted-foreground"
+                                />
                             </div>
                         )}
 
@@ -135,9 +137,12 @@ export function SenderCard({
                             </div>
                         )}
 
-                        {/* Request message */}
+                        {/* Request message with formatted content */}
                         <div className="mt-4 p-4 bg-muted/50 rounded-md border border-border/30">
-                            <p className="text-sm whitespace-pre-wrap">{request.message}</p>
+                            <HtmlContent
+                                html={request.message}
+                                className="text-sm"
+                            />
                         </div>
                     </div>
                 </div>
