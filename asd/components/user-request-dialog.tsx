@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -9,6 +9,8 @@ import * as React from "react";
 import { MentorshipRequestError, sendMentorshipRequest } from "@/app/service/mentorship";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import mentorService from "@/app/service/mentor";
+import { Input } from "@/components/ui/input";
 
 // Custom Textarea component
 export interface TextareaProps
@@ -45,6 +47,8 @@ export function UserRequestDialog({
 }: UserRequestDialogProps) {
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showContactFields, setShowContactFields] = useState(false);
+  const [contactInfo, setContactInfo] = useState({ telegram: "", email: "" });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -53,26 +57,97 @@ export function UserRequestDialog({
       toast.error("Пожалуйста, введите сообщение для пользователя");
       return;
     }
+
+    // Валидация контактной информации, если поля отображаются
+    if (showContactFields) {
+      if (!contactInfo.telegram.trim() && !contactInfo.email.trim()) {
+        toast.error("Пожалуйста, укажите хотя бы один способ связи");
+        return;
+      }
+
+      if (contactInfo.email && !isValidEmail(contactInfo.email)) {
+        toast.error("Пожалуйста, укажите корректный email");
+        return;
+      }
+    }
     
     setIsSubmitting(true);
     
     try {
-      // When a mentor sends a request to a user, the receiver type should be 'user'
+      // Сначала обновляем контактную информацию в профиле, если она отсутствовала
+      if (showContactFields) {
+        try {
+          // Используем PATCH запрос для обновления только контактной информации
+          await mentorService.updateMentorProfile({
+            telegram_link: contactInfo.telegram || null,
+            email: contactInfo.email || null
+          });
+          
+          // Сообщаем пользователю, что контактная информация была сохранена
+          toast.success("Контактная информация сохранена в вашем профиле");
+        } catch (error) {
+          // Предупреждаем, но продолжаем отправку запроса
+          toast.warning("Не удалось сохранить контактную информацию");
+        }
+      }
+
+      // Отправляем запрос на менторство
       const response = await sendMentorshipRequest(userId, message, 'user');
       
       if (response) {
         toast.success("Запрос успешно отправлен");
         onClose();
         setMessage("");
+        setContactInfo({ telegram: "", email: "" });
       } else {
         toast.error("Не удалось отправить запрос");
       }
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Ошибка при отправке запроса");
+      // Обработка ошибок при отправке запроса
+      if (error instanceof MentorshipRequestError && error.code === 'EXISTING_REQUEST') {
+        toast.error("У вас уже есть активная заявка к этому пользователю");
+      } else {
+        toast.error(error instanceof Error ? error.message : "Ошибка при отправке запроса");
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  // Простая валидация email
+  const isValidEmail = (email: string): boolean => {
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  useEffect(() => {
+    // При открытии диалога проверяем наличие контактной информации в профиле ментора (отправитель)
+    const checkContactInfo = async () => {
+      if (!isOpen) return;
+      
+      try {
+        const mentorProfile = await mentorService.getCurrentMentor();
+        
+        // Проверяем, есть ли контактная информация в профиле
+        const hasContactInfo = !!(mentorProfile?.telegram_link || mentorProfile?.email);
+        
+        // Показываем поля для ввода только если нет контактной информации
+        setShowContactFields(!hasContactInfo);
+        
+        // Заполняем имеющиеся данные, если они есть
+        if (mentorProfile?.telegram_link) {
+          setContactInfo(prev => ({ ...prev, telegram: mentorProfile.telegram_link || "" }));
+        }
+        if (mentorProfile?.email) {
+          setContactInfo(prev => ({ ...prev, email: mentorProfile.email || "" }));
+        }
+      } catch (error) {
+        // В случае ошибки лучше показать поля, чтобы пользователь мог ввести данные
+        setShowContactFields(true);
+      }
+    };
+    
+    checkContactInfo();
+  }, [isOpen]);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -85,6 +160,35 @@ export function UserRequestDialog({
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
+          {showContactFields && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="telegram">Telegram</Label>
+                <Input
+                  id="telegram"
+                  placeholder="t.me/username"
+                  value={contactInfo.telegram}
+                  onChange={(e) => setContactInfo(prev => ({ ...prev, telegram: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={contactInfo.email}
+                  onChange={(e) => setContactInfo(prev => ({ ...prev, email: e.target.value }))}
+                  disabled={isSubmitting}
+                />
+              </div>
+              <div className="text-sm text-muted-foreground">
+                Укажите хотя бы один способ связи. Эта информация будет сохранена в вашем профиле.
+              </div>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="message">Сообщение для пользователя</Label>
             <Textarea
