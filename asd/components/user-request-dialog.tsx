@@ -68,6 +68,7 @@ export function UserRequestDialog({
         toast.error("Не удалось отправить запрос");
       }
     } catch (error) {
+      // Display the exact error message from the server
       toast.error(error instanceof Error ? error.message : "Ошибка при отправке запроса");
     } finally {
       setIsSubmitting(false);

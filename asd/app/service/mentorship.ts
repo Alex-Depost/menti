@@ -118,7 +118,7 @@ export async function sendMentorshipRequest(
 
       if (errorDetail === 'У вас уже есть активная заявка к этому получателю') {
         throw new MentorshipRequestError(
-          'У вас уже есть активная заявка к этому получателю',
+          errorDetail, // Use the exact error message from the server
           'EXISTING_REQUEST'
         );
       }
@@ -128,6 +128,11 @@ export async function sendMentorshipRequest(
 
     return await response.json();
   } catch (error) {
+    // If it's already a MentorshipRequestError, rethrow it to preserve the type
+    if (error instanceof MentorshipRequestError) {
+      throw error;
+    }
+    // Otherwise, throw a generic error
     throw new Error('Ошибка при отправке запроса на менторство');
   }
 }
