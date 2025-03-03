@@ -6,6 +6,7 @@ import {
   MentorshipRequestDisplay,
   rejectMentorshipRequest
 } from "@/app/service/mentorship";
+import notificationService from "@/app/service/notification";
 import { SenderCard } from "@/components/sender-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,9 @@ export default function UserInboxPage() {
       setIsRefreshing(true);
       const data = await getIncomingMentorshipRequestsForUI();
       setRequests(data);
+      
+      // Reset notification state since user is viewing the inbox
+      notificationService.resetNotificationState();
       
       // Extract contact info from accepted requests
       const contactInfoMap: Record<number, { email: string; telegram_link?: string }> = {};

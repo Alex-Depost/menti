@@ -6,6 +6,7 @@ import {
   cancelMentorshipRequest,
   RequestApproveResponse
 } from "@/app/service/mentorship";
+import notificationService from "@/app/service/notification";
 import { ReceiverCard } from "@/components/receiver-card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -40,6 +41,9 @@ export default function UserOutgoingPage() {
       setIsRefreshing(true);
       const data = await getOutgoingMentorshipRequestsForUI();
       setRequests(data);
+      
+      // Reset notification state for outgoing requests
+      notificationService.resetNotificationState();
       
       // Extract contact info from accepted requests
       const contactInfoMap: Record<number, { email: string; telegram_link?: string }> = {};
