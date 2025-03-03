@@ -85,17 +85,8 @@ export default function MentorInboxPage() {
       const result = await acceptMentorshipRequest(requestId);
       if (result && typeof result !== 'boolean') {
         toast.success("Заявка принята");
-        // Update the request status in the UI
-        setRequests(prevRequests =>
-          prevRequests.map(req =>
-            req.id === requestId ? { ...req, status: 'accepted' } : req
-          )
-        );
-        // Store contact info
-        setContactInfo(prev => ({
-          ...prev,
-          [requestId]: result.contact_info
-        }));
+        // Reload all requests to get the most up-to-date data
+        await loadRequests();
       } else {
         toast.error("Не удалось принять заявку");
       }
@@ -113,12 +104,8 @@ export default function MentorInboxPage() {
       const success = await rejectMentorshipRequest(requestId);
       if (success) {
         toast.success("Заявка отклонена");
-        // Update the request status in the UI
-        setRequests(prevRequests =>
-          prevRequests.map(req =>
-            req.id === requestId ? { ...req, status: 'rejected' } : req
-          )
-        );
+        // Reload all requests to get the most up-to-date data
+        await loadRequests();
       } else {
         toast.error("Не удалось отклонить заявку");
       }
