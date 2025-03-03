@@ -37,18 +37,18 @@ export function LoginForm({
         <CardHeader>
           <CardTitle>Войдите в свой аккаунт</CardTitle>
           <CardDescription>
-            Введите своё имя для входа в аккаунт
+            Введите свой логин для входа в аккаунт
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit}>
             <div className="flex flex-col gap-6">
               <div className="grid gap-3">
-                <Label htmlFor="login">Имя</Label>
+                <Label htmlFor="login">Логин</Label>
                 <Input
                   id="login"
                   type="text"
-                  placeholder="Иван Иванов"
+                  placeholder="ivan_1"
                   required
                   onChange={e => setLogin(e.target.value)}
                 />
