@@ -121,7 +121,12 @@ export class MentorService {
             }
 
             return await response.json();
-        } catch (error) {
+        } catch (error: any) {
+            // If the error already has fieldErrors (from our structured error), preserve it
+            if (error.fieldErrors) {
+                throw error;
+            }
+            // Otherwise throw a generic error
             throw new Error('Ошибка при обновлении профиля');
         }
     }
