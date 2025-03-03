@@ -93,6 +93,24 @@ services:
       - "${REDIS_PORT:-6379}:6379"
     volumes:
       - redis_data:/data
+    networks:
+      - app-network
+
+  # Redis metrics exporter
+  redis-exporter:
+    image: oliver006/redis_exporter:latest
+    container_name: redis-exporter
+    hostname: redis-exporter
+    restart: always
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis://redis:6379
+      - TZ=Europe/Moscow
+    networks:
+      - app-network
+    depends_on:
+      - redis
 
   prometheus:
     image: prom/prometheus:v2.51.1
