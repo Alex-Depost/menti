@@ -62,6 +62,15 @@ export function ProfileEditForm({
         }));
     };
 
+    const handleUniversityChange = (universities: string[]) => {
+        // Only take the first university (limit to one)
+        const university = universities.length > 0 ? universities[0] : null;
+        setFormData(prev => ({
+            ...prev,
+            university
+        }));
+    };
+
     const handleDescriptionChange = (value: string) => {
         setFormData(prev => ({
             ...prev,
@@ -124,14 +133,36 @@ export function ProfileEditForm({
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                                id="university"
-                                label="Университет"
-                                value={formData.university || ""}
-                                onChange={handleChange}
-                                placeholder="Название университета"
-                                error={fieldErrors.university}
-                            />
+                            <div className="space-y-2">
+                                <label htmlFor="university" className="block text-sm font-medium">
+                                    Университет
+                                    {fieldErrors.university && (
+                                        <span className="text-red-500 ml-1">*</span>
+                                    )}
+                                </label>
+                                <TagInput
+                                    value={formData.university ? [formData.university] : []}
+                                    onChange={handleUniversityChange}
+                                    suggestions={[
+                                        "МГУ",
+                                        "МФТИ",
+                                        "ВШЭ",
+                                        "МГТУ им. Баумана",
+                                        "Санкт-Петербургский государственный университет",
+                                        "ИТМО",
+                                        "Новосибирский государственный университет",
+                                        "Томский государственный университет",
+                                        "РАНХиГС",
+                                        "МГИМО"
+                                    ]}
+                                    placeholder="Введите название университета"
+                                    error={fieldErrors.university}
+                                    maxTags={1} // Limit to one university
+                                />
+                                <p className="text-sm text-gray-500">
+                                    Введите название университета и нажмите Enter. Можно указать только один университет.
+                                </p>
+                            </div>
                             <FormField
                                 id="admission_type"
                                 label="Тип поступления"

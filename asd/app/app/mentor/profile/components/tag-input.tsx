@@ -10,6 +10,7 @@ interface TagInputProps {
   suggestions: string[];
   placeholder?: string;
   error?: string;
+  maxTags?: number; // Maximum number of tags allowed
 }
 
 export function TagInput({
@@ -17,13 +18,15 @@ export function TagInput({
   onChange,
   suggestions,
   placeholder = "Добавить...",
-  error
+  error,
+  maxTags
 }: TagInputProps) {
   const [inputValue, setInputValue] = useState("");
   const [filteredSuggestions, setFilteredSuggestions] = useState<string[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-  const [activeSuggestion, setActiveSuggestion] = useState(0);
+  const [activeSuggestion, setActiveSuggestion] = useState(-1); // Start with no active suggestion
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [isNavigatingWithKeys, setIsNavigatingWithKeys] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -46,13 +49,28 @@ export function TagInput({
                    !value.includes(suggestion)
     );
     setFilteredSuggestions(filtered);
-    setActiveSuggestion(0);
-  }, [inputValue, suggestions, value, isDropdownOpen]);
+    
+    // Reset active suggestion when not navigating with keys
+    if (!isNavigatingWithKeys) {
+      setActiveSuggestion(-1);
+    }
+    
+    // Reset navigation state when input changes
+    setIsNavigatingWithKeys(false);
+  }, [inputValue, suggestions, value, isDropdownOpen, isNavigatingWithKeys]);
 
   const addTag = (tag: string) => {
     if (tag.trim() !== "" && !value.includes(tag)) {
-      const newTags = [...value, tag];
-      onChange(newTags);
+      // Check if adding this tag would exceed the maximum
+      if (maxTags !== undefined && value.length >= maxTags) {
+        // If maxTags is set and we've reached the limit, replace the existing tag
+        const newTags = [tag];
+        onChange(newTags);
+      } else {
+        // Otherwise add the tag to the existing ones
+        const newTags = [...value, tag];
+        onChange(newTags);
+      }
     }
     setInputValue("");
     setShowSuggestions(false);
@@ -65,8 +83,8 @@ export function TagInput({
   };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    // Add tag on Enter or Space
-    if ((e.key === "Enter" || e.key === " ") && inputValue.trim() !== "") {
+    // Add tag only on Enter, not on Space (to allow multi-word tags)
+    if (e.key === "Enter" && inputValue.trim() !== "") {
       e.preventDefault();
       
       if (showSuggestions && filteredSuggestions.length > 0) {
@@ -78,6 +96,13 @@ export function TagInput({
       }
     }
     
+    // Add tag on comma (for comma-separated input)
+    else if (e.key === "," && inputValue.trim() !== "") {
+      e.preventDefault();
+      // Remove the comma and add the tag
+      addTag(inputValue.trim());
+    }
+    
     // Remove last tag on Backspace if input is empty
     else if (e.key === "Backspace" && inputValue === "" && value.length > 0) {
       removeTag(value[value.length - 1]);
@@ -86,14 +111,16 @@ export function TagInput({
     // Navigate through suggestions
     else if (e.key === "ArrowDown" && showSuggestions) {
       e.preventDefault();
-      setActiveSuggestion(prev => 
+      setIsNavigatingWithKeys(true);
+      setActiveSuggestion(prev =>
         prev < filteredSuggestions.length - 1 ? prev + 1 : 0
       );
     }
     
     else if (e.key === "ArrowUp" && showSuggestions) {
       e.preventDefault();
-      setActiveSuggestion(prev => 
+      setIsNavigatingWithKeys(true);
+      setActiveSuggestion(prev =>
         prev > 0 ? prev - 1 : filteredSuggestions.length - 1
       );
     }
@@ -164,6 +191,8 @@ export function TagInput({
             placeholder={value.length === 0 ? placeholder : ""}
             className="flex-grow min-w-[120px] outline-none bg-transparent"
             onClick={(e) => e.stopPropagation()}
+            // Disable input if we've reached the maximum number of tags
+            disabled={maxTags !== undefined && value.length >= maxTags}
           />
           <button
             type="button"
@@ -186,7 +215,9 @@ export function TagInput({
           {filteredSuggestions.map((suggestion, index) => (
             <li
               key={index}
-              className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${index === activeSuggestion ? 'bg-gray-100' : ''}`}
+              className={`px-4 py-2 cursor-pointer hover:bg-gray-100 ${
+                isNavigatingWithKeys && index === activeSuggestion ? 'bg-gray-100' : ''
+              }`}
               onClick={() => addTag(suggestion)}
             >
               {suggestion}
