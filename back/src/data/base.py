@@ -40,7 +40,7 @@ async def session_scope():
 async def create_schema():
     """Create schema if not exists."""
     async with main_engine.begin() as connection:
-        await drop_all_tables()  # Временно раскомментировано для пересоздания схемы
+        # await drop_all_tables()  # Временно раскомментировано для пересоздания схемы
         await connection.execute(CreateSchema(SCHEMA_NAME, if_not_exists=True))
         await connection.run_sync(Base.metadata.create_all)
         await connection.commit()
