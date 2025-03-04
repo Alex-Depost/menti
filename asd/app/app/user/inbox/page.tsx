@@ -299,7 +299,7 @@ export default function UserInboxPage() {
                 />
                 
                 {request.status === 'pending' && (
-                  <div className="flex justify-end gap-2 mt-2">
+                  <div className="flex justify-end gap-2 mt-2" data-tour="card-actions">
                     <Button
                       variant="outline"
                       size="sm"

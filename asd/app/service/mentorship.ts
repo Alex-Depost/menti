@@ -113,17 +113,13 @@ export async function sendMentorshipRequest(
 
     if (!response.ok) {
       const errorData = await response.json();
-      const errorDetail = errorData.detail || 'Failed to send mentorship request';
+      const errorDetail = errorData.detail;
 
 
-      if (errorDetail === 'У вас уже есть активная заявка к этому получателю') {
-        throw new MentorshipRequestError(
-          errorDetail, // Use the exact error message from the server
-          'EXISTING_REQUEST'
-        );
-      }
-
-      throw new Error(errorDetail);
+      throw new MentorshipRequestError(
+        errorDetail, // Use the exact error message from the server
+        'ERROR'
+      );
     }
 
     return await response.json();

@@ -66,18 +66,18 @@ export function SenderCard({
     const getStatusBadge = () => {
         switch (request.status) {
             case 'pending':
-                return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200">Ожидает ответа</Badge>;
+                return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200" data-tour="status-badge">Ожидает ответа</Badge>;
             case 'accepted':
-                return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200">Принята</Badge>;
+                return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200" data-tour="status-badge">Принята</Badge>;
             case 'rejected':
-                return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200">Отклонена</Badge>;
+                return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200" data-tour="status-badge">Отклонена</Badge>;
             default:
                 return null;
         }
     };
 
     return (
-        <Card className="w-full overflow-hidden border-border/50 shadow-sm hover:shadow-md transition-shadow">
+        <Card className="w-full overflow-hidden border-border/50 shadow-sm hover:shadow-md transition-shadow" data-tour="sender-card">
             <CardContent className="p-5">
                 {/* Header section with sender info */}
                 <div className="flex items-start gap-4">

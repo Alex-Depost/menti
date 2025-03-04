@@ -169,7 +169,7 @@ export function TagInput({
   };
 
   return (
-    <div ref={containerRef} className="relative">
+    <div ref={containerRef} className="relative" data-tour="tag-input">
       <div
         className={`flex flex-wrap gap-2 p-2 border rounded-md min-h-10 ${error ? 'border-red-500' : 'border-gray-300'}`}
       >

@@ -26,7 +26,7 @@ import { useEffect, useState } from "react";
 function NavLink({ href, children, className }: { href: string, children: React.ReactNode, className?: string }) {
   const { setOpenMobile, isMobile } = useSidebar();
   const pathname = usePathname();
-  
+
   const handleClick = () => {
     if (isMobile) {
       setOpenMobile(false);
@@ -36,9 +36,9 @@ function NavLink({ href, children, className }: { href: string, children: React.
   const isActive = pathname === href;
 
   return (
-    <Link 
-      href={href} 
-      className={`nav-button ${isActive ? 'nav-button-active' : ''} ${className}`} 
+    <Link
+      href={href}
+      className={`nav-button ${isActive ? 'nav-button-active' : ''} ${className}`}
       onClick={handleClick}
     >
       {children}
@@ -58,21 +58,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   useEffect(() => {
     if (isAuthenticated) {
       notificationService.startBackgroundCheck();
-      
+
       // Listen for new inbox messages
       const handleNewMessages = (event: CustomEvent) => {
         setNewMessagesCount(event.detail.count);
       };
-      
+
       // Listen for reset notifications
       const handleResetNotifications = () => {
         setNewMessagesCount(0);
       };
-      
+
       // Add event listeners
       window.addEventListener('new-inbox-messages', handleNewMessages as EventListener);
       window.addEventListener('reset-inbox-notifications', handleResetNotifications);
-      
+
       // Clean up
       return () => {
         notificationService.stopBackgroundCheck();
@@ -81,7 +81,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       };
     }
   }, [isAuthenticated]);
-  
+
   // Reset notifications when navigating to inbox
   useEffect(() => {
     if (pathname === "/app/user/inbox" || pathname === "/app/mentor/inbox") {
@@ -98,7 +98,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   return (
     <Sidebar className="border-r bg-card/50 min-h-screen" {...props}>
-      <SidebarContent className="px-4 py-6 space-y-6">
+      <SidebarContent className="sidebar-content px-4 py-6 space-y-6">
         {isAuthenticated ? (
           <div className="flex flex-col items-center text-center px-4 py-6">
             <Avatar className="h-20 w-20 mb-4 ring-4 ring-background shadow-sm">

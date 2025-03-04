@@ -38,8 +38,13 @@ export function SignupForm({
       } else {
         await authService.registerUser(name)
       }
+      
+      // Set a flag in localStorage to indicate this is a new user
+      // This will be used to automatically start the tour
+      localStorage.setItem('is-new-user', 'true')
+      
       // Перенаправляем на главную страницу, так как токен уже установлен в authService
-      router.push("/")
+      router.push("/app")
     } catch (err) {
       setError(err instanceof Error ? err.message : "Произошла ошибка при регистрации")
     }
