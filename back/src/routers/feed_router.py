@@ -46,7 +46,7 @@ def prepare_user_data(user: User, base_url: str) -> Dict:
     if user.avatar_uuid is not None:
         avatar_url = urljoin(base_url, f"img/{user.avatar_uuid}")
 
-    admission_type = str(user.admission_type) if user.admission_type else None
+    admission_type = user.admission_type.value if user.admission_type else None
 
     return {
         "id": user.id,
@@ -92,7 +92,7 @@ async def get_mentors_feed(
         admission_type_value = ""
 
         if current_user and current_user.admission_type:
-            admission_type_value = str(current_user.admission_type)
+            admission_type_value = current_user.admission_type.value
 
         mentors, total = await get_filtered_mentors(
             target_universities=target_universities,
@@ -208,7 +208,7 @@ async def get_users_feed(
         admission_type_value = ""
 
         if current_mentor and current_mentor.admission_type:
-            admission_type_value = str(current_mentor.admission_type)
+            admission_type_value = current_mentor.admission_type.value
 
         users, total = await get_filtered_users(
             university=university,
