@@ -34,7 +34,7 @@ export default function FeedPage() {
   }, [auth.isAuthenticated]);
   
   // Separate fetch functions for initial load and search
-  const fetchInitialFeed = useCallback(async (page: number = currentPage) => {
+  const fetchInitialFeed = useCallback(async (page: number) => {
     if (isAuthLoading) return;
     
     setIsLoading(true);
@@ -50,9 +50,9 @@ export default function FeedPage() {
     } finally {
       setIsLoading(false);
     }
-  }, [currentPage, isMentor, isAuthLoading]);
+  }, [isMentor, isAuthLoading]);
 
-  const fetchSearchResults = useCallback(async (page: number = 1, query: string) => {
+  const fetchSearchResults = useCallback(async (page: number, query: string) => {
     if (isAuthLoading || !query.trim()) return;
     
     setIsLoading(true);
@@ -70,27 +70,29 @@ export default function FeedPage() {
     }
   }, [isMentor, isAuthLoading]);
 
+  // This effect handles all data fetching based on current state
   useEffect(() => {
-    if (!isAuthLoading) {
-      fetchInitialFeed();
+    if (isAuthLoading) return;
+    
+    // This will run on initial load and whenever searchQuery or currentPage changes
+    if (searchQuery.trim()) {
+      fetchSearchResults(currentPage, searchQuery);
+    } else {
+      fetchInitialFeed(currentPage);
     }
-  }, [fetchInitialFeed, isAuthLoading]);
+  }, [fetchInitialFeed, fetchSearchResults, isAuthLoading, searchQuery, currentPage]);
 
   const handlePageChange = (page: number) => {
+    // Just update the page state - the useEffect will handle the data fetching
     setCurrentPage(page);
-    // Use the appropriate fetch function based on whether we're searching or not
-    if (searchQuery.trim()) {
-      fetchSearchResults(page, searchQuery);
-    } else {
-      fetchInitialFeed(page);
-    }
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
     setCurrentPage(1);
-    fetchSearchResults(1, query);
+    // No need to call fetchSearchResults directly
+    // The useEffect will handle it when searchQuery changes
   };
 
   const handleSearchChange = (value: string) => {

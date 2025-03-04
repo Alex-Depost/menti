@@ -154,6 +154,10 @@ export function MentorshipRequestDialog({
             setFieldErrors(error.fieldErrors);
             toast.error("Пожалуйста, исправьте ошибки в контактной информации");
             return; // Прерываем выполнение, не отправляем запрос на менторство
+          } else if (error.message && error.message !== 'Failed to fetch') {
+            // Показываем конкретную ошибку от сервера
+            toast.error(error.message);
+            return; // Прерываем выполнение, не отправляем запрос на менторство
           } else {
             // Общая ошибка
             toast.error("Не удалось сохранить контактную информацию");
