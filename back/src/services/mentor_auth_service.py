@@ -117,7 +117,7 @@ async def update_mentor_profile_service(
         Обновленный объект ментора
 
     Raises:
-        HTTPException: Если ментор не найден
+        HTTPException: Если ментор не найден или данные некорректны
     """
     # Преобразуем данные в словарь и удаляем None значения
     update_dict = update_data.dict(exclude_unset=True)
@@ -130,14 +130,30 @@ async def update_mentor_profile_service(
     if "login" in update_dict:
         # Убираем логин из обновляемых данных
         update_dict.pop("login")
+    
+    # Проверяем, существует ли уже ментор с таким email
+    if "email" in update_dict and update_dict["email"]:
+        existing_mentor = await mentor_repo.get_mentor_by_email(update_dict["email"])
+        if existing_mentor and existing_mentor.id != mentor_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email уже используется другим ментором",
+            )
 
-    # Обновляем профиль
-    updated_mentor = await mentor_repo.update_mentor_profile(mentor_id, update_dict)
+    try:
+        # Обновляем профиль
+        updated_mentor = await mentor_repo.update_mentor_profile(mentor_id, update_dict)
 
-    if not updated_mentor:
+        if not updated_mentor:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Ментор не найден",
+            )
+
+        return updated_mentor
+    except IntegrityError as e:
+        # Обрабатываем другие возможные ошибки целостности данных
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Ментор не найден",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка обновления профиля: возможно, некоторые данные уже используются",
         )
-
-    return updated_mentor

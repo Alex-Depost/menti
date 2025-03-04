@@ -113,7 +113,7 @@ async def update_user_profile_service(user_id: int, update_data: UserUpdateSchem
         Обновленный объект пользователя
     
     Raises:
-        HTTPException: Если пользователь не найден
+        HTTPException: Если пользователь не найден или данные некорректны
     """
     # Преобразуем данные в словарь и удаляем None значения
     update_dict = update_data.dict(exclude_unset=True, exclude_none=False)
@@ -127,13 +127,29 @@ async def update_user_profile_service(user_id: int, update_data: UserUpdateSchem
         # Убираем логин из обновляемых данных
         update_dict.pop("login")
     
-    # Обновляем профиль
-    updated_user = await user_repo.update_user_profile(user_id, update_dict)
+    # Проверяем, существует ли уже пользователь с таким email
+    if "email" in update_dict and update_dict["email"]:
+        existing_user = await user_repo.get_user_by_email(update_dict["email"])
+        if existing_user and existing_user.id != user_id:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email уже используется другим пользователем",
+            )
     
-    if not updated_user:
+    try:
+        # Обновляем профиль
+        updated_user = await user_repo.update_user_profile(user_id, update_dict)
+        
+        if not updated_user:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Пользователь не найден",
+            )
+        
+        return updated_user
+    except IntegrityError as e:
+        # Обрабатываем другие возможные ошибки целостности данных
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Пользователь не найден",
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Ошибка обновления профиля: возможно, некоторые данные уже используются",
         )
-    
-    return updated_user
