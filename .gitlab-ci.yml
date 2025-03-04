@@ -31,7 +31,7 @@ deploy_to_production:
     # Stop containers and remove old project
     - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker compose down || true"
     - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR/back/static/avatars"
-    - ssh $SSH_ADDRESS "find $REMOTE_DIR -path '$REMOTE_DIR/back/static/avatars' -prune -o -not -path '$REMOTE_DIR' -delete"
+    - ssh $SSH_ADDRESS "cd $REMOTE_DIR && rm -rf $(ls -A | grep -v 'back') && cd back && rm -rf $(ls -A | grep -v 'static') && cd static && rm -rf $(ls -A | grep -v 'avatars')"
     
     # Copy the new project and run containers
     - scp -r ./* $SSH_ADDRESS:$REMOTE_DIR/
