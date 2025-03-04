@@ -27,15 +27,14 @@ deploy_to_production:
   script:
     # Create main directory on remote server
     - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR"
-    
+
     # Stop containers and remove old project
     - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker compose down || true"
-    - ssh $SSH_ADDRESS "mkdir -p $REMOTE_DIR/back/static/avatars"
-    - ssh $SSH_ADDRESS "cd $REMOTE_DIR && rm -rf $(ls -A | grep -v 'back') && cd back && rm -rf $(ls -A | grep -v 'static') && cd static && rm -rf $(ls -A | grep -v 'avatars')"
-    
+    - ssh $SSH_ADDRESS "rm -rf $REMOTE_DIR/* || true"
+
     # Copy the new project and run containers
     - scp -r ./* $SSH_ADDRESS:$REMOTE_DIR/
     - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker compose up -d --build"
-    
+
     # Clean up unused images
     - ssh $SSH_ADDRESS "docker system prune -f"
