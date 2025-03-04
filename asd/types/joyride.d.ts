@@ -20,6 +20,9 @@ export interface Step {
   showSkipButton?: boolean;
   spotlightClicks?: boolean;
   spotlightPadding?: number;
+  // Custom properties for navigation
+  action?: 'navigate' | string;
+  path?: string;
   styles?: {
     options?: object;
     beacon?: object;

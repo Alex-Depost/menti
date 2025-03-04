@@ -1,4 +1,5 @@
 import "./globals.css";
+import "../styles/tour-guide.css";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { Toaster } from "sonner";
@@ -6,7 +7,7 @@ import { Toaster } from "sonner";
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
-  title: "GOYDA - Наставники и менти",
+  title: "Менти - Наставники и менти",
   description: "Платформа для взаимодействия наставников и менти",
 };
 

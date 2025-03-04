@@ -7,80 +7,116 @@ import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TourModal } from "@/components/tour-guide";
 import { Step } from "@/types/joyride";
 import { useAuth } from "@/hooks/use-auth";
-import { ReactNode, useEffect } from "react";
+import { ReactNode, useEffect, useMemo } from "react";
 
-// Define tour steps
+// Mobile tour steps for users - with page navigation
 const userTourSteps: Step[] = [
     {
         target: 'body',
         content: 'Добро пожаловать в приложение! Давайте познакомимся с основными функциями.',
         placement: 'center',
         disableBeacon: true,
+        action: 'navigate',
+        path: '/app',
     },
     {
-        target: '.nav-button:nth-child(1)',
-        content: 'Здесь вы можете просмотреть список всех доступных менторов.',
-        placement: 'right',
+        target: 'body',
+        content: 'Это главная страница, где вы можете находить менторов и отправлять им заявки на менторство.',
+        placement: 'center',
     },
     {
-        target: '.nav-button:nth-child(2)',
-        content: 'Здесь вы можете просмотреть входящие заявки на менторство.',
-        placement: 'right',
-        offset: 10,
-        event: 'click',
-        disableBeacon: false,
-        disableOverlayClose: true,
-        spotlightClicks: true,
-        spotlightPadding: 10,
-        showProgress: true,
-        showSkipButton: true,
+        target: 'body',
+        content: 'Теперь давайте посмотрим на раздел "Входящие", где вы можете просматривать заявки на менторство от других пользователей.',
+        placement: 'center',
+        action: 'navigate',
+        path: '/app/user/inbox',
     },
     {
-        target: '.nav-button:nth-child(3)',
-        content: 'Здесь вы можете просмотреть ваши исходящие заявки на менторство.',
-        placement: 'right',
+        target: 'body',
+        content: 'Здесь отображаются все входящие заявки на менторство. Вы можете принимать или отклонять их.',
+        placement: 'center',
     },
     {
-        target: '.nav-button:nth-child(4)',
-        content: 'Здесь вы можете редактировать свой профиль и настройки.',
-        placement: 'right',
+        target: 'body',
+        content: 'Теперь перейдем в раздел "Исходящие", где вы можете отслеживать статус ваших заявок на менторство.',
+        placement: 'center',
+        action: 'navigate',
+        path: '/app/user/outgoing',
+    },
+    {
+        target: 'body',
+        content: 'Здесь отображаются все ваши исходящие заявки на менторство и их текущий статус.',
+        placement: 'center',
+    },
+    {
+        target: 'body',
+        content: 'И наконец, давайте посмотрим на ваш профиль, где вы можете редактировать свои данные и настройки.',
+        placement: 'center',
+        action: 'navigate',
+        path: '/app/user/profile',
+    },
+    {
+        target: 'body',
+        content: 'Здесь вы можете изменить свои личные данные, настройки приватности и другие параметры профиля.',
+        placement: 'center',
+    },
+    {
+        target: 'body',
+        content: 'После заполнения профиля система будет использовать нейропоиск при выдаче ленты менторов, что поможет находить наиболее подходящих для вас специалистов.',
+        placement: 'center',
     }
 ];
 
+// Mobile tour steps for mentors - with page navigation
 const mentorTourSteps: Step[] = [
     {
         target: 'body',
         content: 'Добро пожаловать в приложение! Давайте познакомимся с основными функциями.',
         placement: 'center',
         disableBeacon: true,
+        action: 'navigate',
+        path: '/app',
     },
     {
-        target: '.nav-button:nth-child(1)',
-        content: 'Здесь вы можете искать потенциальных менти.',
-        placement: 'right',
+        target: 'body',
+        content: 'Это главная страница, где вы можете находить потенциальных менти и предлагать им менторство.',
+        placement: 'center',
     },
     {
-        target: '.nav-button:nth-child(2)',
-        content: 'Здесь вы можете просмотреть входящие заявки от менти.',
-        placement: 'right',
-        offset: 10,
-        event: 'click',
-        disableBeacon: false,
-        disableOverlayClose: true,
-        spotlightClicks: true,
-        spotlightPadding: 10,
-        showProgress: true,
-        showSkipButton: true,
+        target: 'body',
+        content: 'Теперь давайте посмотрим на раздел "Входящие", где вы можете просматривать заявки на менторство от потенциальных менти.',
+        placement: 'center',
+        action: 'navigate',
+        path: '/app/mentor/inbox',
     },
     {
-        target: '.nav-button:nth-child(3)',
-        content: 'Здесь вы можете просмотреть ваши исходящие заявки к менти.',
-        placement: 'right',
+        target: 'body',
+        content: 'Здесь отображаются все входящие заявки на менторство. Вы можете принимать или отклонять их.',
+        placement: 'center',
     },
     {
-        target: '.nav-button:nth-child(4)',
-        content: 'Здесь вы можете редактировать свой профиль и настройки.',
-        placement: 'right',
+        target: 'body',
+        content: 'Теперь перейдем в раздел "Исходящие", где вы можете отслеживать статус ваших заявок к менти.',
+        placement: 'center',
+        action: 'navigate',
+        path: '/app/mentor/outgoing',
+    },
+    {
+        target: 'body',
+        content: 'Здесь отображаются все ваши исходящие заявки на менторство и их текущий статус.',
+        placement: 'center',
+    },
+    {
+        target: 'body',
+        content: 'И наконец, давайте посмотрим на ваш профиль, где вы можете редактировать свои данные и настройки менторства.',
+        placement: 'center',
+        action: 'navigate',
+        path: '/app/mentor/profile',
+    },
+    {
+        target: 'body',
+        content: 'После заполнения профиля система будет использовать нейропоиск при выдаче ленты менти, что поможет находить наиболее подходящих для вас учеников.',
+        placement: 'center',
     }
 ];
 
@@ -92,7 +128,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         if (isAuthenticated) {
             // Start background checking for new messages
             notificationService.startBackgroundCheck();
-            
+
             // Clean up when component unmounts
             return () => {
                 notificationService.stopBackgroundCheck();
@@ -100,8 +136,10 @@ export default function AppLayout({ children }: { children: ReactNode }) {
         }
     }, [isAuthenticated]);
 
-    // Select the appropriate tour steps based on user role
-    const tourSteps = isUser ? userTourSteps : mentorTourSteps;
+    // Use mobile tour steps for all devices as they provide a better experience
+    const tourSteps = useMemo(() => {
+        return isUser ? userTourSteps : mentorTourSteps;
+    }, [isUser]);
 
     return (
         <SidebarProvider>
