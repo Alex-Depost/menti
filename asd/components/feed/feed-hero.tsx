@@ -1,21 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sparkles, Users, LogIn, Filter } from "lucide-react";
+import { Sparkles, Users, LogIn, Filter, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
 
 export function MentorsFeedHero() {
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-
-  const scrollToMentors = () => {
-    const mentorsSection = document.getElementById('mentors-list');
-    if (mentorsSection) {
-      mentorsSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
+  
   return (
     <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b" data-tour="feed-hero">
       <div className="container mx-auto px-4 py-8 md:py-12">
@@ -34,10 +27,6 @@ export function MentorsFeedHero() {
             <div className="flex gap-3">
               {isAuthenticated ? (
                 <>
-                  <Button className="gap-2" onClick={scrollToMentors}>
-                    <Users className="h-4 w-4" />
-                    Просмотреть менторов
-                  </Button>
                   <Button variant="outline" className="gap-2" onClick={() => router.push("/auth/signup?type=mentor")}>
                     <Sparkles className="h-4 w-4" />
                     Стать ментором
@@ -49,17 +38,15 @@ export function MentorsFeedHero() {
                     <LogIn className="h-4 w-4" />
                     Войти
                   </Button>
-                  <Button variant="outline" className="gap-2" onClick={scrollToMentors}>
-                    <Users className="h-4 w-4" />
-                    Просмотреть всех менторов
-                  </Button>
                 </>
               )}
             </div>
             {isAuthenticated && (
-              <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground bg-primary/5 p-2 rounded-md border border-primary/10">
-                <Filter className="h-4 w-4 text-primary" />
-                <span>Результаты отфильтрованы на основе вашего профиля</span>
+              <div className="mt-4">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-primary/5 p-2 rounded-md border border-primary/10">
+                  <Filter className="h-4 w-4 text-primary" />
+                  <span>Результаты отфильтрованы на основе вашего профиля</span>
+                </div>
               </div>
             )}
           </div>

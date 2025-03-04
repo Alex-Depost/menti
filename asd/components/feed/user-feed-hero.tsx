@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sparkles, Users } from "lucide-react";
+import { Sparkles, Users, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export function UserFeedHero() {

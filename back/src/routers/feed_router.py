@@ -67,12 +67,14 @@ async def get_mentors_feed(
     filtered: bool = Query(True, description="Whether to filter by profile parameters"),
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Number of items per page"),
+    prompt: Optional[str] = Query(None, description="Custom prompt for AI to determine order instead of user profile"),
 ):
     """
     Fetch feed of mentors with pagination.
     If filtered=true, returns mentors that match the current user's profile.
     If filtered=false, returns all mentors.
     Mentors are sorted by interest relevance if user is authenticated.
+    If prompt is provided, it will be used instead of user profile for determining order.
     """
     if page < 1:
         page = 1
@@ -111,10 +113,13 @@ async def get_mentors_feed(
         mentor_data_list.append(mentor_data)
         mentor_list.append(MentorFeedResponse(**mentor_data))
 
-    # Проверяем кеш, если есть авторизованный пользователь
-    if current_user and current_user.description:
+    # Determine which description to use for ranking (prompt or user description)
+    description_for_ranking = prompt if prompt else (current_user.description if current_user else None)
+    
+    # Проверяем кеш, если есть описание для ранжирования
+    if description_for_ranking:
         cache_key = redis_service.generate_feed_cache_key(
-            current_user.description,
+            description_for_ranking,
             mentor_data_list,
             filtered,
             page,
@@ -124,13 +129,13 @@ async def get_mentors_feed(
         if cached_response:
             return FeedResponse(**cached_response)
 
-    if current_user and current_user.description:
+    if description_for_ranking:
         mentors_for_ranking = [
             {"id": m.id, "description": m.description or ""} for m in mentor_list
         ]
 
         ranked_mentor_ids = await interest_service.get_ranked_mentors(
-            mentors=mentors_for_ranking, user_description=current_user.description
+            mentors=mentors_for_ranking, user_description=description_for_ranking
         )
 
         mentor_dict = {m.id: m for m in mentor_list}
@@ -157,10 +162,10 @@ async def get_mentors_feed(
         items=items, total=total, page=page, size=size, pages=total_pages
     )
 
-    # Сохраняем результат в кеш, если есть авторизованный пользователь
-    if current_user and current_user.description:
+    # Сохраняем результат в кеш, если есть описание для ранжирования
+    if description_for_ranking:
         cache_key = redis_service.generate_feed_cache_key(
-            current_user.description,
+            description_for_ranking,
             mentor_data_list,
             filtered,
             page,
@@ -179,11 +184,13 @@ async def get_users_feed(
     filtered: bool = Query(True, description="Whether to filter by profile parameters"),
     page: int = Query(1, ge=1, description="Page number"),
     size: int = Query(10, ge=1, le=100, description="Number of items per page"),
+    prompt: Optional[str] = Query(None, description="Custom prompt for AI to determine order instead of mentor profile"),
 ):
     """
     Fetch feed of users with pagination.
     If filtered=true, returns users that match the current mentor's profile.
     If filtered=false, returns all users.
+    If prompt is provided, it will be used instead of mentor profile for determining order.
     """
     if page < 1:
         page = 1
@@ -222,10 +229,13 @@ async def get_users_feed(
         user_data_list.append(user_data)
         user_list.append(UserFeedResponse(**user_data))
 
-    # Проверяем кеш, если есть авторизованный ментор
-    if current_mentor and current_mentor.description:
+    # Determine which description to use for ranking (prompt or mentor description)
+    description_for_ranking = prompt if prompt else (current_mentor.description if current_mentor else None)
+    
+    # Проверяем кеш, если есть описание для ранжирования
+    if description_for_ranking:
         cache_key = redis_service.generate_feed_cache_key(
-            current_mentor.description,
+            description_for_ranking,
             user_data_list,
             filtered,
             page,
@@ -235,13 +245,13 @@ async def get_users_feed(
         if cached_response:
             return FeedResponse(**cached_response)
 
-    if current_mentor and current_mentor.description:
+    if description_for_ranking:
         users_for_ranking = [
             {"id": u.id, "description": u.description or ""} for u in user_list
         ]
 
         ranked_user_ids = await interest_service.get_ranked_users(
-            users=users_for_ranking, mentor_description=current_mentor.description
+            users=users_for_ranking, mentor_description=description_for_ranking
         )
 
         user_dict = {u.id: u for u in user_list}
@@ -268,10 +278,10 @@ async def get_users_feed(
         items=items, total=total, page=page, size=size, pages=total_pages
     )
 
-    # Сохраняем результат в кеш, если есть авторизованный ментор
-    if current_mentor and current_mentor.description:
+    # Сохраняем результат в кеш, если есть описание для ранжирования
+    if description_for_ranking:
         cache_key = redis_service.generate_feed_cache_key(
-            current_mentor.description,
+            description_for_ranking,
             user_data_list,
             filtered,
             page,

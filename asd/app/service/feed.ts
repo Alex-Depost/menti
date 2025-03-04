@@ -23,12 +23,15 @@ export interface FeedResponse {
     pages: number;
 }
 
-const getMentorsFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
+const getMentorsFeed = async (page = 1, size = 10, prompt?: string): Promise<FeedResponse> => {
     try {
         // Build URL with query parameters
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('size', size.toString());
+        if (prompt) {
+            params.append('prompt', prompt);
+        }
 
         const url = `${API_URL}/feed/mentors/?${params.toString()}`;
 
@@ -61,12 +64,15 @@ const getMentorsFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
     }
 };
 
-const getUsersFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
+const getUsersFeed = async (page = 1, size = 10, prompt?: string): Promise<FeedResponse> => {
     try {
         // Build URL with query parameters
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('size', size.toString());
+        if (prompt) {
+            params.append('prompt', prompt);
+        }
 
         const url = `${API_URL}/feed/users/?${params.toString()}`;
         // Get auth token
@@ -99,8 +105,8 @@ const getUsersFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
 };
 
 // Legacy function for backward compatibility
-const getFeed = async (page = 1, size = 10): Promise<FeedResponse> => {
-    return getMentorsFeed(page, size);
+const getFeed = async (page = 1, size = 10, prompt?: string): Promise<FeedResponse> => {
+    return getMentorsFeed(page, size, prompt);
 };
 
 const feedService = {
