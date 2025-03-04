@@ -2,7 +2,7 @@ FROM node:lts AS dependencies
 WORKDIR /asd
 ENV MODE production
 COPY package*.json ./
-RUN npm install
+RUN npm install --legacy-peer-deps
 
 FROM node:lts AS builder
 WORKDIR /asd
