@@ -1,9 +1,9 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Sparkles, Users, LogIn, Filter, Search } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/use-auth";
+import { LogIn, Sparkles } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function MentorsFeedHero() {
   const router = useRouter();
@@ -21,7 +21,7 @@ export function MentorsFeedHero() {
             </h1>
             <p className="text-muted-foreground text-lg mb-4">
               {isAuthenticated
-                ? "Список менторов отфильтрован на основе вашего профиля и описания. Чем подробнее ваш профиль, тем точнее подбор менторов."
+                ? "Список менторов фильтруется на основе вашего профиля. Чем подробнее ваш профиль, тем точнее подбор менторов."
                 : "Войдите в систему, чтобы получить персонализированные рекомендации менторов на основе вашего профиля."}
             </p>
             <div className="flex gap-3">
@@ -41,14 +41,6 @@ export function MentorsFeedHero() {
                 </>
               )}
             </div>
-            {isAuthenticated && (
-              <div className="mt-4">
-                <div className="flex items-center gap-2 text-sm text-muted-foreground bg-primary/5 p-2 rounded-md border border-primary/10">
-                  <Filter className="h-4 w-4 text-primary" />
-                  <span>Результаты отфильтрованы на основе вашего профиля</span>
-                </div>
-              </div>
-            )}
           </div>
           <div className="hidden md:block relative w-64 h-64">
             <div className="absolute top-0 right-0 w-48 h-48 bg-primary/10 rounded-full"></div>
