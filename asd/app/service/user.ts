@@ -137,6 +137,10 @@ export class UserService {
             if (error.fieldErrors) {
                 throw error;
             }
+            // If the error already has a message from the backend, preserve it
+            if (error.message && error.message !== 'Failed to fetch') {
+                throw error;
+            }
             // Otherwise throw a generic error
             throw new Error('Ошибка при обновлении профиля');
         }
