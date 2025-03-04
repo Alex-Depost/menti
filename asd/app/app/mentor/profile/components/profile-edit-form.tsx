@@ -184,16 +184,6 @@ export function ProfileEditForm({
                             </FormField>
                         </div>
 
-                        <FormField
-                            id="password"
-                            label="Новый пароль"
-                            type="password"
-                            value={formData.password || ""}
-                            onChange={handleChange}
-                            placeholder="Оставьте пустым, чтобы не менять"
-                            error={fieldErrors.password}
-                        />
-
                         <Separator />
 
                         <div className="space-y-2">
