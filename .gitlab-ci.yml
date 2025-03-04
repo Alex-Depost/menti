@@ -30,7 +30,7 @@ deploy_to_production:
     
     # Stop containers and remove old project
     - ssh $SSH_ADDRESS "cd $REMOTE_DIR && docker compose down || true"
-    - ssh $SSH_ADDRESS "rm -rf $REMOTE_DIR/*"
+    - ssh $SSH_ADDRESS "rm -rf $REMOTE_DIR"
     
     # Copy the new project and run containers
     - scp -r ./* $SSH_ADDRESS:$REMOTE_DIR/
