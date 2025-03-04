@@ -79,7 +79,7 @@ export function ProfileEditForm({
     };
 
     return (
-        <Card>
+        <Card data-tour="profile-edit-form">
             <CardHeader>
                 <CardTitle>Редактирование профиля</CardTitle>
                 <CardDescription>

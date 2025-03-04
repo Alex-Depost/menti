@@ -17,7 +17,7 @@ export function MentorsFeedHero() {
   };
 
   return (
-    <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b">
+    <div className="bg-gradient-to-r from-primary/5 to-primary/10 border-b" data-tour="feed-hero">
       <div className="container mx-auto px-4 py-8 md:py-12">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
           <div className="max-w-2xl">

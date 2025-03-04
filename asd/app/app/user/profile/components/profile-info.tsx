@@ -32,7 +32,7 @@ export function ProfileInfo({ userData, onAvatarUpload, uploadingAvatar = false 
         await onAvatarUpload(file);
     };
     return (
-        <Card>
+        <Card data-tour="profile-info">
             <CardHeader className="text-center">
                 <div className="flex flex-col items-center mb-4">
                     <Avatar className="w-24 h-24 mb-2">

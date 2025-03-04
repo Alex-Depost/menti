@@ -19,7 +19,7 @@ export function MentorsFeedList({
   handlePageChange
 }: FeedListProps) {
   return (
-    <main id="mentors-list" className="container mx-auto px-4 py-8">
+    <main id="mentors-list" className="container mx-auto px-4 py-8" data-tour="feed-list">
       {isLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {Array.from({ length: 6 }).map((_, index) => (

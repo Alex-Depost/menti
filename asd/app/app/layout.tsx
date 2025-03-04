@@ -20,9 +20,14 @@ const userTourSteps: Step[] = [
         path: '/app',
     },
     {
-        target: 'body',
+        target: '[data-tour="feed-hero"]',
         content: 'Это главная страница, где вы можете находить менторов и отправлять им заявки на менторство.',
-        placement: 'center',
+        placement: 'bottom',
+    },
+    {
+        target: '[data-tour="feed-list"]',
+        content: 'Здесь отображаются доступные менторы. Вы можете просмотреть их профили и отправить заявку на менторство.',
+        placement: 'top',
     },
     {
         target: 'body',
@@ -33,20 +38,10 @@ const userTourSteps: Step[] = [
     },
     {
         target: 'body',
-        content: 'Здесь отображаются все входящие заявки на менторство. Вы можете принимать или отклонять их.',
-        placement: 'center',
-    },
-    {
-        target: 'body',
         content: 'Теперь перейдем в раздел "Исходящие", где вы можете отслеживать статус ваших заявок на менторство.',
         placement: 'center',
         action: 'navigate',
         path: '/app/user/outgoing',
-    },
-    {
-        target: 'body',
-        content: 'Здесь отображаются все ваши исходящие заявки на менторство и их текущий статус.',
-        placement: 'center',
     },
     {
         target: 'body',
@@ -56,8 +51,13 @@ const userTourSteps: Step[] = [
         path: '/app/user/profile',
     },
     {
-        target: 'body',
-        content: 'Здесь вы можете изменить свои личные данные, настройки приватности и другие параметры профиля.',
+        target: '[data-tour="profile-info"]',
+        content: 'Здесь вы можете изменить свой аватар.',
+        placement: 'bottom',
+    },
+    {
+        target: '[data-tour="profile-edit-form"]',
+        content: 'Заполните все поля профиля, чтобы система могла подбирать для вас наиболее подходящих менторов.',
         placement: 'center',
     },
     {
@@ -78,9 +78,14 @@ const mentorTourSteps: Step[] = [
         path: '/app',
     },
     {
-        target: 'body',
+        target: '[data-tour="user-feed-hero"]',
         content: 'Это главная страница, где вы можете находить потенциальных менти и предлагать им менторство.',
-        placement: 'center',
+        placement: 'bottom',
+    },
+    {
+        target: '[data-tour="user-feed-list"]',
+        content: 'Здесь отображаются потенциальные менти. Вы можете просмотреть их профили и предложить им менторство.',
+        placement: 'top',
     },
     {
         target: 'body',
@@ -91,11 +96,6 @@ const mentorTourSteps: Step[] = [
     },
     {
         target: 'body',
-        content: 'Здесь отображаются все входящие заявки на менторство. Вы можете принимать или отклонять их.',
-        placement: 'center',
-    },
-    {
-        target: 'body',
         content: 'Теперь перейдем в раздел "Исходящие", где вы можете отслеживать статус ваших заявок к менти.',
         placement: 'center',
         action: 'navigate',
@@ -103,15 +103,20 @@ const mentorTourSteps: Step[] = [
     },
     {
         target: 'body',
-        content: 'Здесь отображаются все ваши исходящие заявки на менторство и их текущий статус.',
-        placement: 'center',
-    },
-    {
-        target: 'body',
         content: 'И наконец, давайте посмотрим на ваш профиль, где вы можете редактировать свои данные и настройки менторства.',
         placement: 'center',
         action: 'navigate',
         path: '/app/mentor/profile',
+    },
+    {
+        target: '[data-tour="profile-info"]',
+        content: 'Здесь вы можете изменить свой аватар.',
+        placement: 'bottom',
+    },
+    {
+        target: '[data-tour="profile-edit-form"]',
+        content: 'Заполните все поля профиля, чтобы система могла подбирать для вас наиболее подходящих менти.',
+        placement: 'center',
     },
     {
         target: 'body',

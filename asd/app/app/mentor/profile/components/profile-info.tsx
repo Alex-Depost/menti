@@ -24,16 +24,16 @@ export function ProfileInfo({ mentorData, onAvatarUpload, uploadingAvatar = fals
 
     const handleAvatarSave = async (blob: Blob) => {
         if (!onAvatarUpload) return;
-        
+
         // Convert Blob to File
         const file = new File([blob], "avatar.jpg", { type: "image/jpeg" });
-        
+
         // Call upload handler
         await onAvatarUpload(file);
     };
     return (
         <Card>
-            <CardHeader className="text-center">
+            <CardHeader className="text-center" data-tour="profile-info">
                 <div className="flex flex-col items-center mb-4">
                     <Avatar className="w-24 h-24 mb-2">
                         {(mentorData?.avatar_url || mentorData?.avatar_uuid) && (
@@ -58,7 +58,7 @@ export function ProfileInfo({ mentorData, onAvatarUpload, uploadingAvatar = fals
                             >
                                 {uploadingAvatar ? "Загрузка..." : "Изменить аватар"}
                             </button>
-                            
+
                             {/* Avatar editor */}
                             <AvatarEditor
                                 open={isAvatarEditorOpen}

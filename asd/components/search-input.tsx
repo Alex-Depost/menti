@@ -32,7 +32,7 @@ export function SearchInput({ value, onChange, onSearch }: SearchInputProps) {
     };
 
     return (
-        <div className={`relative flex w-full max-w-xs items-center transition-all duration-200 ${isFocused ? 'ring-2 ring-primary/20 rounded-md' : ''}`}>
+        <div className={`relative flex w-full max-w-xs items-center transition-all duration-200 ${isFocused ? 'ring-2 ring-primary/20 rounded-md' : ''}`} data-tour="search-input">
             <div className={`absolute left-2.5 transition-all duration-200 ${isFocused ? 'text-primary' : 'text-muted-foreground'}`}>
                 <Search className="h-4 w-4" />
             </div>
