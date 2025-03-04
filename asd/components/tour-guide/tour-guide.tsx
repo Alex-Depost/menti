@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Joyride, { STATUS, CallBackProps } from 'react-joyride';
+import Joyride, { STATUS, CallBackProps } from 'react-joyride-react-19';
 import { useLocalStorage } from '../../hooks/use-local-storage';
 import { TourProps, Step } from '../../types/joyride';
 import { useRouter } from 'next/navigation';
