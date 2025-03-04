@@ -21,7 +21,7 @@ def mock_token():
     return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ0ZXN0X3VzZXIiLCJleHAiOjk5OTk5OTk5OTksInJvbGUiOiJ1c2VyIn0.signature"
 
 
-def test_verify_password():
+def test_verify_password_success():
     with patch("src.security.auth.pwd_context.verify") as mock_verify:
         mock_verify.return_value = True
 
@@ -29,6 +29,16 @@ def test_verify_password():
 
         assert result is True
         mock_verify.assert_called_once_with("plain_password", "hashed_password")
+
+
+def test_verify_password_failure():
+    with patch("src.security.auth.pwd_context.verify") as mock_verify:
+        mock_verify.return_value = False
+
+        result = verify_password("wrong_password", "hashed_password")
+
+        assert result is False
+        mock_verify.assert_called_once_with("wrong_password", "hashed_password")
 
 
 def test_get_password_hash():
@@ -87,6 +97,33 @@ def test_create_access_token_default_expiry():
             "sub": "test_user",
             "exp": expected_expire,
             "role": Roles.USER,
+        }
+
+        mock_encode.assert_called_once_with(
+            expected_payload, SECRET_KEY, algorithm=ALGORITHM
+        )
+
+
+def test_create_access_token_mentor_role():
+    with patch("src.security.auth.jwt.encode") as mock_encode, patch(
+        "src.security.auth.datetime"
+    ) as mock_datetime:
+        mock_now = datetime(2023, 1, 1, 12, 0, 0)
+        mock_datetime.now.return_value = mock_now
+        mock_encode.return_value = "encoded_token"
+
+        data = {"sub": "test_mentor"}
+        expires_delta = timedelta(minutes=30)
+
+        result = create_access_token(Roles.MENTOR, data, expires_delta)
+
+        assert result == "encoded_token"
+
+        expected_expire = mock_now + expires_delta
+        expected_payload = {
+            "sub": "test_mentor",
+            "exp": expected_expire,
+            "role": Roles.MENTOR,
         }
 
         mock_encode.assert_called_once_with(
@@ -222,6 +259,45 @@ async def test_get_current_mentor_wrong_role(mock_token):
 
 
 @pytest.mark.asyncio
+async def test_get_current_mentor_invalid_token():
+    with patch("src.security.auth.jwt.decode") as mock_decode:
+        mock_decode.side_effect = jwt.PyJWTError()
+
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_mentor("invalid_token")
+
+        assert exc_info.value.status_code == 401
+        assert exc_info.value.detail == "Could not validate credentials"
+
+
+@pytest.mark.asyncio
+async def test_get_current_mentor_missing_sub(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode:
+        mock_decode.return_value = {"role": Roles.MENTOR}  # Missing 'sub'
+
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_mentor(mock_token)
+
+        assert exc_info.value.status_code == 401
+        assert exc_info.value.detail == "Could not validate credentials"
+
+
+@pytest.mark.asyncio
+async def test_get_current_mentor_not_found(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode, patch(
+        "src.security.auth.get_mentor_by_login", new_callable=AsyncMock
+    ) as mock_get_mentor:
+        mock_decode.return_value = {"sub": "test_mentor", "role": Roles.MENTOR}
+        mock_get_mentor.return_value = None  # Mentor not found
+
+        with pytest.raises(HTTPException) as exc_info:
+            await get_current_mentor(mock_token)
+
+        assert exc_info.value.status_code == 401
+        assert exc_info.value.detail == "Could not validate credentials"
+
+
+@pytest.mark.asyncio
 async def test_get_optional_current_user_valid_token(mock_token):
     with patch("src.security.auth.jwt.decode") as mock_decode, patch(
         "src.security.auth.get_user_by_login", new_callable=AsyncMock
@@ -253,6 +329,58 @@ async def test_get_optional_current_user_invalid_token():
         mock_decode.side_effect = jwt.PyJWTError()
 
         result = await get_optional_current_user("invalid_token")
+
+        assert result is None
+
+
+@pytest.mark.asyncio
+async def test_get_optional_current_user_missing_sub(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode:
+        mock_decode.return_value = {"role": Roles.USER}  # Missing 'sub'
+
+        result = await get_optional_current_user(mock_token)
+
+        assert result is None
+
+
+@pytest.mark.asyncio
+async def test_get_optional_current_user_wrong_role(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode:
+        mock_decode.return_value = {
+            "sub": "test_user",
+            "role": Roles.MENTOR,
+        }  # Wrong role
+
+        result = await get_optional_current_user(mock_token)
+
+        assert result is None
+
+
+@pytest.mark.asyncio
+async def test_get_optional_current_user_not_found(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode, patch(
+        "src.security.auth.get_user_by_login", new_callable=AsyncMock
+    ) as mock_get_user:
+        mock_decode.return_value = {"sub": "test_user", "role": Roles.USER}
+        mock_get_user.return_value = None  # User not found
+
+        result = await get_optional_current_user(mock_token)
+
+        assert result is None
+
+
+@pytest.mark.asyncio
+async def test_get_optional_current_user_inactive(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode, patch(
+        "src.security.auth.get_user_by_login", new_callable=AsyncMock
+    ) as mock_get_user:
+        mock_decode.return_value = {"sub": "test_user", "role": Roles.USER}
+
+        mock_user = MagicMock()
+        mock_user.is_active = False  # Inactive user
+        mock_get_user.return_value = mock_user
+
+        result = await get_optional_current_user(mock_token)
 
         assert result is None
 
@@ -290,6 +418,45 @@ async def test_get_optional_current_mentor_wrong_role(mock_token):
             "sub": "test_mentor",
             "role": Roles.USER,
         }  # Wrong role
+
+        result = await get_optional_current_mentor(mock_token)
+
+        assert result is None
+
+
+@pytest.mark.asyncio
+async def test_get_optional_current_mentor_missing_sub(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode:
+        mock_decode.return_value = {"role": Roles.MENTOR}  # Missing 'sub'
+
+        result = await get_optional_current_mentor(mock_token)
+
+        assert result is None
+
+
+@pytest.mark.asyncio
+async def test_get_optional_current_mentor_not_found(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode, patch(
+        "src.security.auth.get_mentor_by_login", new_callable=AsyncMock
+    ) as mock_get_mentor:
+        mock_decode.return_value = {"sub": "test_mentor", "role": Roles.MENTOR}
+        mock_get_mentor.return_value = None  # Mentor not found
+
+        result = await get_optional_current_mentor(mock_token)
+
+        assert result is None
+
+
+@pytest.mark.asyncio
+async def test_get_optional_current_mentor_inactive(mock_token):
+    with patch("src.security.auth.jwt.decode") as mock_decode, patch(
+        "src.security.auth.get_mentor_by_login", new_callable=AsyncMock
+    ) as mock_get_mentor:
+        mock_decode.return_value = {"sub": "test_mentor", "role": Roles.MENTOR}
+
+        mock_mentor = MagicMock()
+        mock_mentor.is_active = False  # Inactive mentor
+        mock_get_mentor.return_value = mock_mentor
 
         result = await get_optional_current_mentor(mock_token)
 
