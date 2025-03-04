@@ -5,6 +5,11 @@ import pytest
 from src.repository.user_repository import (
     create_user,
     update_user_avatar,
+    get_user_by_email,
+    get_user_by_login,
+    update_user_profile,
+    get_users,
+    get_filtered_users,
 )
 
 
