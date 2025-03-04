@@ -35,7 +35,7 @@
     "react-dom": "^19.0.0",
     "react-hot-toast": "^2.5.2",
     "react-image-crop": "^11.0.7",
-    "react-joyride": "^2.9.3",
+    "react-joyride-react-19": "^2.9.2",
     "sonner": "^2.0.1",
     "tailwind-merge": "^3.0.2",
     "tailwindcss-animate": "^1.0.7"
