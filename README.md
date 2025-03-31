@@ -77,7 +77,7 @@
 ## 🛠 Установка и запуск
 
 1. Клонировать репозиторий:
-git clone https://gitlab.prodcontest.ru/team-12/prod
+git clone https://github.com/Alex-Depost
 
 
 2. Установить зависимости:
