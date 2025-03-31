@@ -77,7 +77,7 @@
 ## 🛠 Установка и запуск
 
 1. Клонировать репозиторий:
-git clone https://github.com/Alex-Depost
+git clone https://github.com/Alex-Depost/menti
 
 
 2. Установить зависимости:
@@ -103,15 +103,3 @@ docker compose up
 
 - [ ] Нейросетевая модерация
 - [ ] Коллаборация с другими сервисами
-
-## 🔗 Репозитории проекта
-
-- [Frontend репозиторий](https://gitlab.prodcontest.ru/team-12/prod/-/tree/master/asd?ref_type=heads)
-- [Backend репозиторий](https://gitlab.prodcontest.ru/team-12/prod/-/tree/master/back?ref_type=heads)
-
-## 📚 Полезные ссылки
-
-### Инструменты разработки
-- [Основной проект](https://prod-team-12-lc5mhpv9.final.prodcontest.ru) - Рабочая версия приложения
-- [Swagger UI](http://prod-team-12-lc5mhpv9.final.prodcontest.ru/api/docs) - Интерактивная документация API
-- [Grafana дашборд](https://prod-team-12-lc5mhpv9.final.prodcontest.ru/grafana) - Мониторинг системы
